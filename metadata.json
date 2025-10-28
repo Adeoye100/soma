@@ -1,0 +1,5 @@
+{
+  "name": "Smart Examination App",
+  "description": "An AI-powered app that generates personalized exams from course materials. It features automatic grading, detailed performance feedback, and progress tracking to enhance learning.",
+  "requestFramePermissions": []
+}
