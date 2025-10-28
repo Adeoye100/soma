@@ -30,7 +30,7 @@ const FAQContent: React.FC = () => (
     <div>
       <h4 className="font-semibold">3. What is Soma used for?</h4>
       <p>Soma is strictly designed for educational and academic purposes only. It is not intended for any form of malicious or unethical activity, the spread of false information, or non-academic or harmful usage.</p>
-      {/* <p className="mt-2 italic text-slate-500 dark:text-slate-400">“Wisdom is the principal thing; therefore get wisdom” — Proverbs 4:7</p> */}
+      <p className="mt-2 italic text-slate-500 dark:text-slate-400">“Wisdom is the principal thing; therefore get wisdom” — Proverbs 4:7</p>
     </div>
 
     <div>
@@ -73,7 +73,7 @@ const TermsContent: React.FC = () => (
     <div>
       <h4 className="font-semibold">1. Introduction</h4>
       <p>Welcome to Soma – Study Partner (“Soma”, “we”, “our”, or “us”). By using this application, you agree to these Terms and Conditions. Soma is designed for educational purposes only.</p>
-      {/* <p className="mt-2 italic text-slate-500 dark:text-slate-400">“Whatever you do, work at it with all your heart, as working for the Lord…” — Colossians 3:23</p> */}
+      <p className="mt-2 italic text-slate-500 dark:text-slate-400">“Whatever you do, work at it with all your heart, as working for the Lord…” — Colossians 3:23</p>
     </div>
 
     <div>
@@ -84,7 +84,7 @@ const TermsContent: React.FC = () => (
     <div>
       <h4 className="font-semibold">3. Privacy and Data Protection</h4>
       <p>Your privacy is sacred. We do not sell your data. Personal data is used only to improve your learning experience and is securely encrypted. You can request data deletion at any time.</p>
-      {/* <p className="mt-2 italic text-slate-500 dark:text-slate-400">“A faithful person will be richly blessed…” — Proverbs 28:20</p> */}
+      <p className="mt-2 italic text-slate-500 dark:text-slate-400">“A faithful person will be richly blessed…” — Proverbs 28:20</p>
     </div>
 
     <div>

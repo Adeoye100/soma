@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { User } from 'firebase/auth';
 import { BookOpenIcon, UserCircleIcon, LogoutIcon } from './icons';
 import Switch from './Switch';
+import InfoModal from './InfoModal';
 
 interface HeaderProps {
   theme: 'light' | 'dark';
@@ -11,6 +12,8 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, user, onLogout }) => {
+  const [showInfoModal, setShowInfoModal] = useState(false);
+
   return (
     <header className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm sticky top-0 z-10 shadow-md shadow-slate-200/10 dark:shadow-slate-800/10">
       <div className="container mx-auto px-4 md:px-8 py-4 flex justify-between items-center">
@@ -27,6 +30,9 @@ const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, user, onLogout }) =
                     {user.displayName || user.email}
                 </span>
             </div>
+          <button onClick={() => setShowInfoModal(true)} className="hidden sm:block text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">
+            FAQ & Terms
+          </button>
           {/* Theme Toggle Switch */}
           <Switch isChecked={theme === 'dark'} onToggle={toggleTheme} />
            <button
@@ -38,6 +44,7 @@ const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, user, onLogout }) =
           </button>
         </div>
       </div>
+      {showInfoModal && <InfoModal onClose={() => setShowInfoModal(false)} />}
     </header>
   );
 };
