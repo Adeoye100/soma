@@ -1,7 +1,16 @@
-import { GoogleGenAI, Type, Modality } from "@google/genai";
+import { GoogleGenAI, HarmCategory, HarmBlockThreshold, type Part } from "@google/genai";
 import { ExamConfig, Material, Question, UserAnswer, ExamType, QuestionType, Evaluation, PracticeConfig } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY! });
+// --- Google Gemini API Setup ---
+const API_KEYS = [
+  import.meta.env.VITE_GEMINI_API_KEY,
+  'AIzaSyAlQmatWW3os-qyOC16PbT-QiuD_d_XT3Q', // Your new fallback key
+  'AIzaSyCCf741y_zmfJYE9ISa5pVCUQ5AvMGIGvQ'  // Original fallback key
+].filter(Boolean) as string[];
+
+if (API_KEYS.length === 0) {
+  throw new Error("No Gemini API keys found. Please set VITE_GEMINI_API_KEY in your environment.");
+}
 
 const fileToGenerativePart = (content: string, mimeType: string) => {
     return {
@@ -12,38 +21,66 @@ const fileToGenerativePart = (content: string, mimeType: string) => {
     };
 };
 
+const safetySettings = [
+    { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+    { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+    { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+    { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+];
+
+/**
+ * Tries to make a request to the Gemini API, falling back to the next key on quota errors.
+ */
+async function generateWithFallback(generationConfig: {
+    model: string;
+    prompt: string | (string | Part)[];
+    responseMimeType?: string;
+    responseSchema?: any;
+}): Promise<string> {
+    let lastError: any = null;
+
+    for (const key of API_KEYS) {
+        try {
+            const genAI = new GoogleGenAI(key);
+            const model = genAI.getGenerativeModel({ model: generationConfig.model, safetySettings });
+            const result = await model.generateContent({
+                contents: [{ role: 'user', parts: Array.isArray(generationConfig.prompt) ? generationConfig.prompt : [{ text: generationConfig.prompt }] }],
+                generationConfig: {
+                    responseMimeType: generationConfig.responseMimeType,
+                }
+            });
+            return result.response.text();
+        } catch (err: any) {
+            lastError = err;
+            if (err.message?.includes('quota') || err.message?.includes('rate limit') || err.status === 429) {
+                console.warn(`API key quota likely exceeded, trying next key...`);
+                continue; // Try next provider
+            }
+            throw err; // Rethrow other errors immediately
+        }
+    }
+    throw lastError || new Error('All AI providers failed or were unavailable.');
+}
+
 export const extractTopics = async (materials: Material[]): Promise<string[]> => {
     if (materials.length === 0) return [];
     const contentParts = materials.map(m => fileToGenerativePart(m.content, m.mimeType));
     const prompt = 'Analyze the following course materials and extract a concise list of key topics and concepts. Respond STRICTLY in the following JSON format: `{"topics": ["topic1", "topic2", ...]}`';
-
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
-        contents: [{ parts: [...contentParts, { text: prompt }] }],
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                    topics: {
-                        type: Type.ARRAY,
-                        items: { type: Type.STRING }
-                    }
-                },
-                required: ['topics']
-            }
-        }
+    const responseText = await generateWithFallback({
+        model: 'gemini-1.5-flash',
+        prompt: [...contentParts, { text: prompt }],
+        responseMimeType: "application/json",
     });
 
     try {
-        const jsonText = response.text.trim();
+        const jsonText = responseText.trim();
         const parsedResult = JSON.parse(jsonText);
         if (!parsedResult.topics || !Array.isArray(parsedResult.topics)) {
             throw new Error("Invalid JSON structure for topics received from API.");
         }
         return parsedResult.topics as string[];
     } catch (e) {
-        console.error("Failed to parse topics from response:", response.text);
+        console.error("Failed to parse topics from response:", responseText);
         throw new Error(`Error parsing topics: ${(e as Error).message}`);
     }
 };
@@ -128,52 +165,6 @@ const getPracticeQuizPrompt = (config: PracticeConfig): string => {
     `;
 };
 
-
-const questionSchema = {
-    type: Type.OBJECT,
-    properties: {
-        question: { type: Type.STRING, description: 'The question text. For Fill-in-the-Blank, use "___" for blanks.' },
-        type: {
-            type: Type.STRING,
-            enum: Object.values(QuestionType),
-            description: 'The type of the question.'
-        },
-        topic: { type: Type.STRING, description: 'The primary topic this question covers.' },
-        options: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
-            description: 'Array of 4 options for Multiple Choice. Omit for other types.',
-            nullable: true,
-        },
-        correctAnswer: {
-            type: Type.STRING,
-            description: 'The correct answer for Multiple Choice, True/False, Short Answer, or Essay. For T/F, it should be "True" or "False".',
-            nullable: true,
-        },
-        correctAnswers: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
-            description: 'Array of correct answers for each blank in a Fill-in-the-Blank question.',
-            nullable: true,
-        },
-        matchingPairs: {
-            type: Type.ARRAY,
-            description: 'An array of prompt-answer pairs for Matching questions.',
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    prompt: { type: Type.STRING },
-                    answer: { type: Type.STRING }
-                },
-                required: ['prompt', 'answer']
-            },
-            nullable: true,
-        }
-    },
-    required: ['question', 'type', 'topic']
-};
-
-
 export const generateExam = async (config: ExamConfig, materials: Material[]): Promise<Question[]> => {
     const topicStrings = await extractTopics(materials);
     const topics = topicStrings.join(', ');
@@ -183,69 +174,43 @@ export const generateExam = async (config: ExamConfig, materials: Material[]): P
 
     const examPrompt = getExamPrompt(config, topics);
 
-    const examGenerationResponse = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
-        contents: [{ parts: [{ text: examPrompt }] }],
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                    questions: {
-                        type: Type.ARRAY,
-                        items: questionSchema
-                    }
-                },
-                required: ['questions']
-            }
-        }
+    const responseText = await generateWithFallback({
+        model: 'gemini-1.5-flash',
+        prompt: examPrompt,
+        responseMimeType: "application/json",
     });
 
     try {
-        const jsonText = examGenerationResponse.text.trim();
+        const jsonText = responseText.trim();
         const parsedResult = JSON.parse(jsonText);
 
         if (!parsedResult.questions || !Array.isArray(parsedResult.questions)) {
              throw new Error("Invalid JSON structure received from API. Expected a 'questions' array.");
         }
-
         return parsedResult.questions as Question[];
     } catch (e) {
-        console.error("Failed to parse JSON response:", examGenerationResponse.text);
+        console.error("Failed to parse JSON response:", responseText);
         throw new Error(`Error parsing exam questions: ${(e as Error).message}`);
     }
 };
 
 export const generatePracticeQuiz = async (config: PracticeConfig): Promise<Question[]> => {
     const quizPrompt = getPracticeQuizPrompt(config);
-
-    const quizGenerationResponse = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
-        contents: [{ parts: [{ text: quizPrompt }] }],
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                    questions: {
-                        type: Type.ARRAY,
-                        items: questionSchema
-                    }
-                },
-                required: ['questions']
-            }
-        }
+    const responseText = await generateWithFallback({
+        model: 'gemini-1.5-flash',
+        prompt: quizPrompt,
+        responseMimeType: "application/json",
     });
 
     try {
-        const jsonText = quizGenerationResponse.text.trim();
+        const jsonText = responseText.trim();
         const parsedResult = JSON.parse(jsonText);
         if (!parsedResult.questions || !Array.isArray(parsedResult.questions)) {
             throw new Error("Invalid JSON structure for quiz received from API.");
         }
         return parsedResult.questions as Question[];
     } catch (e) {
-        console.error("Failed to parse quiz JSON response:", quizGenerationResponse.text);
+        console.error("Failed to parse quiz JSON response:", responseText);
         throw new Error(`Error parsing practice quiz questions: ${(e as Error).message}`);
     }
 };
@@ -328,52 +293,19 @@ export const evaluateAnswer = async (question: Question, userAnswer: UserAnswer)
       Respond STRICTLY in the following JSON format.
     `;
 
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: [{ parts: [{ text: prompt }] }],
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                    score: { type: Type.NUMBER, description: 'Overall score from 0-10.' },
-                    feedback: { type: Type.STRING, description: 'Overall constructive feedback.' },
-                    isCorrect: { type: Type.BOOLEAN, description: 'True if score >= 7.' },
-                    criteria: {
-                        type: Type.ARRAY,
-                        description: "Breakdown of scores by criteria.",
-                        items: {
-                            type: Type.OBJECT,
-                            properties: {
-                                criterion: { type: Type.STRING },
-                                score: { type: Type.NUMBER },
-                                feedback: { type: Type.STRING }
-                            },
-                            required: ["criterion", "score", "feedback"]
-                        }
-                    },
-                    strengths: {
-                        type: Type.ARRAY,
-                        description: "Quotes from the student's answer that are strengths.",
-                        items: { type: Type.STRING }
-                    },
-                    weaknesses: {
-                        type: Type.ARRAY,
-                        description: "Quotes from the student's answer that are weaknesses.",
-                        items: { type: Type.STRING }
-                    }
-                },
-                required: ['score', 'feedback', 'isCorrect', 'criteria', 'strengths', 'weaknesses']
-            }
-        }
+    const responseText = await generateWithFallback({
+        model: 'gemini-1.5-flash',
+        prompt: prompt,
+        responseMimeType: "application/json",
     });
 
+
     try {
-        const jsonText = response.text.trim();
+        const jsonText = responseText.trim();
         const parsedResult = JSON.parse(jsonText);
         return { ...parsedResult, topic: question.topic };
     } catch (e) {
-        console.error("Failed to parse detailed evaluation response:", response.text);
+        console.error("Failed to parse detailed evaluation response:", responseText);
         // Fallback to a simpler evaluation if the detailed one fails
         return {
             score: 0,

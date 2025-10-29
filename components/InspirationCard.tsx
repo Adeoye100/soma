@@ -21,13 +21,13 @@ const images = [
     '/img/1.jpg',
     '/img/2.jpg',
     '/img/3.jpg',
-    '/img/4.jpg', // Assuming you have these images in your public/img folder
-    '/img/5.jpg', // Assuming you have these images in your public/img folder
-    // Add more image paths here if you have more images in your public/img folder
-    // For example:
-    // '/img/6.jpg',
-    // '/img/7.jpg',
-    // Make sure the number of images is at least equal to the number of quotes for a smooth carousel.
+    '/img/4.jpg',
+    '/img/5.jpg',
+     '/img/6.jpg',
+      '/img/7.jpg',
+       '/img/8.jpg',
+        '/img/9.jpg',
+ '/img/10.jpg'
 ];
 
 const InspirationCard: React.FC = () => {

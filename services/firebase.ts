@@ -4,13 +4,13 @@ import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB5nFLw3nYuawEZ3bgS3I5KukVS2MSD5hE",
-  authDomain: "soma-a6525.firebaseapp.com",
-  projectId: "soma-a6525",
-  storageBucket: "soma-a6525.firebasestorage.app",
-  messagingSenderId: "408589892477",
-  appId: "1:408589892477:web:5b9b532fd269e472366a14",
-  measurementId: "G-QZMWB8PXBZ"
+  apiKey: import.meta.env.VITE_API_KEY,
+  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_APP_ID,
+  measurementId: import.meta.env.VITE_MEASUREMENT_ID
 };
 
 // Initialize Firebase

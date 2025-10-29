@@ -16,7 +16,7 @@ const FAQContent: React.FC = () => (
 
     <div>
       <h4 className="font-semibold">2. Who developed Soma?</h4>
-      <p>Soma – Study Partner was created and developed by Adeoye Opeyemi, a passionate software engineer and UI/UX designer dedicated to using technology to promote education and personal development.</p>
+      <p>Soma – Study Partner was created and developed by <strong className="text-[20px] font-semibold">Adeoye Opeyemi</strong>, a passionate potential software engineer dedicated to using technology to promote education and personal development.</p>
       <div className="flex items-center gap-4 mt-2">
         <a href="mailto:adeoyeopeyemi951@gmail.com" className="flex items-center gap-2 text-sm text-primary-600 hover:underline">
           <MailIcon className="h-4 w-4" /> adeoyeopeyemi951@gmail.com
@@ -50,12 +50,12 @@ const FAQContent: React.FC = () => (
 
     <div>
       <h4 className="font-semibold">7. How can I contact the developer?</h4>
-      <p>You can reach out to Adeoye Opeyemi via email or WhatsApp for support, collaborations, or feature suggestions.</p>
+      <p>You can reach out to <strong className="text-[20px] font-semibold">Adeoye Opeyemi</strong>via email or WhatsApp for support, collaborations, or feature suggestions.</p>
     </div>
 
     <div>
       <h4 className="font-semibold">8. Is Soma open-source or free to use?</h4>
-      <p>Currently, Soma is free for educational use. Future versions may include premium features, but the foundational purpose will always remain education-first.</p>
+      <p>Currently, Soma is free for educational use. Future versions may include premium features, also the foundational purpose will always remain education-first.</p>
     </div>
 
     <div>
@@ -89,7 +89,7 @@ const TermsContent: React.FC = () => (
 
     <div>
       <h4 className="font-semibold">4. Intellectual Property Rights</h4>
-      <p>All intellectual property of Soma belongs exclusively to Adeoye Opeyemi. You may not reproduce, resell, or reverse-engineer any part of it without consent.</p>
+      <p>All intellectual property of Soma belongs exclusively to <strong className="text-[20px] font-semibold">Adeoye Emmanuel Opeyemi</strong>. You may not reproduce, resell, or reverse-engineer any part of it without consent.</p>
     </div>
 
     <div>
@@ -104,12 +104,12 @@ const TermsContent: React.FC = () => (
 
     <div>
       <h4 className="font-semibold">7. Contact and Support</h4>
-      <p>For inquiries, contact Adeoye Opeyemi at adeoyeopeyemi951@gmail.com or via WhatsApp at +234 812 406 8599.</p>
+      <p>For inquiries, contact <strong className="text-[20px] font-semibold">Adeoye Opeyemi</strong> <i>aka/alias</i> <strong className="text-[20px] font-semibold">AD</strong>at adeoyeopeyemi951@gmail.com or via WhatsApp at +234 812 406 8599.</p>
     </div>
 
     <div>
       <h4 className="font-semibold">8. Governing Law</h4>
-      <p>These Terms are governed by the laws of the Federal Republic of Nigeria.</p>
+      <p>These Terms are governed by the laws of the <strong className="text-[20px] font-semibold">Federal Republic of Nigeria.</strong></p>
     </div>
   </div>
 );
