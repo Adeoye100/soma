@@ -1,0 +1,5 @@
+{
+  "name": "Soma",
+  "description": "Soma is an AI-powered app that generates personalized exams from course materials. It features automatic grading, detailed performance feedback, and progress tracking to enhance learning.",
+  "requestFramePermissions": []
+}
