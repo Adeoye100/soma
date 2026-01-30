@@ -1,0 +1,134 @@
+import { BusinessRulesEngine as IBusinessRulesEngine } from '../../../shared/types';
+import { ServiceResult } from '../../../shared/types';
+import { WorkflowRule } from '../../../shared/types';
+
+/**
+ * Base class for implementing business rules engines
+ * Evaluates rules against data and applies business logic
+ */
+export abstract class BusinessRulesEngine implements IBusinessRulesEngine {
+  public readonly id: string;
+  public readonly name: string;
+  public readonly version: string;
+  public readonly rules: WorkflowRule[];
+  public readonly config: any;
+  public readonly enabled: boolean;
+
+  constructor(engine: IBusinessRulesEngine) {
+    this.id = engine.id;
+    this.name = engine.name;
+    this.version = engine.version;
+    this.rules = engine.rules;
+    this.config = engine.config;
+    this.enabled = engine.enabled;
+  }
+
+  /**
+   * Evaluate rules against the provided data
+   */
+  abstract evaluate(data: any): Promise<ServiceResult<any>>;
+
+  /**
+   * Execute business logic based on rules
+   */
+  abstract execute(data: any, rules?: WorkflowRule[]): Promise<ServiceResult<any>>;
+
+  /**
+   * Add a new rule to the engine
+   */
+  abstract addRule(rule: WorkflowRule): Promise<ServiceResult<WorkflowRule>>;
+
+  /**
+   * Remove a rule from the engine
+   */
+  abstract removeRule(ruleId: string): Promise<ServiceResult<boolean>>;
+
+  /**
+   * Update an existing rule
+   */
+  abstract updateRule(ruleId: string, rule: Partial<WorkflowRule>): Promise<ServiceResult<WorkflowRule>>;
+
+  /**
+   * Get all rules currently loaded in the engine
+   */
+  async getRules(): Promise<ServiceResult<WorkflowRule[]>> {
+    return {
+      success: true,
+      data: this.rules,
+      metadata: { executionTime: 0 }
+    };
+  }
+
+  /**
+   * Validate rule configuration
+   */
+  async validateRule(rule: WorkflowRule): Promise<ServiceResult<boolean>> {
+    try {
+      // Basic validation logic
+      const isValid = rule.id && rule.name && rule.type && rule.conditions && rule.actions;
+      
+      return {
+        success: true,
+        data: !!isValid,
+        metadata: { executionTime: 0 }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: {
+          code: 'RULE_VALIDATION_FAILED',
+          message: error instanceof Error ? error.message : 'Rule validation failed',
+          details: error
+        }
+      };
+    }
+  }
+
+  /**
+   * Test rules against sample data
+   */
+  async testRules(sampleData: any): Promise<ServiceResult<any>> {
+    try {
+      const results = await this.evaluate(sampleData);
+      return {
+        success: true,
+        data: {
+          testData: sampleData,
+          evaluationResults: results.data,
+          totalRules: this.rules.length,
+          activeRules: this.rules.filter(rule => rule.enabled).length
+        },
+        metadata: { executionTime: 0 }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: {
+          code: 'RULE_TEST_FAILED',
+          message: error instanceof Error ? error.message : 'Rule testing failed',
+          details: error
+        }
+      };
+    }
+  }
+
+  /**
+   * Get engine statistics
+   */
+  async getStats(): Promise<ServiceResult<any>> {
+    return {
+      success: true,
+      data: {
+        engineId: this.id,
+        engineName: this.name,
+        version: this.version,
+        totalRules: this.rules.length,
+        activeRules: this.rules.filter(rule => rule.enabled).length,
+        enabled: this.enabled,
+        lastExecuted: null,
+        totalExecutions: 0
+      },
+      metadata: { executionTime: 0 }
+    };
+  }
+}

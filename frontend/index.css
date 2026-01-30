@@ -1,0 +1,24 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Animated gradient text */
+.animated-gradient-text {
+  background: linear-gradient(to right,
+    #8b5cf6, /* purple-500 */
+    #fdba74  /* orange-300 */
+  );
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: gradient-animation 6s ease infinite;
+}
+
+@keyframes gradient-animation {
+  0% { background-size: 200% 200%; }
+  50% { background-size: 100% 200%; }
+  100% { background-size: 200% 200%; }
+}

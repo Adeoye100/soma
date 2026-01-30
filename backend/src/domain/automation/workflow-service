@@ -1,0 +1,411 @@
+import { 
+  WorkflowDefinition, 
+  WorkflowExecution, 
+  WorkflowStepExecution, 
+  WorkflowStepConfig,
+  ActionConfig,
+  ConditionConfig,
+  ParallelWorkflowConfig,
+  SequenceWorkflowConfig,
+  AutomationAction,
+  AutomationActionType
+} from './types';
+import { ActionRegistry } from './action-registry';
+import { ExpressionEvaluator } from './expression-evaluator';
+
+export class WorkflowService {
+  private actionRegistry: ActionRegistry;
+  private expressionEvaluator: ExpressionEvaluator;
+  private activeExecutions: Map<string, WorkflowExecution> = new Map();
+  private workflowDefinitions: Map<string, WorkflowDefinition> = new Map();
+
+  constructor() {
+    this.actionRegistry = new ActionRegistry();
+    this.expressionEvaluator = new ExpressionEvaluator();
+  }
+
+  /**
+   * Register a new workflow definition
+   */
+  registerWorkflow(workflow: WorkflowDefinition): void {
+    this.workflowDefinitions.set(workflow.id, workflow);
+  }
+
+  /**
+   * Start execution of a workflow
+   */
+  async executeWorkflow(
+    workflowId: string, 
+    input: Record<string, any>
+  ): Promise<WorkflowExecution> {
+    const workflow = this.workflowDefinitions.get(workflowId);
+    if (!workflow) {
+      throw new Error(`Workflow ${workflowId} not found`);
+    }
+
+    const executionId = this.generateExecutionId();
+    const execution: WorkflowExecution = {
+      id: executionId,
+      workflowId,
+      status: 'running',
+      startTime: new Date(),
+      input,
+      output: {},
+      stepExecutions: [],
+      context: {
+        variables: { ...input },
+        history: [],
+        metadata: {}
+      }
+    };
+
+    this.activeExecutions.set(executionId, execution);
+
+    try {
+      // Find the starting step(s)
+      const startSteps = this.findStartSteps(workflow.steps);
+      const result = await this.executeSteps(execution, startSteps, workflow.steps);
+      
+      execution.status = 'completed';
+      execution.output = result;
+      execution.endTime = new Date();
+      
+      return execution;
+    } catch (error) {
+      execution.status = 'failed';
+      execution.error = error instanceof Error ? error.message : 'Unknown error';
+      execution.endTime = new Date();
+      throw error;
+    } finally {
+      this.activeExecutions.delete(executionId);
+    }
+  }
+
+  /**
+   * Get execution status and details
+   */
+  getExecution(executionId: string): WorkflowExecution | undefined {
+    return this.activeExecutions.get(executionId);
+  }
+
+  /**
+   * Get all workflow definitions
+   */
+  getWorkflows(): WorkflowDefinition[] {
+    return Array.from(this.workflowDefinitions.values());
+  }
+
+  /**
+   * Pause a running execution
+   */
+  async pauseExecution(executionId: string): Promise<void> {
+    const execution = this.activeExecutions.get(executionId);
+    if (!execution) {
+      throw new Error(`Execution ${executionId} not found`);
+    }
+
+    if (execution.status !== 'running') {
+      throw new Error(`Cannot pause execution with status ${execution.status}`);
+    }
+
+    execution.status = 'paused';
+  }
+
+  /**
+   * Resume a paused execution
+   */
+  async resumeExecution(executionId: string): Promise<void> {
+    const execution = this.activeExecutions.get(executionId);
+    if (!execution) {
+      throw new Error(`Execution ${executionId} not found`);
+    }
+
+    if (execution.status !== 'paused') {
+      throw new Error(`Cannot resume execution with status ${execution.status}`);
+    }
+
+    execution.status = 'running';
+    // Continue execution from where it left off
+    // This would require more complex state management for real implementation
+  }
+
+  /**
+   * Cancel a running execution
+   */
+  async cancelExecution(executionId: string): Promise<void> {
+    const execution = this.activeExecutions.get(executionId);
+    if (!execution) {
+      throw new Error(`Execution ${executionId} not found`);
+    }
+
+    execution.status = 'cancelled';
+    execution.endTime = new Date();
+    this.activeExecutions.delete(executionId);
+  }
+
+  /**
+   * Execute workflow steps
+   */
+  private async executeSteps(
+    execution: WorkflowExecution,
+    steps: WorkflowStepConfig[],
+    allSteps: WorkflowStepConfig[]
+  ): Promise<Record<string, any>> {
+    let results: Record<string, any> = {};
+
+    for (const step of steps) {
+      const stepExecution = await this.executeStep(execution, step);
+      execution.stepExecutions.push(stepExecution);
+
+      if (stepExecution.status === 'failed') {
+        // Handle error according to step configuration
+        if (step.onError) {
+          const errorStep = allSteps.find(s => s.id === step.onError);
+          if (errorStep) {
+            const errorResult = await this.executeStep(execution, errorStep);
+            execution.stepExecutions.push(errorResult);
+          }
+        }
+        throw new Error(`Step ${step.name} failed: ${stepExecution.error}`);
+      }
+
+      if (stepExecution.output) {
+        results[step.id] = stepExecution.output;
+      }
+
+      // Execute next steps if specified
+      if (step.next && step.next.length > 0) {
+        const nextSteps = step.next
+          .map(nextId => allSteps.find(s => s.id === nextId))
+          .filter(Boolean) as WorkflowStepConfig[];
+        
+        const nextResults = await this.executeSteps(execution, nextSteps, allSteps);
+        Object.assign(results, nextResults);
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * Execute a single workflow step
+   */
+  private async executeStep(
+    execution: WorkflowExecution,
+    step: WorkflowStepConfig
+  ): Promise<WorkflowStepExecution> {
+    const stepExecution: WorkflowStepExecution = {
+      stepId: step.id,
+      stepName: step.name,
+      startTime: new Date(),
+      status: 'running',
+      contextSnapshot: { ...execution.context }
+    };
+
+    try {
+      switch (step.type) {
+        case 'action':
+          await this.executeActionStep(execution, step, stepExecution);
+          break;
+        case 'condition':
+          await this.executeConditionStep(execution, step, stepExecution);
+          break;
+        case 'parallel':
+          await this.executeParallelStep(execution, step, stepExecution);
+          break;
+        case 'sequence':
+          await this.executeSequenceStep(execution, step, stepExecution);
+          break;
+        default:
+          throw new Error(`Unknown step type: ${step.type}`);
+      }
+
+      stepExecution.status = 'completed';
+      stepExecution.endTime = new Date();
+    } catch (error) {
+      stepExecution.status = 'failed';
+      stepExecution.error = error instanceof Error ? error.message : 'Unknown error';
+      stepExecution.endTime = new Date();
+    }
+
+    return stepExecution;
+  }
+
+  /**
+   * Execute an action step
+   */
+  private async executeActionStep(
+    execution: WorkflowExecution,
+    step: WorkflowStepConfig,
+    stepExecution: WorkflowStepExecution
+  ): Promise<void> {
+    const config = step.config as ActionConfig;
+    
+    // Resolve action parameters
+    const resolvedParams = this.resolveParameters(config.parameters, execution.context);
+    
+    // Execute the action
+    const action = this.actionRegistry.getAction(config.actionType);
+    if (!action) {
+      throw new Error(`Action type ${config.actionType} not registered`);
+    }
+
+    const result = await action.execute(resolvedParams, execution.context);
+    stepExecution.output = result;
+    
+    // Update execution context with result
+    if (config.outputVariable) {
+      execution.context.variables[config.outputVariable] = result;
+    }
+  }
+
+  /**
+   * Execute a condition step
+   */
+  private async executeConditionStep(
+    execution: WorkflowExecution,
+    step: WorkflowStepConfig,
+    stepExecution: WorkflowStepExecution
+  ): Promise<void> {
+    const config = step.config as ConditionConfig;
+    
+    // Evaluate the condition expression
+    const conditionResult = this.expressionEvaluator.evaluate(
+      config.expression,
+      execution.context.variables
+    );
+
+    stepExecution.output = { condition: conditionResult };
+
+    // Execute the appropriate branch
+    if (conditionResult) {
+      const trueResults = await this.executeSteps(execution, config.trueBranch, []);
+      Object.assign(stepExecution.output, trueResults);
+    } else {
+      const falseResults = await this.executeSteps(execution, config.falseBranch, []);
+      Object.assign(stepExecution.output, falseResults);
+    }
+  }
+
+  /**
+   * Execute a parallel step
+   */
+  private async executeParallelStep(
+    execution: WorkflowExecution,
+    step: WorkflowStepConfig,
+    stepExecution: WorkflowStepExecution
+  ): Promise<void> {
+    const config = step.config as ParallelWorkflowConfig;
+    
+    // Execute all branches in parallel
+    const branchPromises = config.branches.map(async (branch) => {
+      try {
+        const results = await this.executeSteps(execution, branch, []);
+        return { success: true, results };
+      } catch (error) {
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      }
+    });
+
+    const branchResults = await Promise.all(branchPromises);
+    stepExecution.output = { branches: branchResults };
+
+    // Check merge strategy
+    const successCount = branchResults.filter(r => r.success).length;
+    
+    switch (config.mergeStrategy) {
+      case 'all_success':
+        if (successCount !== config.branches.length) {
+          throw new Error('Not all parallel branches succeeded');
+        }
+        break;
+      case 'any_success':
+        if (successCount === 0) {
+          throw new Error('No parallel branches succeeded');
+        }
+        break;
+      case 'all_complete':
+        // No additional checks needed
+        break;
+    }
+  }
+
+  /**
+   * Execute a sequence step
+   */
+  private async executeSequenceStep(
+    execution: WorkflowExecution,
+    step: WorkflowStepConfig,
+    stepExecution: WorkflowStepExecution
+  ): Promise<void> {
+    const config = step.config as SequenceWorkflowConfig;
+    
+    const results: Record<string, any> = {};
+    
+    for (const subStep of config.steps) {
+      try {
+        const subStepExecution = await this.executeStep(execution, subStep);
+        execution.stepExecutions.push(subStepExecution);
+        
+        if (subStepExecution.status === 'failed' && !config.continueOnError) {
+          throw new Error(`Sequence step failed: ${subStepExecution.error}`);
+        }
+        
+        if (subStepExecution.output) {
+          Object.assign(results, subStepExecution.output);
+        }
+      } catch (error) {
+        if (!config.continueOnError) {
+          throw error;
+        }
+        // Continue with next step if continueOnError is true
+      }
+    }
+    
+    stepExecution.output = results;
+  }
+
+  /**
+   * Find start steps (steps with no incoming dependencies)
+   */
+  private findStartSteps(steps: WorkflowStepConfig[]): WorkflowStepConfig[] {
+    const stepIds = new Set(steps.map(s => s.id));
+    const referencedSteps = new Set<string>();
+    
+    // Find all steps that are referenced as next steps
+    steps.forEach(step => {
+      step.next?.forEach(nextId => referencedSteps.add(nextId));
+    });
+    
+    // Start steps are those not referenced by any other step
+    return steps.filter(step => !referencedSteps.has(step.id));
+  }
+
+  /**
+   * Resolve parameters with context variables
+   */
+  private resolveParameters(
+    parameters: Record<string, any>,
+    context: { variables: Record<string, any> }
+  ): Record<string, any> {
+    const resolved: Record<string, any> = {};
+    
+    for (const [key, value] of Object.entries(parameters)) {
+      if (typeof value === 'string' && value.startsWith('${') && value.endsWith('}')) {
+        const varName = value.slice(2, -1);
+        resolved[key] = context.variables[varName];
+      } else {
+        resolved[key] = value;
+      }
+    }
+    
+    return resolved;
+  }
+
+  /**
+   * Generate unique execution ID
+   */
+  private generateExecutionId(): string {
+    return `exec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+}
