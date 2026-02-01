@@ -23,6 +23,9 @@ export interface StepResult {
   data?: any;
   error?: string;
   duration?: number;
+  stepIndex?: number;
+  stepName?: string;
+  timestamp?: Date;
   metadata?: Record<string, any>;
 }
 

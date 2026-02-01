@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
 import winston from 'winston';
 import { BusinessRuleError } from '../../shared/errors';
-import { WorkflowDefinition, WorkflowContext, WorkflowStep, StepResult, WorkflowStatus } from '../types';
+import { WorkflowDefinition, WorkflowContext, WorkflowStep, StepResult, WorkflowStatus } from './types';
 
 /**
  * Core Workflow Engine - Orchestrates automated workflows
@@ -122,6 +122,7 @@ export class WorkflowEngine extends EventEmitter {
 
     for (let i = 0; i < definition.steps.length; i++) {
       const step = definition.steps[i];
+      if (!step) continue; // or handle the undefined case appropriately
       context.currentStep = i;
       
       this.emit('stepStarted', { 
@@ -135,11 +136,11 @@ export class WorkflowEngine extends EventEmitter {
         
         context.results.push({
           stepIndex: i,
-          stepName: step!.name,
+          stepName: step.name,
           success: stepResult.success,
           data: stepResult.data,
-          error: stepResult.error,
-          duration: stepResult.duration,
+          error: stepResult.error ?? '',
+          duration: stepResult.duration ?? 0,
           timestamp: new Date()
         });
 
@@ -148,15 +149,15 @@ export class WorkflowEngine extends EventEmitter {
         if (!stepResult.success) {
           throw new BusinessRuleError(
             'STEP_EXECUTION_FAILED',
-            `Step failed: ${step!.name}`,
-            { stepIndex: i, stepName: step!.name, error: stepResult.error }
+            `Step failed: ${step.name}`,
+            { stepIndex: i, stepName: step.name, error: stepResult.error }
           );
         }
 
         this.emit('stepCompleted', { 
           workflowId: context.id, 
           stepIndex: i, 
-          stepName: step!.name,
+          stepName: step.name,
           duration: stepResult.duration
         });
 
@@ -168,12 +169,12 @@ export class WorkflowEngine extends EventEmitter {
         this.emit('stepFailed', { 
           workflowId: context.id, 
           stepIndex: i, 
-          stepName: step!.name,
+          stepName: step.name,
           error: stepError.message 
         });
 
         if (step.onError === 'continue') {
-          this.logger.warn(`Step ${step!.name} failed but continuing workflow`, {
+          this.logger.warn(`Step ${step.name} failed but continuing workflow`, {
             workflowId: context.id,
             stepIndex: i,
             error: stepError.message

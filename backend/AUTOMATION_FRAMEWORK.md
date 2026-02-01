@@ -36,24 +36,28 @@ The Smart Examination Automation Framework is a comprehensive, modular system de
 ## Key Features
 
 ### 🎯 Workflow Automation
+
 - **Sequential Processing**: Execute steps in defined order with dependencies
 - **Error Handling**: Comprehensive error recovery with retry mechanisms
 - **State Management**: Track workflow execution and maintain state
 - **Monitoring**: Real-time monitoring and event-driven updates
 
 ### 📥 Input Processing
+
 - **Multiple Formats**: Support for various input types (materials, configurations, user data)
 - **Validation**: Built-in validation with customizable rules
 - **Content Extraction**: Automatic content analysis and topic extraction
 - **Normalization**: Standardize input data for consistent processing
 
 ### ⚖️ Business Rules
+
 - **Configurable Rules**: Define custom business logic and constraints
 - **Rule Chains**: Execute multiple rules in sequence
 - **Priority System**: Prioritize rule execution based on importance
 - **Decision Making**: Automated decision-making based on business logic
 
 ### 📤 Output Generation
+
 - **Multiple Formats**: JSON, HTML, CSV, XML output generation
 - **Customizable Templates**: Custom output formatting
 - **Data Integrity**: Checksum generation and validation
@@ -64,7 +68,7 @@ The Smart Examination Automation Framework is a comprehensive, modular system de
 ### 1. Initialize the Automation System
 
 ```typescript
-import { automationOrchestrator } from './src/automation/AutomationOrchestrator';
+import { automationOrchestrator } from "./src/automation/AutomationOrchestrator";
 
 // Initialize the system
 await automationOrchestrator.initialize();
@@ -78,8 +82,8 @@ const materials = [
   {
     content: "Your course material content here...",
     mimeType: "text/plain",
-    title: "Introduction to Programming"
-  }
+    title: "Introduction to Programming",
+  },
 ];
 
 // Define exam configuration
@@ -87,7 +91,7 @@ const config = {
   type: "OBJECTIVE",
   difficulty: "medium",
   numQuestions: 10,
-  timeLimit: 60
+  timeLimit: 60,
 };
 
 // Generate exam automatically
@@ -97,8 +101,8 @@ const result = await automationOrchestrator.generateExam(
   { userId: "user123" },
   {
     outputFormat: "html",
-    includeValidation: true
-  }
+    includeValidation: true,
+  },
 );
 ```
 
@@ -109,12 +113,12 @@ const result = await automationOrchestrator.generateExam(
 const processedInput = await automationOrchestrator.processInput(
   {
     content: "Your content here",
-    mimeType: "application/pdf"
+    mimeType: "application/pdf",
   },
   {
     preferredProcessor: "material-processor",
-    validateInput: true
-  }
+    validateInput: true,
+  },
 );
 ```
 
@@ -126,12 +130,12 @@ const validation = await automationOrchestrator.validateConfiguration(
   {
     type: "ESSAY",
     difficulty: "hard",
-    numQuestions: 20
+    numQuestions: 20,
   },
   {
     materials: materials,
-    user: { experienceLevel: "beginner" }
-  }
+    user: { experienceLevel: "beginner" },
+  },
 );
 
 if (!validation.valid) {
@@ -149,19 +153,15 @@ const htmlOutput = await automationOrchestrator.generateOutput(
   {
     title: "Generated Exam",
     template: "exam",
-    includeStyles: true
-  }
+    includeStyles: true,
+  },
 );
 
 // Generate CSV output
-const csvOutput = await automationOrchestrator.generateOutput(
-  results,
-  "csv",
-  {
-    delimiter: ",",
-    includeHeaders: true
-  }
-);
+const csvOutput = await automationOrchestrator.generateOutput(results, "csv", {
+  delimiter: ",",
+  includeHeaders: true,
+});
 ```
 
 ## Advanced Usage
@@ -169,39 +169,38 @@ const csvOutput = await automationOrchestrator.generateOutput(
 ### Custom Workflows
 
 ```typescript
-import { WorkflowDefinition } from './src/automation/core/types';
+import { WorkflowDefinition } from "./src/automation/core/types";
 
 const customWorkflow: WorkflowDefinition = {
-  id: 'custom-workflow',
-  name: 'Custom Processing Workflow',
-  description: 'Custom workflow for specific business logic',
-  version: '1.0.0',
+  id: "custom-workflow",
+  name: "Custom Processing Workflow",
+  description: "Custom workflow for specific business logic",
+  version: "1.0.0",
   steps: [
     {
-      name: 'validate-input',
+      name: "validate-input",
       handler: async (context) => {
         // Custom validation logic
         return { success: true, data: { validated: true } };
       },
-      requires: ['inputData']
+      requires: ["inputData"],
     },
     {
-      name: 'process-data',
+      name: "process-data",
       handler: async (context) => {
         // Custom processing logic
         return { success: true, data: { processed: true } };
       },
-      requires: ['validated']
-    }
-  ]
+      requires: ["validated"],
+    },
+  ],
 };
 
 // Register and execute
 automationOrchestrator.registerWorkflow(customWorkflow);
-const result = await automationOrchestrator.executeWorkflow(
-  'custom-workflow',
-  { inputData: yourData }
-);
+const result = await automationOrchestrator.executeWorkflow("custom-workflow", {
+  inputData: yourData,
+});
 ```
 
 ### Custom Business Rules
@@ -218,7 +217,7 @@ const customRule: BusinessRule = {
   async evaluate(context) {
     // Custom rule logic
     const isValid = /* your validation logic */;
-    
+
     return {
       passed: isValid,
       message: isValid ? 'Validation passed' : 'Validation failed',
@@ -231,18 +230,22 @@ const customRule: BusinessRule = {
 ### Custom Output Generators
 
 ```typescript
-import { BaseOutputGenerator } from './src/automation/output/OutputGenerator';
+import { BaseOutputGenerator } from "./src/automation/output/OutputGenerator";
 
 class CustomOutputGenerator extends BaseOutputGenerator {
-  public id = 'custom-output-generator';
-  public name = 'Custom Output Generator';
-  public format = 'custom' as const;
+  public id = "custom-output-generator";
+  public name = "Custom Output Generator";
+  public format = "custom" as const;
 
   public async generate(data: any, options?: any) {
-    return this.generateOutput(data, async (rawData) => {
-      // Custom output generation logic
-      return generateCustomFormat(rawData);
-    }, options);
+    return this.generateOutput(
+      data,
+      async (rawData) => {
+        // Custom output generation logic
+        return generateCustomFormat(rawData);
+      },
+      options,
+    );
   }
 }
 ```
@@ -252,8 +255,8 @@ class CustomOutputGenerator extends BaseOutputGenerator {
 ### Express.js Integration
 
 ```typescript
-import express from 'express';
-import { automationOrchestrator } from './src/automation/AutomationOrchestrator';
+import express from "express";
+import { automationOrchestrator } from "./src/automation/AutomationOrchestrator";
 
 const app = express();
 app.use(express.json());
@@ -262,28 +265,28 @@ app.use(express.json());
 await automationOrchestrator.initialize();
 
 // API endpoint for exam generation
-app.post('/api/exam/generate', async (req, res) => {
+app.post("/api/exam/generate", async (req, res) => {
   try {
     const { materials, config, user, options } = req.body;
-    
+
     const result = await automationOrchestrator.generateExam(
       materials,
       config,
       user,
-      options
+      options,
     );
-    
+
     res.json(result);
   } catch (error) {
     res.status(500).json({
       error: error.message,
-      code: 'GENERATION_FAILED'
+      code: "GENERATION_FAILED",
     });
   }
 });
 
 // Health check endpoint
-app.get('/api/automation/health', async (req, res) => {
+app.get("/api/automation/health", async (req, res) => {
   const health = await automationOrchestrator.healthCheck();
   res.json(health);
 });
@@ -293,24 +296,26 @@ app.get('/api/automation/health', async (req, res) => {
 
 ```typescript
 // Automation microservice
-import { automationOrchestrator } from './src/automation/AutomationOrchestrator';
+import { automationOrchestrator } from "./src/automation/AutomationOrchestrator";
 
 class AutomationService {
-  async handleExamGenerationRequest(request: ExamGenerationRequest): Promise<ExamGenerationResponse> {
+  async handleExamGenerationRequest(
+    request: ExamGenerationRequest,
+  ): Promise<ExamGenerationResponse> {
     await automationOrchestrator.initialize();
-    
+
     const result = await automationOrchestrator.generateExam(
       request.materials,
       request.config,
       request.user,
-      request.options
+      request.options,
     );
-    
+
     return {
       success: true,
       examId: result.examId,
       output: result.formattedOutput,
-      metadata: result.metadata
+      metadata: result.metadata,
     };
   }
 }
@@ -321,16 +326,21 @@ class AutomationService {
 ### Event Monitoring
 
 ```typescript
-automationOrchestrator.on('workflowCompleted', (data) => {
-  console.log('Workflow completed:', data.workflowId, 'Duration:', data.duration);
+automationOrchestrator.on("workflowCompleted", (data) => {
+  console.log(
+    "Workflow completed:",
+    data.workflowId,
+    "Duration:",
+    data.duration,
+  );
 });
 
-automationOrchestrator.on('workflowFailed', (data) => {
-  console.error('Workflow failed:', data.workflowId, 'Error:', data.error);
+automationOrchestrator.on("workflowFailed", (data) => {
+  console.error("Workflow failed:", data.workflowId, "Error:", data.error);
 });
 
-automationOrchestrator.on('rulesEvaluated', (data) => {
-  console.log('Rules evaluated:', data.result.summary);
+automationOrchestrator.on("rulesEvaluated", (data) => {
+  console.log("Rules evaluated:", data.result.summary);
 });
 ```
 
@@ -339,9 +349,9 @@ automationOrchestrator.on('rulesEvaluated', (data) => {
 ```typescript
 // Get system status
 const status = automationOrchestrator.getStatus();
-console.log('Active workflows:', status.workflowEngine.activeWorkflows);
-console.log('Rules executed:', status.rulesEngine.enabledRules);
-console.log('Processors active:', status.inputProcessors.totalProcessors);
+console.log("Active workflows:", status.workflowEngine.activeWorkflows);
+console.log("Rules executed:", status.rulesEngine.enabledRules);
+console.log("Processors active:", status.inputProcessors.totalProcessors);
 ```
 
 ## Error Handling
@@ -362,13 +372,13 @@ try {
 } catch (error) {
   if (error instanceof BusinessRuleError) {
     // Handle business rule violations
-    console.error('Business rule error:', error.message);
+    console.error("Business rule error:", error.message);
   } else if (error instanceof ValidationError) {
     // Handle validation errors
-    console.error('Validation error:', error.message);
+    console.error("Validation error:", error.message);
   } else {
     // Handle other errors
-    console.error('Unexpected error:', error.message);
+    console.error("Unexpected error:", error.message);
   }
 }
 ```
@@ -406,47 +416,52 @@ const customConfig = {
     defaultTimeout: 600000,
     retryPolicy: {
       maxRetries: 3,
-      backoffMultiplier: 2
-    }
+      backoffMultiplier: 2,
+    },
   },
   inputProcessing: {
     strictValidation: false,
-    enableCaching: true
+    enableCaching: true,
   },
   businessRules: {
     enableCaching: true,
-    cacheTimeout: 300000
+    cacheTimeout: 300000,
   },
   outputGeneration: {
-    defaultFormat: 'json',
-    includeMetadata: true
-  }
+    defaultFormat: "json",
+    includeMetadata: true,
+  },
 };
 ```
 
 ## Best Practices
 
 ### 1. Input Validation
+
 - Always validate input before processing
 - Use appropriate input processors for different data types
 - Provide meaningful error messages for validation failures
 
 ### 2. Error Handling
+
 - Implement comprehensive error handling
 - Use appropriate error types for different scenarios
 - Log errors for debugging and monitoring
 
 ### 3. Performance
+
 - Enable caching where appropriate
 - Use appropriate timeouts for workflows
 - Monitor resource usage and optimize accordingly
 
 ### 4. Monitoring
+
 - Implement comprehensive monitoring
 - Track key metrics (execution time, success rate, error rate)
 - Set up alerts for critical failures
 
 ### 5. Testing
+
 - Test workflows with various input scenarios
 - Validate business rules with edge cases
 - Test output generation with different formats
@@ -474,7 +489,7 @@ const customConfig = {
 
 ```typescript
 // Enable debug logging
-process.env.AUTOMATION_LOG_LEVEL = 'debug';
+process.env.AUTOMATION_LOG_LEVEL = "debug";
 
 // Check system status
 const status = automationOrchestrator.getStatus();
@@ -507,6 +522,7 @@ console.log(JSON.stringify(status, null, 2));
 ## Support
 
 For issues and questions:
+
 1. Check the troubleshooting section
 2. Review the logs for detailed error information
 3. Verify configuration settings
@@ -515,6 +531,7 @@ For issues and questions:
 ## Contributing
 
 To contribute to the automation framework:
+
 1. Follow the established code patterns
 2. Add comprehensive tests for new features
 3. Update documentation for API changes
