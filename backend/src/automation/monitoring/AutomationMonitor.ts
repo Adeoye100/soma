@@ -364,9 +364,14 @@ export class AutomationMonitor extends EventEmitter {
   }
 
   private calculateThroughput(metrics: MonitoringMetrics[]): number {
-    const timeSpan = metrics.length > 1 && metrics[0] && metrics[metrics.length - 1] ? 
-      (metrics[0].timestamp.getTime() - metrics[metrics.length - 1].timestamp.getTime()) / 1000 : 0;
+    if (metrics.length < 2) return 0;
     
+    const firstMetric = metrics[0];
+    const lastMetric = metrics[metrics.length - 1];
+    
+    if (!firstMetric || !lastMetric) return 0;
+    
+    const timeSpan = (firstMetric.timestamp.getTime() - lastMetric.timestamp.getTime()) / 1000;
     return timeSpan > 0 ? metrics.length / timeSpan : 0;
   }
 

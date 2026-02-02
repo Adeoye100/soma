@@ -228,8 +228,9 @@ export class DistributedTaskEngine extends EventEmitter {
     // Validate dependencies
     for (let i = 0; i < tasks.length; i++) {
       const taskDef = taskDefinitions[i];
-      if (!taskDef) {
-        throw new Error(`Task definition not found: ${tasks[i].taskId}`);
+      const task = tasks[i];
+      if (!taskDef || !task) {
+        throw new Error(`Task definition not found: ${task ? task.taskId : 'unknown'}`);
       }
 
       if (taskDef.dependencies) {
