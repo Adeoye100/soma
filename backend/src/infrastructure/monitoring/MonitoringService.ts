@@ -1,7 +1,9 @@
 /**
  * Monitoring and logging service for automation workflows
  */
-import { MonitoringEvent, MonitoringEventHandler, Configuration } from '../automation/types';
+import { MonitoringEvent, Configuration } from '../../domain/automation/types';
+
+export type MonitoringEventHandler = (event: MonitoringEvent) => Promise<void> | void;
 
 export class MonitoringService {
   private handlers: Map<string, MonitoringEventHandler[]> = new Map();
@@ -172,5 +174,3 @@ export class MonitoringService {
     this.events = this.events.filter(event => event.timestamp > cutoff);
   }
 }
-
-export type MonitoringEventHandler = (event: MonitoringEvent) => Promise<void> | void;

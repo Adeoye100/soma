@@ -193,12 +193,12 @@ export class TaskQueueManager {
         status: job.finishedOn ? 'completed' : 
                 job.processedOn ? 'active' : 
                 job.timestamp + (job.opts.delay || 0) > Date.now() ? 'delayed' : 'waiting',
-        progress: job.progress(),
+        progress: typeof job.progress === 'number' ? job.progress : 0,
         data: job.data,
         returnvalue: job.returnvalue,
-        failedReason: job.failedReason,
-        finishedOn: job.finishedOn,
-        processedOn: job.processedOn,
+        failedReason: job.failedReason || null,
+        finishedOn: job.finishedOn || null,
+        processedOn: job.processedOn || null,
         timestamp: job.timestamp
       };
     } catch (error) {
@@ -277,10 +277,10 @@ export class TaskQueueManager {
           status: job.finishedOn ? 'completed' : 
                   job.processedOn ? 'active' : 
                   job.timestamp + (job.opts.delay || 0) > Date.now() ? 'delayed' : 'waiting',
-          progress: typeof job.progress === 'function' ? job.progress() : 0,
+          progress: typeof job.progress === 'number' ? job.progress : 0,
           data: job.data,
           returnvalue: job.returnvalue,
-          failedReason: job.failedReason,
+          failedReason: job.failedReason || null,
           finishedOn: job.finishedOn || null,
           processedOn: job.processedOn || null,
           timestamp: job.timestamp

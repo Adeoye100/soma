@@ -161,7 +161,7 @@ export interface RecoveryStrategy {
 }
 
 export interface RecoveryTrigger {
-  type: 'error-pattern' | 'health-check-failure' | 'performance-degradation' | 'manual';
+  type: 'error-pattern' | 'health-check-failure' | 'performance-degradation' | 'manual' | 'error-severity' | 'custom';
   condition: string;
 }
 
@@ -344,8 +344,8 @@ export class CircuitBreaker {
   }
 
   private shouldAttemptReset(): boolean {
-    return this.state.lastFailureTime && 
-           Date.now() - this.state.lastFailureTime.getTime() > this.config.resetTimeout;
+    return !!(this.state.lastFailureTime && 
+           Date.now() - this.state.lastFailureTime.getTime() > this.config.resetTimeout);
   }
 
   getState(): CircuitBreakerState {
@@ -525,7 +525,7 @@ export class ErrorHandlingSystem extends EventEmitter {
 
     this.retryContexts.set(correlationId, retryContext);
 
-    let lastError: Error;
+    let lastError: Error | undefined;
 
     for (let attempt = 1; attempt <= retryConfig.maxAttempts; attempt++) {
       retryContext.attempt = attempt;
@@ -610,7 +610,7 @@ export class ErrorHandlingSystem extends EventEmitter {
       finalError: lastError?.message
     });
 
-    throw lastError!;
+    throw lastError || new Error('All retries failed without specific error');
   }
 
   /**

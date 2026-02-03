@@ -2,7 +2,7 @@
  * Action Registry for managing automation actions
  */
 
-import { ActionConfig } from './types';
+// import { ActionConfig } from './types';
 
 export interface ActionHandler {
   name: string;

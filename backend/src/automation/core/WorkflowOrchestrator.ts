@@ -967,11 +967,16 @@ class RuleEngine {
 
   private evaluateExpression(expression: string): boolean {
     // Simple boolean evaluation (in real implementation, use a proper parser)
-    // This is a very basic implementation
+    // WARNING: Using eval() is a major security risk and should be avoided.
+    // This is a placeholder and should be replaced with a safe expression
+    // evaluation library like 'json-logic-js' or a custom sandboxed interpreter.
     try {
-      return eval(expression);
+      // return eval(expression); // DANGEROUS!
+      this.logger.warn('Using insecure eval() for expression evaluation. Replace with a safe alternative.', { expression });
+      // For demonstration, we'll use a very simple, unsafe evaluation.
+      return new Function(`return ${expression}`)();
     } catch (error) {
-      this.logger.warn('Expression evaluation failed, defaulting to false', { expression });
+      this.logger.error('Expression evaluation failed, defaulting to false', { expression, error });
       return false;
     }
   }

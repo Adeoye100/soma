@@ -465,10 +465,13 @@ export class EnterpriseMonitoringSystem extends EventEmitter {
       startTime,
       endTime: startTime,
       status: 'ok',
-      parentSpanId: options.parentSpanId,
       attributes: options.tags || {},
       logs: []
     };
+
+    if (options.parentSpanId) {
+      span.parentSpanId = options.parentSpanId;
+    }
 
     trace.spans.push(span);
     
@@ -977,16 +980,22 @@ export class EnterpriseMonitoringSystem extends EventEmitter {
     for (const rule of this.config.alerting.rules) {
       if (!rule.enabled) continue;
 
-      const relevantMetrics = this.queryMetrics({
-        name: rule.conditions[0]?.metric ?? undefined,
+      const queryOptions: any = {
         startTime: new Date(Date.now() - 300000) // Last 5 minutes
-      });
+      };
+
+      if (rule.conditions[0]?.metric) {
+        queryOptions.name = rule.conditions[0].metric;
+      }
+
+      const relevantMetrics = this.queryMetrics(queryOptions);
 
       for (const condition of rule.conditions) {
         const metrics = relevantMetrics.filter(m => m.name === condition.metric);
         if (this.evaluateCondition(metrics, condition)) {
-          if (metrics.length > 0) {
-            this.triggerAlert(rule, metrics[metrics.length - 1]);
+          const lastMetric = metrics[metrics.length - 1];
+          if (lastMetric) {
+            this.triggerAlert(rule, lastMetric);
           }
           break;
         }
@@ -1019,6 +1028,11 @@ export class EnterpriseMonitoringSystem extends EventEmitter {
   private evaluateCondition(metrics: Metric[], condition: AlertCondition): boolean {
     if (metrics.length === 0) return false;
 
+    const firstMetric = metrics[0];
+    const lastMetric = metrics[metrics.length - 1];
+
+    if (!firstMetric || !lastMetric) return false;
+
     let aggregatedValue: number;
     switch (condition.aggregation) {
       case 'avg':
@@ -1034,24 +1048,16 @@ export class EnterpriseMonitoringSystem extends EventEmitter {
         aggregatedValue = Math.max(...metrics.map(m => m.value));
         break;
       default:
-        aggregatedValue = metrics.length > 0 ? metrics[metrics.length - 1].value : 0;
+        aggregatedValue = lastMetric.value;
     }
 
     // Create test metric for condition evaluation
     const testMetric: Metric = {
-      name: metrics[0].name,
+      name: firstMetric.name,
       value: aggregatedValue,
       timestamp: new Date(),
-      labels: metrics[0].labels,
-      type: metrics[0].type
-    };
-    return this.matchesCondition(testMetric, condition);
-    const testMetric: Metric = {
-      name: metrics[0].name,
-      value: aggregatedValue,
-      timestamp: new Date(),
-      labels: metrics[0].labels,
-      type: metrics[0].type
+      labels: firstMetric.labels,
+      type: firstMetric.type
     };
     return this.matchesCondition(testMetric, condition);
   }

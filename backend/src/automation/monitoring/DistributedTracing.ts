@@ -1,5 +1,5 @@
-import { Context, trace, Span, SpanStatusCode } from '@opentelemetry/api';
-import { logger } from '../shared/logger';
+import { Context, trace, Span, SpanStatusCode, SpanContext as OTSpanContext, SpanKind as OTSpanKind, context as contextAPI } from '@opentelemetry/api';
+import { logger } from '../../shared/utils/logger';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -10,6 +10,7 @@ export class DistributedTracing {
   private static instance: DistributedTracing;
   private activeSpans: Map<string, Span> = new Map();
   private correlationContext: Map<string, Context> = new Map();
+  private spanData: Map<string, { name: string; startTime: number }> = new Map();
 
   private constructor() {}
 
@@ -34,8 +35,8 @@ export class DistributedTracing {
       links?: SpanLink[];
     } = {}
   ): SpanContext {
-    const traceId = options.traceId || uuidv4();
-    const spanId = uuidv4();
+    const traceId = options.traceId || uuidv4().replace(/-/g, '');
+    const spanId = uuidv4().replace(/-/g, '').substring(0, 16);
     const parentSpanId = options.parentSpanId;
     
     const spanContext: SpanContext = {
@@ -49,6 +50,19 @@ export class DistributedTracing {
 
     // Create OpenTelemetry span
     const tracer = trace.getTracer('automation-framework');
+    
+    const otSpanContext: OTSpanContext = {
+      traceId: spanContext.traceId,
+      spanId: spanContext.spanId,
+      traceFlags: 1 // Sampled
+    };
+
+    const parentContext = parentSpanId ? trace.setSpanContext(contextAPI.active(), {
+      traceId,
+      spanId: parentSpanId,
+      traceFlags: 1
+    }) : contextAPI.active();
+
     const span = tracer.startSpan(operationName, {
       attributes: {
         ...spanContext.attributes,
@@ -56,14 +70,14 @@ export class DistributedTracing {
         'automation.span.id': spanId,
         'automation.operation': operationName,
         'automation.timestamp': new Date().toISOString()
-      }
-    }, parentSpanId ? trace.setSpanContext(Context.ROOT_CONTEXT, {
-      traceId,
-      spanId: parentSpanId
-    }) : Context.ROOT_CONTEXT);
+      },
+      kind: options.kind as unknown as OTSpanKind
+    }, parentContext);
 
+    const startTime = Date.now();
     this.activeSpans.set(spanId, span);
-    this.correlationContext.set(spanId, Context.current());
+    this.correlationContext.set(spanId, contextAPI.active());
+    this.spanData.set(spanId, { name: operationName, startTime });
 
     logger.info('Started trace span', {
       operationName,
@@ -80,6 +94,8 @@ export class DistributedTracing {
    */
   public endSpan(spanContext: SpanContext, status: SpanStatusCode, error?: Error): void {
     const span = this.activeSpans.get(spanContext.spanId);
+    const data = this.spanData.get(spanContext.spanId);
+    
     if (!span) {
       logger.warn('Span not found for ending', { spanContext });
       return;
@@ -99,9 +115,10 @@ export class DistributedTracing {
       span.end();
       this.activeSpans.delete(spanContext.spanId);
       this.correlationContext.delete(spanContext.spanId);
+      this.spanData.delete(spanContext.spanId);
 
       logger.info('Ended trace span', {
-        operationName: span.name,
+        operationName: data?.name || 'unknown',
         traceId: spanContext.traceId,
         spanId: spanContext.spanId,
         status
@@ -150,12 +167,13 @@ export class DistributedTracing {
    */
   public getCorrelationContext(spanId: string): Record<string, any> {
     const span = this.activeSpans.get(spanId);
+    const data = this.spanData.get(spanId);
     if (!span) return {};
 
     return {
       traceId: span.spanContext().traceId,
       spanId: span.spanContext().spanId,
-      operation: span.name
+      operation: data?.name
     };
   }
 
@@ -214,12 +232,15 @@ export class DistributedTracing {
   /**
    * Get active spans for monitoring
    */
-  public getActiveSpans(): Array<{ spanId: string; operation: string; startTime: string }> {
-    return Array.from(this.activeSpans.entries()).map(([spanId, span]) => ({
-      spanId,
-      operation: span.name,
-      startTime: span.startTime
-    }));
+  public getActiveSpans(): Array<{ spanId: string; operation: string; startTime: number }> {
+    return Array.from(this.activeSpans.keys()).map(spanId => {
+      const data = this.spanData.get(spanId);
+      return {
+        spanId,
+        operation: data?.name || 'unknown',
+        startTime: data?.startTime || 0
+      };
+    });
   }
 
   /**
@@ -229,17 +250,18 @@ export class DistributedTracing {
     const now = Date.now();
     const expiredSpans: string[] = [];
 
-    this.activeSpans.forEach((span, spanId) => {
-      const startTime = span.startTime ? new Date(span.startTime).getTime() : 0;
-      if (now - startTime > maxAgeMs) {
+    this.spanData.forEach((data, spanId) => {
+      if (now - data.startTime > maxAgeMs) {
         expiredSpans.push(spanId);
-        span.end();
+        const span = this.activeSpans.get(spanId);
+        span?.end();
       }
     });
 
     expiredSpans.forEach(spanId => {
       this.activeSpans.delete(spanId);
       this.correlationContext.delete(spanId);
+      this.spanData.delete(spanId);
     });
 
     if (expiredSpans.length > 0) {
@@ -251,7 +273,7 @@ export class DistributedTracing {
 export interface SpanContext {
   traceId: string;
   spanId: string;
-  parentSpanId?: string;
+  parentSpanId?: string | undefined;
   attributes: Record<string, any>;
   kind: SpanKind;
   links: SpanLink[];

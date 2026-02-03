@@ -19,6 +19,28 @@ export interface IOProcessorConfig {
   api: ApiConfig;
 }
 
+export interface Validator {
+  validate: (data: any) => ValidationResult | { valid: boolean; errors: any[] };
+}
+
+export interface Transformer {
+  transform: (data: any) => any;
+}
+
+export interface TransformationConfig {
+  enabled: boolean;
+  defaultPipeline?: string | undefined;
+  allowCustomPipelines: boolean;
+  maxSteps: number;
+}
+
+export interface ValidationConfig {
+  enabled: boolean;
+  strict: boolean;
+  customValidators?: Record<string, (value: any) => boolean> | undefined;
+  cacheResults: boolean;
+}
+
 export interface DataFormat {
   name: string;
   extension: string;
@@ -32,6 +54,7 @@ export interface FormatHandler {
   canHandle: (input: any) => boolean;
   read: (input: any, options?: any) => Promise<any>;
   write: (data: any, options?: any) => Promise<any>;
+  [key: string]: any;
 }
 
 export interface ValidationSchema {
@@ -61,14 +84,14 @@ export interface ValidationError {
   message: string;
   severity: 'error' | 'warning' | 'info';
   code: string;
-  line?: number;
-  column?: number;
+  line?: number | undefined;
+  column?: number | undefined;
 }
 
 export interface ValidationWarning {
   field: string;
   message: string;
-  suggestion?: string;
+  suggestion?: string | undefined;
 }
 
 export interface ValidationMetadata {
@@ -165,21 +188,21 @@ export interface IOOperation {
   output?: any;
   format: string;
   status: 'pending' | 'processing' | 'completed' | 'failed';
-  startTime?: Date;
-  endTime?: Date;
-  duration?: number;
-  error?: string;
+  startTime?: Date | undefined;
+  endTime?: Date | undefined;
+  duration?: number | undefined;
+  error?: string | undefined;
   metadata: OperationMetadata;
 }
 
 export interface OperationMetadata {
   correlationId: string;
   source: string;
-  destination?: string;
-  recordCount?: number;
-  byteCount?: number;
-  compression?: string;
-  encoding?: string;
+  destination?: string | undefined;
+  recordCount?: number | undefined;
+  byteCount?: number | undefined;
+  compression?: string | undefined;
+  encoding?: string | undefined;
 }
 
 export interface ProcessingResult {
@@ -193,7 +216,7 @@ export interface ProcessingResult {
 
 export interface ProcessingMetadata {
   inputFormat: string;
-  outputFormat?: string;
+  outputFormat?: string | undefined;
   recordsProcessed: number;
   bytesProcessed: number;
   processingTime: number;
@@ -204,16 +227,16 @@ export interface ProcessingMetadata {
 export interface ProcessingError {
   code: string;
   message: string;
-  field?: string;
-  line?: number;
-  column?: number;
+  field?: string | undefined;
+  line?: number | undefined;
+  column?: number | undefined;
   severity: 'error' | 'warning';
 }
 
 export interface ProcessingWarning {
   code: string;
   message: string;
-  suggestion?: string;
+  suggestion?: string | undefined;
 }
 
 /**
@@ -312,19 +335,20 @@ export class MultiFormatIOProcessor extends EventEmitter {
 
     try {
       // Auto-detect format if not specified
-      let detectedFormat = options.format;
+      let detectedFormat: string | undefined = options.format;
       if (!detectedFormat || detectedFormat === 'auto-detect') {
-        detectedFormat = this.detectFormat(input);
+        detectedFormat = this.detectFormat(input) || undefined;
       }
 
       if (!detectedFormat) {
         throw new Error('Unable to detect input format');
       }
 
-      const handler = this.formatHandlers.get(detectedFormat);
-      if (!handler) {
+      const dataFormat = this.formatHandlers.get(detectedFormat);
+      if (!dataFormat) {
         throw new Error(`No handler found for format: ${detectedFormat}`);
       }
+      const handler = dataFormat.handler;
 
       operation.status = 'processing';
       operation.format = detectedFormat;
@@ -350,15 +374,17 @@ export class MultiFormatIOProcessor extends EventEmitter {
       // Convert output format if specified
       let output = transformedData;
       if (options.outputFormat && options.outputFormat !== detectedFormat) {
-        const outputHandler = this.formatHandlers.get(options.outputFormat);
-        if (outputHandler) {
-          output = await outputHandler.write(transformedData);
+        const outputDataFormat = this.formatHandlers.get(options.outputFormat);
+        if (outputDataFormat) {
+          output = await outputDataFormat.handler.write(transformedData);
         }
       }
 
       operation.status = 'completed';
       operation.endTime = new Date();
-      operation.duration = operation.endTime.getTime() - operation.startTime.getTime();
+      if (operation.startTime && operation.endTime) {
+        operation.duration = operation.endTime.getTime() - operation.startTime.getTime();
+      }
       operation.output = output;
 
       const result: ProcessingResult = {
@@ -367,15 +393,22 @@ export class MultiFormatIOProcessor extends EventEmitter {
         data: output,
         metadata: {
           inputFormat: detectedFormat,
-          outputFormat: options.outputFormat,
+          outputFormat: options.outputFormat || undefined,
           recordsProcessed: Array.isArray(output) ? output.length : 1,
           bytesProcessed: JSON.stringify(output).length,
-          processingTime: operation.duration!,
+          processingTime: operation.duration || 0,
           transformations: options.pipeline ? [options.pipeline] : [],
           validations: options.schema ? [options.schema] : []
         },
-        errors: validationResult?.errors || [],
-        warnings: validationResult?.warnings || []
+        errors: (validationResult?.errors || []).map(err => ({
+          ...err,
+          severity: err.severity === 'info' ? 'warning' : err.severity as 'error' | 'warning'
+        })),
+        warnings: (validationResult?.warnings || []).map(warn => ({
+          code: 'VALIDATION_WARNING',
+          message: warn.message,
+          suggestion: warn.suggestion
+        }))
       };
 
       this.updateMetrics(true, operation.duration!);
@@ -386,7 +419,9 @@ export class MultiFormatIOProcessor extends EventEmitter {
     } catch (error) {
       operation.status = 'failed';
       operation.endTime = new Date();
-      operation.duration = operation.endTime.getTime() - operation.startTime.getTime();
+      if (operation.startTime && operation.endTime) {
+        operation.duration = operation.endTime.getTime() - operation.startTime.getTime();
+      }
       operation.error = (error as Error).message;
 
       const result: ProcessingResult = {
@@ -437,8 +472,8 @@ export class MultiFormatIOProcessor extends EventEmitter {
       throw new Error('Unable to detect input format for streaming');
     }
 
-    const handler = this.formatHandlers.get(format);
-    if (!handler || !handler.read) {
+    const dataFormat = this.formatHandlers.get(format);
+    if (!dataFormat || !dataFormat.handler || !dataFormat.handler.read) {
       throw new Error(`Streaming not supported for format: ${format}`);
     }
 
@@ -780,15 +815,15 @@ export class MultiFormatIOProcessor extends EventEmitter {
       extension: '.json',
       mimeType: 'application/json',
       handler: {
-        canHandle: (input) => typeof input === 'string' && (input.trim().startsWith('{') || input.trim().startsWith('[')),
-        read: async (input) => JSON.parse(input),
-        write: async (data) => JSON.stringify(data, null, 2)
+        canHandle: (input: any) => typeof input === 'string' && (input.trim().startsWith('{') || input.trim().startsWith('[')),
+        read: async (input: any) => JSON.parse(input),
+        write: async (data: any) => JSON.stringify(data, null, 2)
       },
       validator: {
-        validate: (data) => ({ valid: true, errors: [] })
+        validate: (data: any) => ({ valid: true, errors: [] })
       },
       transformer: {
-        transform: (data) => data
+        transform: (data: any) => data
       }
     });
 
@@ -797,34 +832,34 @@ export class MultiFormatIOProcessor extends EventEmitter {
       extension: '.csv',
       mimeType: 'text/csv',
       handler: {
-        canHandle: (input) => typeof input === 'string' && input.includes(',') && input.includes('\n'),
-        read: async (input) => {
+        canHandle: (input: any) => typeof input === 'string' && input.includes(',') && input.includes('\n'),
+        read: async (input: any) => {
           const lines = input.trim().split('\n');
           const headers = lines[0].split(',');
-          return lines.slice(1).map(line => {
+          return lines.slice(1).map((line: string) => {
             const values = line.split(',');
             const obj: any = {};
-            headers.forEach((header, index) => {
+            headers.forEach((header: string, index: number) => {
               obj[header.trim()] = values[index]?.trim();
             });
             return obj;
           });
         },
-        write: async (data) => {
+        write: async (data: any) => {
           if (!Array.isArray(data) || data.length === 0) return '';
           const headers = Object.keys(data[0]);
           const lines = [headers.join(',')];
-          data.forEach(row => {
-            lines.push(headers.map(header => String(row[header] || '')).join(','));
+          data.forEach((row: any) => {
+            lines.push(headers.map((header: string) => String(row[header] || '')).join(','));
           });
           return lines.join('\n');
         }
       },
       validator: {
-        validate: (data) => ({ valid: true, errors: [] })
+        validate: (data: any) => ({ valid: true, errors: [] })
       },
       transformer: {
-        transform: (data) => data
+        transform: (data: any) => data
       }
     });
 

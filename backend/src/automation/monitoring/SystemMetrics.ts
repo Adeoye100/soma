@@ -187,6 +187,22 @@ export class SystemMetrics {
     }
   }
 
+  incrementCounter(name: string, tags?: Record<string, string | number>): void {
+    const history = this.metrics.get(name) || [];
+    const lastValue = history.length > 0 ? history[history.length - 1]!.value : 0;
+    this.recordMetric(name, lastValue + 1, 'count', tags);
+  }
+
+  decrementCounter(name: string, tags?: Record<string, string | number>): void {
+    const history = this.metrics.get(name) || [];
+    const lastValue = history.length > 0 ? history[history.length - 1]!.value : 0;
+    this.recordMetric(name, lastValue - 1, 'count', tags);
+  }
+
+  recordGauge(name: string, value: number, tags?: Record<string, string | number>): void {
+    this.recordMetric(name, value, 'gauge', tags);
+  }
+
   // Get current metrics
   getCurrentMetrics(): {
     performance: PerformanceMetric | null;

@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
+import * as winston from 'winston';
 import { v4 as uuidv4 } from 'uuid';
-import winston from 'winston';
 import { BusinessRuleError } from '../../shared/errors';
 import { WorkflowDefinition, WorkflowContext, WorkflowStep, StepResult, WorkflowStatus } from './types';
 
@@ -15,21 +15,33 @@ export class WorkflowEngine extends EventEmitter {
 
   constructor() {
     super();
-    this.logger = winston.createLogger({
-      level: 'info',
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.errors({ stack: true }),
-        winston.format.json()
-      ),
-      transports: [
-        new winston.transports.Console(),
-        new winston.transports.File({ filename: 'logs/workflows.log' })
-      ]
-    });
+
+    this.logger = this.createLogger();
 
     // Set up event listeners for monitoring
     this.setupEventHandlers();
+  }
+
+  /**
+   * Create a logger instance for the engine
+   */
+  private createLogger(): winston.Logger {
+    return winston.createLogger({
+      level: 'info',
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json()
+      ),
+      defaultMeta: { service: 'workflow-engine' },
+      transports: [
+        new winston.transports.Console({
+          format: winston.format.combine(
+            winston.format.colorize(),
+            winston.format.simple()
+          )
+        })
+      ]
+    });
   }
 
   /**
@@ -375,7 +387,8 @@ export class WorkflowEngine extends EventEmitter {
     };
 
     // Count workflows by status
-    for (const context of this.activeWorkflows.values()) {
+    const activeWorkflowsArray = Array.from(this.activeWorkflows.values());
+    for (const context of activeWorkflowsArray) {
       stats.workflowsByStatus[context.status] = 
         (stats.workflowsByStatus[context.status] || 0) + 1;
     }

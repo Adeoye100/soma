@@ -688,7 +688,7 @@ export class PriorityScheduler extends EventEmitter {
       throw new Error('No workers available for job scheduling');
     }
 
-    let bestWorker: WorkerState = workers[0];
+    let bestWorker: WorkerState = workers[0]!;
     let bestScore = -Infinity;
 
     for (const worker of workers) {

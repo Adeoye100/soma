@@ -398,22 +398,19 @@ export class DistributedTaskEngine extends EventEmitter {
     );
 
     for (const queueName of uniqueQueues) {
+      const connection = {
+        host: this.config.redis.host,
+        port: this.config.redis.port,
+        ...(this.config.redis.password !== undefined && { password: this.config.redis.password }),
+        ...(this.config.redis.database !== undefined && { db: this.config.redis.database })
+      };
+
       const queue = new Queue(queueName, {
-        connection: {
-          host: this.config.redis.host,
-          port: this.config.redis.port,
-          password: this.config.redis.password,
-          db: this.config.redis.database
-        }
+        connection
       });
 
       const events = new QueueEvents(queueName, {
-        connection: {
-          host: this.config.redis.host,
-          port: this.config.redis.port,
-          password: this.config.redis.password,
-          db: this.config.redis.database
-        }
+        connection
       });
 
       this.queues.set(queueName, queue);
@@ -439,8 +436,8 @@ export class DistributedTaskEngine extends EventEmitter {
             connection: {
               host: this.config.redis.host,
               port: this.config.redis.port,
-              password: this.config.redis.password,
-              db: this.config.redis.database
+              ...(this.config.redis.password !== undefined && { password: this.config.redis.password }),
+              ...(this.config.redis.database !== undefined && { db: this.config.redis.database })
             },
             concurrency: task.concurrency
           }
@@ -492,7 +489,7 @@ export class DistributedTaskEngine extends EventEmitter {
       }
 
       // Update execution status
-      if (execution) {
+      if (execution && execution.endTime && execution.startTime) {
         execution.status = 'completed';
         execution.endTime = new Date();
         execution.result = result;
@@ -513,7 +510,9 @@ export class DistributedTaskEngine extends EventEmitter {
         execution.status = 'failed';
         execution.endTime = new Date();
         execution.error = (error as Error).message;
-        execution.duration = execution.endTime.getTime() - execution.startTime.getTime();
+        if (execution.startTime) {
+          execution.duration = execution.endTime.getTime() - execution.startTime.getTime();
+        }
         execution.retryCount++;
       }
 
@@ -530,19 +529,19 @@ export class DistributedTaskEngine extends EventEmitter {
 
   private async processComputeTask(data: any): Promise<any> {
     // Simulate compute-intensive task
-    await new Promise(resolve => setTimeout(Math.random() * 5000, resolve));
+    await new Promise(resolve => setTimeout(resolve, Math.random() * 5000));
     return { result: `Compute task completed with data: ${JSON.stringify(data)}` };
   }
 
   private async processApiCall(data: any): Promise<any> {
     // Simulate API call
-    await new Promise(resolve => setTimeout(Math.random() * 2000, resolve));
+    await new Promise(resolve => setTimeout(resolve, Math.random() * 2000));
     return { result: `API call completed for: ${data.url || 'unknown endpoint'}` };
   }
 
   private async processFileTask(data: any): Promise<any> {
     // Simulate file processing
-    await new Promise(resolve => setTimeout(Math.random() * 3000, resolve));
+    await new Promise(resolve => setTimeout(resolve, Math.random() * 3000));
     return { result: `File processing completed for: ${data.filename || 'unknown file'}` };
   }
 
@@ -566,8 +565,8 @@ export class DistributedTaskEngine extends EventEmitter {
         connection: {
           host: this.config.redis.host,
           port: this.config.redis.port,
-          password: this.config.redis.password,
-          db: this.config.redis.database
+          ...(this.config.redis.password !== undefined && { password: this.config.redis.password }),
+          ...(this.config.redis.database !== undefined && { db: this.config.redis.database })
         }
       });
       this.queues.set(queueName, queue);
@@ -624,29 +623,11 @@ export class DistributedTaskEngine extends EventEmitter {
   }
 
   private setupQueueEventHandlers(queueName: string, events: QueueEvents): void {
-    events.on('completed', ({ jobId, returnvalue }) => {
-      const correlationId = (jobId as any)?.data?.correlationId;
-      if (correlationId) {
-        this.emit('taskCompleted', {
-          correlationId,
-          jobId,
-          result: returnvalue,
-          duration: 0
-        });
-      }
-    });
-
-    events.on('failed', ({ jobId, failedReason }) => {
-      const correlationId = (jobId as any)?.data?.correlationId;
-      if (correlationId) {
-        this.emit('taskFailed', {
-          correlationId,
-          jobId,
-          error: failedReason,
-          duration: 0
-        });
-      }
-    });
+    // The 'completed' and 'failed' events from QueueEvents do not contain the job's data payload,
+    // so we cannot get the correlationId here directly. The primary event emission is handled
+    // correctly within the `processTask` method of the Worker.
+    // If out-of-band notifications are needed, you must fetch the job from Redis using the jobId.
+    // For now, we will rely on the worker's event emissions.
   }
 
   private startMonitoring(): void {

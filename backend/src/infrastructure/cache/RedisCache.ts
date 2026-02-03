@@ -10,29 +10,64 @@ export interface CacheOptions {
 export class RedisCache {
   private client: Redis;
   private defaultTtl: number = 3600; // 1 hour default
+  private isConnected: boolean = false;
+  private memoryFallback = new Map<string, { value: string, expiry: number }>();
 
   constructor() {
     this.client = new Redis(config.redisUrl, {
       enableReadyCheck: false,
-      maxRetriesPerRequest: 3,
+      maxRetriesPerRequest: 1, // Minimize retries on failure
       lazyConnect: true,
+      retryStrategy: (times) => {
+        const delay = Math.min(times * 50, 2000);
+        if (times > 3) {
+          return null; // Stop retrying after 3 attempts
+        }
+        return delay;
+      },
       reconnectOnError: (err) => {
-        winston.warn('Redis reconnect on error:', err);
+        const targetError = 'READONLY';
+        if (err.message.includes(targetError)) {
+          return true;
+        }
         return false;
       },
     });
 
     this.client.on('connect', () => {
+      this.isConnected = true;
       winston.info('Redis cache connected');
     });
 
     this.client.on('error', (err) => {
-      winston.error('Redis cache error:', err);
+      this.isConnected = false;
+      if (config.nodeEnv === 'development' && (err as any).code === 'ECONNREFUSED') {
+        winston.debug('Redis cache unavailable, using memory fallback');
+      } else {
+        winston.error('Redis cache error:', err);
+      }
     });
 
     this.client.on('ready', () => {
+      this.isConnected = true;
       winston.info('Redis cache ready');
     });
+
+    this.client.on('close', () => {
+      this.isConnected = false;
+    });
+
+    // Start cleanup interval for memory fallback
+    setInterval(() => this.cleanupMemoryFallback(), 60000);
+  }
+
+  private cleanupMemoryFallback() {
+    const now = Date.now();
+    for (const [key, data] of this.memoryFallback.entries()) {
+      if (data.expiry < now) {
+        this.memoryFallback.delete(key);
+      }
+    }
   }
 
   /**
@@ -40,12 +75,19 @@ export class RedisCache {
    */
   async get<T>(key: string): Promise<T | null> {
     try {
-      const value = await this.client.get(key);
-      if (!value) return null;
-
-      return JSON.parse(value) as T;
+      if (this.isConnected) {
+        const value = await this.client.get(key);
+        if (!value) return null;
+        return JSON.parse(value) as T;
+      }
+      
+      const record = this.memoryFallback.get(key);
+      if (record && record.expiry > Date.now()) {
+        return JSON.parse(record.value) as T;
+      }
+      return null;
     } catch (error) {
-      winston.error('Cache get error:', error);
+      if (this.isConnected) winston.error('Cache get error:', error);
       return null;
     }
   }
@@ -58,9 +100,16 @@ export class RedisCache {
       const serializedValue = JSON.stringify(value);
       const expiry = ttl || this.defaultTtl;
 
-      await this.client.setex(key, expiry, serializedValue);
+      if (this.isConnected) {
+        await this.client.setex(key, expiry, serializedValue);
+      } else {
+        this.memoryFallback.set(key, {
+          value: serializedValue,
+          expiry: Date.now() + (expiry * 1000)
+        });
+      }
     } catch (error) {
-      winston.error('Cache set error:', error);
+      if (this.isConnected) winston.error('Cache set error:', error);
     }
   }
 
@@ -69,9 +118,13 @@ export class RedisCache {
    */
   async delete(key: string): Promise<void> {
     try {
-      await this.client.del(key);
+      if (this.isConnected) {
+        await this.client.del(key);
+      } else {
+        this.memoryFallback.delete(key);
+      }
     } catch (error) {
-      winston.error('Cache delete error:', error);
+      if (this.isConnected) winston.error('Cache delete error:', error);
     }
   }
 
@@ -80,10 +133,14 @@ export class RedisCache {
    */
   async exists(key: string): Promise<boolean> {
     try {
-      const result = await this.client.exists(key);
-      return result === 1;
+      if (this.isConnected) {
+        const result = await this.client.exists(key);
+        return result === 1;
+      }
+      const record = this.memoryFallback.get(key);
+      return !!(record && record.expiry > Date.now());
     } catch (error) {
-      winston.error('Cache exists error:', error);
+      if (this.isConnected) winston.error('Cache exists error:', error);
       return false;
     }
   }
@@ -93,10 +150,16 @@ export class RedisCache {
    */
   async mget<T>(keys: string[]): Promise<(T | null)[]> {
     try {
-      const values = await this.client.mget(keys);
-      return values.map(value => value ? JSON.parse(value) : null);
+      if (this.isConnected) {
+        const values = await this.client.mget(keys);
+        return values.map(value => value ? JSON.parse(value) : null);
+      }
+      return keys.map(key => {
+        const record = this.memoryFallback.get(key);
+        return (record && record.expiry > Date.now()) ? JSON.parse(record.value) : null;
+      });
     } catch (error) {
-      winston.error('Cache mget error:', error);
+      if (this.isConnected) winston.error('Cache mget error:', error);
       return keys.map(() => null);
     }
   }
@@ -106,17 +169,26 @@ export class RedisCache {
    */
   async mset(keyValuePairs: { [key: string]: any }, ttl?: number): Promise<void> {
     try {
-      const pipeline = this.client.pipeline();
       const expiry = ttl || this.defaultTtl;
 
-      Object.entries(keyValuePairs).forEach(([key, value]) => {
-        const serializedValue = JSON.stringify(value);
-        pipeline.setex(key, expiry, serializedValue);
-      });
-
-      await pipeline.exec();
+      if (this.isConnected) {
+        const pipeline = this.client.pipeline();
+        Object.entries(keyValuePairs).forEach(([key, value]) => {
+          const serializedValue = JSON.stringify(value);
+          pipeline.setex(key, expiry, serializedValue);
+        });
+        await pipeline.exec();
+      } else {
+        const now = Date.now();
+        Object.entries(keyValuePairs).forEach(([key, value]) => {
+          this.memoryFallback.set(key, {
+            value: JSON.stringify(value),
+            expiry: now + (expiry * 1000)
+          });
+        });
+      }
     } catch (error) {
-      winston.error('Cache mset error:', error);
+      if (this.isConnected) winston.error('Cache mset error:', error);
     }
   }
 
@@ -125,9 +197,12 @@ export class RedisCache {
    */
   async clear(): Promise<void> {
     try {
-      await this.client.flushall();
+      if (this.isConnected) {
+        await this.client.flushall();
+      }
+      this.memoryFallback.clear();
     } catch (error) {
-      winston.error('Cache clear error:', error);
+      if (this.isConnected) winston.error('Cache clear error:', error);
     }
   }
 
@@ -136,9 +211,18 @@ export class RedisCache {
    */
   async keys(pattern: string): Promise<string[]> {
     try {
-      return await this.client.keys(pattern);
+      if (this.isConnected) {
+        return await this.client.keys(pattern);
+      }
+      // Simple regex conversion for basic pattern matching
+      const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+      const now = Date.now();
+      return Array.from(this.memoryFallback.keys()).filter(key => {
+        const record = this.memoryFallback.get(key);
+        return record && record.expiry > now && regex.test(key);
+      });
     } catch (error) {
-      winston.error('Cache keys error:', error);
+      if (this.isConnected) winston.error('Cache keys error:', error);
       return [];
     }
   }
@@ -148,9 +232,19 @@ export class RedisCache {
    */
   async increment(key: string, amount: number = 1): Promise<number> {
     try {
-      return await this.client.incrby(key, amount);
+      if (this.isConnected) {
+        return await this.client.incrby(key, amount);
+      }
+      const record = this.memoryFallback.get(key);
+      const currentVal = (record && record.expiry > Date.now()) ? parseInt(JSON.parse(record.value)) : 0;
+      const newVal = currentVal + amount;
+      this.memoryFallback.set(key, {
+        value: JSON.stringify(newVal),
+        expiry: Date.now() + (this.defaultTtl * 1000)
+      });
+      return newVal;
     } catch (error) {
-      winston.error('Cache increment error:', error);
+      if (this.isConnected) winston.error('Cache increment error:', error);
       return 0;
     }
   }
@@ -160,9 +254,16 @@ export class RedisCache {
    */
   async expire(key: string, ttl: number): Promise<void> {
     try {
-      await this.client.expire(key, ttl);
+      if (this.isConnected) {
+        await this.client.expire(key, ttl);
+      } else {
+        const record = this.memoryFallback.get(key);
+        if (record) {
+          record.expiry = Date.now() + (ttl * 1000);
+        }
+      }
     } catch (error) {
-      winston.error('Cache expire error:', error);
+      if (this.isConnected) winston.error('Cache expire error:', error);
     }
   }
 
@@ -171,9 +272,16 @@ export class RedisCache {
    */
   async ttl(key: string): Promise<number> {
     try {
-      return await this.client.ttl(key);
+      if (this.isConnected) {
+        return await this.client.ttl(key);
+      }
+      const record = this.memoryFallback.get(key);
+      if (record && record.expiry > Date.now()) {
+        return Math.ceil((record.expiry - Date.now()) / 1000);
+      }
+      return -1;
     } catch (error) {
-      winston.error('Cache ttl error:', error);
+      if (this.isConnected) winston.error('Cache ttl error:', error);
       return -1;
     }
   }
@@ -183,6 +291,7 @@ export class RedisCache {
    */
   async close(): Promise<void> {
     try {
+      this.isConnected = false;
       await this.client.quit();
       winston.info('Redis cache connection closed');
     } catch (error) {
@@ -195,14 +304,21 @@ export class RedisCache {
    */
   async getStats(): Promise<any> {
     try {
-      const info = await this.client.info();
+      if (this.isConnected) {
+        const info = await this.client.info();
+        return {
+          connected: true,
+          type: 'redis',
+          info: info
+        };
+      }
       return {
-        connected: this.client.status === 'ready',
-        info: info
+        connected: false,
+        type: 'memory',
+        size: this.memoryFallback.size
       };
     } catch (error) {
-      winston.error('Cache stats error:', error);
-      return { connected: false, error: (error as Error).message };
+      return { connected: false, type: 'memory', error: (error as Error).message };
     }
   }
 }

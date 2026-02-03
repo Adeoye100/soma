@@ -40,11 +40,23 @@ if (config.nodeEnv === 'production') {
 
 // Create Redis client for rate limiting
 const redisClient: RedisClientType = createClient({
-  url: config.redisUrl
+  url: config.redisUrl,
+  socket: {
+    reconnectStrategy: (retries) => {
+      if (retries > 3) {
+        return false; // Stop retrying after 3 attempts
+      }
+      return Math.min(retries * 50, 500);
+    }
+  }
 });
 
 redisClient.on('error', (err) => {
-  console.error('Redis Client Error', err);
+  if (config.nodeEnv === 'development' && (err as any).code === 'ECONNREFUSED') {
+    // Only log once or suppress in dev to avoid noise
+  } else {
+    console.error('Redis Client Error', err);
+  }
 });
 
 // Initialize Redis connection

@@ -54,11 +54,21 @@ export class RequestThrottler {
 
     try {
       this.redisClient = createClient({
-        url: config.redisUrl
+        url: config.redisUrl,
+        socket: {
+          reconnectStrategy: (retries) => {
+            if (retries > 3) return false;
+            return Math.min(retries * 50, 500);
+          }
+        }
       });
 
       this.redisClient.on('error', (err) => {
-        this.logger.error('Redis Client Error for throttling:', err);
+        if (config.nodeEnv === 'development' && (err as any).code === 'ECONNREFUSED') {
+          // Suppress in dev to avoid noise if Redis is not running
+        } else {
+          this.logger.error('Redis Client Error for throttling:', err);
+        }
       });
 
       await this.redisClient.connect();

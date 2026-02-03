@@ -220,6 +220,13 @@ export interface ConfigurationSchema {
   metadata: SchemaMetadata;
 }
 
+export interface ValidationConfig {
+  enabled: boolean;
+  strict: boolean;
+  customValidators?: Record<string, (value: any) => boolean>;
+  cacheResults: boolean;
+}
+
 export interface SchemaField {
   name: string;
   type: 'string' | 'number' | 'boolean' | 'object' | 'array' | 'encrypted';
@@ -228,6 +235,7 @@ export interface SchemaField {
   description?: string;
   validation: ValidationRule[];
   deprecated?: boolean;
+  deprecatedMessage?: string;
   sensitive?: boolean;
 }
 
@@ -304,6 +312,11 @@ export class ConfigurationManager extends EventEmitter {
     this.metrics = this.initializeMetrics();
     
     this.setupEventHandlers();
+    
+    this.debouncedReload = this.debounce(async (watchPath: string) => {
+      this.logger.info('Configuration hot reload triggered', { path: watchPath });
+      this.emit('configurationReloaded', { path: watchPath, timestamp: new Date() });
+    }, this.config.hotReload.debounceMs);
   }
 
   /**
@@ -401,14 +414,17 @@ export class ConfigurationManager extends EventEmitter {
       timestamp: new Date(),
       author: options.author,
       environment,
-      changes: [],
-      approval: options.requireApproval ? {
+      changes: []
+    };
+
+    if (options.requireApproval) {
+      change.approval = {
         required: true,
         approvedBy: [],
         status: 'pending',
         timestamp: new Date()
-      } : undefined
-    };
+      };
+    }
 
     try {
       // Validate changes
@@ -420,13 +436,18 @@ export class ConfigurationManager extends EventEmitter {
           const oldValue = env.variables[key];
           const newValue = this.createConfigValue(value);
 
-          change.changes.push({
+          const detail: ConfigurationChangeDetail = {
             field: key,
             oldValue: oldValue?.value,
             newValue: value,
-            type: oldValue ? 'update' : 'create',
-            reason: options.reason
-          });
+            type: oldValue ? 'update' : 'create'
+          };
+
+          if (options.reason) {
+            detail.reason = options.reason;
+          }
+
+          change.changes.push(detail);
 
           env.variables[key] = newValue;
         }
@@ -486,7 +507,9 @@ export class ConfigurationManager extends EventEmitter {
 
     change.approval.approvedBy.push(approver);
     change.approval.status = 'approved';
-    change.approval.comments = comments;
+    if (comments) {
+      change.approval.comments = comments;
+    }
     change.approval.timestamp = new Date();
 
     this.emit('changeApproved', { changeId, approver });
@@ -526,12 +549,22 @@ export class ConfigurationManager extends EventEmitter {
         }
       }
 
-      // Apply rollback
-      const change = await this.updateConfiguration(environment, updates, {
+      const updateOptions: {
+        author: string;
+        reason?: string;
+        requireApproval?: boolean;
+        dryRun?: boolean;
+      } = {
         author: options.author,
-        reason: `Rollback to version ${version}: ${options.reason}`,
-        dryRun: options.dryRun
-      });
+        reason: `Rollback to version ${version}${options.reason ? ': ' + options.reason : ''}`
+      };
+
+      if (options.dryRun !== undefined) {
+        updateOptions.dryRun = options.dryRun;
+      }
+
+      // Apply rollback
+      const change = await this.updateConfiguration(environment, updates, updateOptions);
 
       this.logger.info('Configuration rolled back', {
         environment,
@@ -818,12 +851,22 @@ export class ConfigurationManager extends EventEmitter {
         Object.assign(updates, config);
       }
 
-      // Apply changes
-      const change = await this.updateConfiguration(environment, updates, {
+      const importOptions: {
+        author: string;
+        reason?: string;
+        requireApproval?: boolean;
+        dryRun?: boolean;
+      } = {
         author: options.author,
-        reason: `Import from ${format} format`,
-        dryRun: options.dryRun
-      });
+        reason: `Import from ${format} format`
+      };
+
+      if (options.dryRun !== undefined) {
+        importOptions.dryRun = options.dryRun;
+      }
+
+      // Apply changes
+      const change = await this.updateConfiguration(environment, updates, importOptions);
 
       this.logger.info('Configuration imported', {
         environment,
@@ -1010,7 +1053,7 @@ export class ConfigurationManager extends EventEmitter {
     for (const watchPath of this.config.hotReload.watchPaths) {
       try {
         const watcher = fs.watch(watchPath, { recursive: true }, (eventType, filename) => {
-          if (this.shouldReloadFile(filename)) {
+          if (filename && this.shouldReloadFile(filename)) {
             this.debouncedReload(watchPath);
           }
         });
@@ -1122,10 +1165,7 @@ export class ConfigurationManager extends EventEmitter {
     return true;
   }
 
-  private debouncedReload = this.debounce(async (watchPath: string) => {
-    this.logger.info('Configuration hot reload triggered', { path: watchPath });
-    this.emit('configurationReloaded', { path: watchPath, timestamp: new Date() });
-  }, this.config.hotReload.debounceMs);
+  private debouncedReload: ((watchPath: string) => void) & { cancel?: () => void };
 
   private debounce<T extends (...args: any[]) => any>(func: T, delay: number): T {
     let timeoutId: NodeJS.Timeout;
@@ -1202,8 +1242,10 @@ export class ConfigurationManager extends EventEmitter {
         for (const line of yamlLines) {
           if (line.includes(':')) {
             const [key, ...valueParts] = line.split(':');
-            const value = valueParts.join(':').trim();
-            result[key.trim()] = value;
+            if (key) {
+              const value = valueParts.join(':').trim();
+              result[key.trim()] = value;
+            }
           }
         }
         return result;
@@ -1212,7 +1254,9 @@ export class ConfigurationManager extends EventEmitter {
         for (const line of data.split('\n')) {
           if (line.includes('=')) {
             const [key, ...valueParts] = line.split('=');
-            properties[key.trim()] = valueParts.join('=').trim();
+            if (key) {
+              properties[key.trim()] = valueParts.join('=').trim();
+            }
           }
         }
         return properties;

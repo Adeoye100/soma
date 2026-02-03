@@ -1,0 +1,255 @@
+src/application/automation/output/JsonOutputGenerator.ts(17,9): error TS2353: Object literal may only specify known properties, and 'indent' does not exist in type '{ destination: string; format: string; template?: string; compression?: boolean; encryption?: boolean; batching?: boolean; batchSize?: number; }'.
+src/application/automation/output/JsonOutputGenerator.ts(46,11): error TS2353: Object literal may only specify known properties, and 'generatedAt' does not exist in type '{ executionTime: number; cacheHit?: boolean; attempts?: number; outputSize?: number; processedItems?: number; failedItems?: number; }'.
+src/application/automation/output/JsonOutputGenerator.ts(61,11): error TS2353: Object literal may only specify known properties, and 'outputSize' does not exist in type '{ executionTime: number; cacheHit?: boolean; attempts?: number; }'.
+src/application/automation/output/JsonOutputGenerator.ts(61,45): error TS2339: Property 'content' does not exist on type 'ProcessingResult<any>'.
+src/application/automation/output/JsonOutputGenerator.ts(154,49): error TS2339: Property 'content' does not exist on type 'ProcessingResult<any>'.
+src/application/automation/output/JsonOutputGenerator.ts(163,54): error TS2339: Property 'content' does not exist on type 'ProcessingResult<any>'.
+src/application/automation/output/JsonOutputGenerator.ts(172,50): error TS2339: Property 'content' does not exist on type 'ProcessingResult<any>'.
+src/application/automation/output/JsonOutputGenerator.ts(181,40): error TS2339: Property 'content' does not exist on type 'ProcessingResult<any>'.
+src/application/automation/output/OutputGenerator.ts(9,23): error TS2420: Class 'import("/home/ad/Documents/smart-examination-app /backend/src/application/automation/output/OutputGenerator").OutputGenerator' incorrectly implements interface 'import("/home/ad/Documents/smart-examination-app /backend/src/shared/types/index").OutputGenerator'.
+  Property 'type' is missing in type 'import("/home/ad/Documents/smart-examination-app /backend/src/application/automation/output/OutputGenerator").OutputGenerator' but required in type 'import("/home/ad/Documents/smart-examination-app /backend/src/shared/types/index").OutputGenerator'.
+src/application/automation/output/OutputGenerator.ts(20,30): error TS2339: Property 'version' does not exist on type 'OutputGenerator'.
+src/application/automation/output/OutputGenerator.ts(21,39): error TS2339: Property 'supportedFormats' does not exist on type 'OutputGenerator'.
+src/application/automation/output/OutputGenerator.ts(79,26): error TS2345: Argument of type 'ProcessingResult<any> | undefined' is not assignable to parameter of type 'ProcessingResult<any>'.
+  Type 'undefined' is not assignable to type 'ProcessingResult<any>'.
+src/application/automation/output/OutputGenerator.ts(89,11): error TS2353: Object literal may only specify known properties, and 'processedFormats' does not exist in type '{ executionTime: number; cacheHit?: boolean; attempts?: number; }'.
+src/application/workflow/components/InputProcessor.ts(73,9): error TS2375: Type '{ code: string; message: string; cause: Error | undefined; }' is not assignable to type 'ServiceError' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'cause' are incompatible.
+    Type 'Error | undefined' is not assignable to type 'Error'.
+      Type 'undefined' is not assignable to type 'Error'.
+src/automation/core/ErrorHandlingSystem.ts(347,5): error TS2322: Type 'boolean | undefined' is not assignable to type 'boolean'.
+  Type 'undefined' is not assignable to type 'boolean'.
+src/automation/core/ErrorHandlingSystem.ts(610,19): error TS2454: Variable 'lastError' is used before being assigned.
+src/automation/core/ErrorHandlingSystem.ts(907,12): error TS2678: Type '"error-severity"' is not comparable to type '"manual" | "error-pattern" | "health-check-failure" | "performance-degradation"'.
+src/automation/core/ErrorHandlingSystem.ts(909,12): error TS2678: Type '"custom"' is not comparable to type '"manual" | "error-pattern" | "health-check-failure" | "performance-degradation"'.
+src/automation/core/MultiFormatIOProcessor.ts(15,15): error TS2304: Cannot find name 'ValidationConfig'.
+src/automation/core/MultiFormatIOProcessor.ts(16,19): error TS2552: Cannot find name 'TransformationConfig'. Did you mean 'TransformationCondition'?
+src/automation/core/MultiFormatIOProcessor.ts(27,14): error TS2304: Cannot find name 'Validator'.
+src/automation/core/MultiFormatIOProcessor.ts(28,16): error TS2304: Cannot find name 'Transformer'.
+src/automation/core/MultiFormatIOProcessor.ts(317,9): error TS2322: Type 'string | null' is not assignable to type 'string | undefined'.
+  Type 'null' is not assignable to type 'string | undefined'.
+src/automation/core/MultiFormatIOProcessor.ts(333,34): error TS2339: Property 'read' does not exist on type 'DataFormat'.
+src/automation/core/MultiFormatIOProcessor.ts(355,40): error TS2339: Property 'write' does not exist on type 'DataFormat'.
+src/automation/core/MultiFormatIOProcessor.ts(361,58): error TS18048: 'operation.startTime' is possibly 'undefined'.
+src/automation/core/MultiFormatIOProcessor.ts(368,9): error TS2375: Type '{ inputFormat: string; outputFormat: string | undefined; recordsProcessed: number; bytesProcessed: number; processingTime: number; transformations: string[]; validations: string[]; }' is not assignable to type 'ProcessingMetadata' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'outputFormat' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/automation/core/MultiFormatIOProcessor.ts(377,9): error TS2322: Type 'ValidationError[]' is not assignable to type 'ProcessingError[]'.
+  Type 'ValidationError' is not assignable to type 'ProcessingError' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'severity' are incompatible.
+      Type '"info" | "error" | "warning"' is not assignable to type '"error" | "warning"'.
+        Type '"info"' is not assignable to type '"error" | "warning"'.
+src/automation/core/MultiFormatIOProcessor.ts(378,9): error TS2322: Type 'ValidationWarning[]' is not assignable to type 'ProcessingWarning[]'.
+  Property 'code' is missing in type 'ValidationWarning' but required in type 'ProcessingWarning'.
+src/automation/core/MultiFormatIOProcessor.ts(389,58): error TS18048: 'operation.startTime' is possibly 'undefined'.
+src/automation/core/MultiFormatIOProcessor.ts(441,30): error TS2339: Property 'read' does not exist on type 'DataFormat'.
+src/automation/core/MultiFormatIOProcessor.ts(788,20): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/automation/core/MultiFormatIOProcessor.ts(791,21): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/automation/core/MultiFormatIOProcessor.ts(804,37): error TS7006: Parameter 'line' implicitly has an 'any' type.
+src/automation/core/MultiFormatIOProcessor.ts(807,30): error TS7006: Parameter 'header' implicitly has an 'any' type.
+src/automation/core/MultiFormatIOProcessor.ts(807,38): error TS7006: Parameter 'index' implicitly has an 'any' type.
+src/automation/core/MultiFormatIOProcessor.ts(824,20): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/automation/core/MultiFormatIOProcessor.ts(827,21): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/automation/error-handling/CircuitBreaker.ts(2,34): error TS2307: Cannot find module '../../infrastructure/monitoring/AutomationLogger' or its corresponding type declarations.
+src/automation/error-handling/CircuitBreaker.ts(28,7): error TS2783: 'failureThreshold' is specified more than once, so this usage will be overwritten.
+src/automation/error-handling/CircuitBreaker.ts(29,7): error TS2783: 'resetTimeout' is specified more than once, so this usage will be overwritten.
+src/automation/error-handling/CircuitBreaker.ts(30,7): error TS2783: 'monitoringPeriod' is specified more than once, so this usage will be overwritten.
+src/automation/monitoring/DistributedTracing.ts(2,24): error TS2307: Cannot find module '../shared/logger' or its corresponding type declarations.
+src/automation/monitoring/DistributedTracing.ts(41,11): error TS2375: Type '{ traceId: string; spanId: string; parentSpanId: string | undefined; attributes: Record<string, any>; kind: SpanKind; links: SpanLink[]; }' is not assignable to type 'SpanContext' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'parentSpanId' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/automation/monitoring/DistributedTracing.ts(60,44): error TS2693: 'Context' only refers to a type, but is being used as a value here.
+src/automation/monitoring/DistributedTracing.ts(60,66): error TS2345: Argument of type '{ traceId: string; spanId: string; }' is not assignable to parameter of type 'SpanContext'.
+  Property 'traceFlags' is missing in type '{ traceId: string; spanId: string; }' but required in type 'SpanContext'.
+src/automation/monitoring/DistributedTracing.ts(63,10): error TS2693: 'Context' only refers to a type, but is being used as a value here.
+src/automation/monitoring/DistributedTracing.ts(66,41): error TS2693: 'Context' only refers to a type, but is being used as a value here.
+src/automation/monitoring/DistributedTracing.ts(104,29): error TS2339: Property 'name' does not exist on type 'Span'.
+src/automation/monitoring/DistributedTracing.ts(158,23): error TS2339: Property 'name' does not exist on type 'Span'.
+src/automation/monitoring/DistributedTracing.ts(220,23): error TS2339: Property 'name' does not exist on type 'Span'.
+src/automation/monitoring/DistributedTracing.ts(221,23): error TS2339: Property 'startTime' does not exist on type 'Span'.
+src/automation/monitoring/DistributedTracing.ts(233,30): error TS2339: Property 'startTime' does not exist on type 'Span'.
+src/automation/monitoring/DistributedTracing.ts(233,56): error TS2339: Property 'startTime' does not exist on type 'Span'.
+src/automation/monitoring/EnterpriseMonitoringSystem.ts(461,11): error TS2375: Type '{ id: string; name: string; duration: number; startTime: Date; endTime: Date; status: "ok"; parentSpanId: string | undefined; attributes: Record<string, any>; logs: never[]; }' is not assignable to type 'Span' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'parentSpanId' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/automation/monitoring/EnterpriseMonitoringSystem.ts(980,49): error TS2379: Argument of type '{ name: string | undefined; startTime: Date; }' is not assignable to parameter of type '{ name?: string; startTime?: Date; endTime?: Date; labels?: Record<string, string>; limit?: number; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'name' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/automation/monitoring/EnterpriseMonitoringSystem.ts(989,37): error TS2345: Argument of type 'Metric | undefined' is not assignable to parameter of type 'Metric'.
+  Type 'undefined' is not assignable to type 'Metric'.
+src/automation/monitoring/EnterpriseMonitoringSystem.ts(1037,48): error TS2532: Object is possibly 'undefined'.
+src/automation/monitoring/EnterpriseMonitoringSystem.ts(1041,11): error TS2451: Cannot redeclare block-scoped variable 'testMetric'.
+src/automation/monitoring/EnterpriseMonitoringSystem.ts(1042,13): error TS2532: Object is possibly 'undefined'.
+src/automation/monitoring/EnterpriseMonitoringSystem.ts(1045,15): error TS2532: Object is possibly 'undefined'.
+src/automation/monitoring/EnterpriseMonitoringSystem.ts(1046,13): error TS2532: Object is possibly 'undefined'.
+src/automation/monitoring/EnterpriseMonitoringSystem.ts(1049,11): error TS2451: Cannot redeclare block-scoped variable 'testMetric'.
+src/automation/monitoring/EnterpriseMonitoringSystem.ts(1050,13): error TS2532: Object is possibly 'undefined'.
+src/automation/monitoring/EnterpriseMonitoringSystem.ts(1053,15): error TS2532: Object is possibly 'undefined'.
+src/automation/monitoring/EnterpriseMonitoringSystem.ts(1054,13): error TS2532: Object is possibly 'undefined'.
+src/automation/monitoring/ProcessMonitor.ts(49,18): error TS2339: Property 'incrementCounter' does not exist on type 'SystemMetrics'.
+src/automation/monitoring/ProcessMonitor.ts(63,18): error TS2339: Property 'decrementCounter' does not exist on type 'SystemMetrics'.
+src/automation/monitoring/ProcessMonitor.ts(113,18): error TS2339: Property 'recordGauge' does not exist on type 'SystemMetrics'.
+src/automation/monitoring/ProcessMonitor.ts(114,18): error TS2339: Property 'recordGauge' does not exist on type 'SystemMetrics'.
+src/automation/monitoring/ProcessMonitor.ts(144,20): error TS2339: Property 'incrementCounter' does not exist on type 'SystemMetrics'.
+src/automation/queues/TaskQueueManager.ts(189,7): error TS2375: Type '{ id: string; name: string; queue: string; status: "completed" | "waiting" | "active" | "delayed"; progress: any; data: any; returnvalue: any; failedReason: string; finishedOn: number | undefined; processedOn: number | undefined; timestamp: number; }' is not assignable to type 'JobInfo' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'finishedOn' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number | null'.
+      Type 'undefined' is not assignable to type 'number | null'.
+src/automation/queues/TaskQueueManager.ts(196,23): error TS2349: This expression is not callable.
+  No constituent of type 'JobProgress' is callable.
+src/domain/automation/AutomationRepository.ts(2,3): error TS2305: Module '"./types"' has no exported member 'AutomationConfig'.
+src/domain/automation/AutomationRepository.ts(3,3): error TS2305: Module '"./types"' has no exported member 'AutomationResult'.
+src/domain/automation/AutomationRepository.ts(4,3): error TS2305: Module '"./types"' has no exported member 'AutomationEvent'.
+src/domain/automation/AutomationRepository.ts(5,3): error TS2305: Module '"./types"' has no exported member 'AutomationTrigger'.
+src/domain/automation/AutomationRepository.ts(6,3): error TS2305: Module '"./types"' has no exported member 'ScheduledTask'.
+src/domain/automation/AutomationRepository.ts(7,3): error TS2305: Module '"./types"' has no exported member 'AutomationRule'.
+src/domain/automation/AutomationRepository.ts(8,3): error TS2305: Module '"./types"' has no exported member 'ExternalIntegration'.
+src/domain/automation/AutomationRepository.ts(11,3): error TS2305: Module '"./types"' has no exported member 'AutomationStatus'.
+src/domain/automation/AutomationRepository.ts(12,3): error TS2305: Module '"./types"' has no exported member 'AutomationHistory'.
+src/domain/automation/AutomationRepository.ts(13,3): error TS2305: Module '"./types"' has no exported member 'IntegrationConfig'.
+src/domain/automation/AutomationRepository.ts(14,3): error TS2305: Module '"./types"' has no exported member 'AutomationTemplate'.
+src/domain/automation/AutomationRepository.ts(15,3): error TS2305: Module '"./types"' has no exported member 'AutomationAnalytics'.
+src/domain/automation/AutomationRepository.ts(16,3): error TS2305: Module '"./types"' has no exported member 'AutomationJob'.
+src/domain/automation/AutomationRepository.ts(17,3): error TS2305: Module '"./types"' has no exported member 'JobStatus'.
+src/domain/automation/AutomationRepository.ts(18,3): error TS2305: Module '"./types"' has no exported member 'QueueStats'.
+src/domain/automation/AutomationRepository.ts(19,3): error TS2305: Module '"./types"' has no exported member 'TaskExecutionLog'.
+src/domain/automation/AutomationRepository.ts(20,3): error TS2305: Module '"./types"' has no exported member 'AutomationMetrics'.
+src/domain/automation/AutomationRepository.ts(21,3): error TS2305: Module '"./types"' has no exported member 'RuleExecutionResult'.
+src/domain/automation/AutomationRepository.ts(23,10): error TS2305: Module '"./interfaces"' has no exported member 'IAutomationRepository'.
+src/domain/automation/AutomationRepository.ts(406,39): error TS2339: Property 'id' does not exist on type 'WorkflowContext'.
+src/domain/automation/interfaces.ts(2,3): error TS2305: Module '"./types"' has no exported member 'AutomationConfig'.
+src/domain/automation/interfaces.ts(3,3): error TS2305: Module '"./types"' has no exported member 'AutomationResult'.
+src/domain/automation/interfaces.ts(4,3): error TS2305: Module '"./types"' has no exported member 'AutomationEvent'.
+src/domain/automation/interfaces.ts(5,3): error TS2305: Module '"./types"' has no exported member 'AutomationTrigger'.
+src/domain/automation/interfaces.ts(6,3): error TS2305: Module '"./types"' has no exported member 'ScheduledTask'.
+src/domain/automation/interfaces.ts(7,3): error TS2305: Module '"./types"' has no exported member 'AutomationRule'.
+src/domain/automation/interfaces.ts(8,3): error TS2305: Module '"./types"' has no exported member 'ExternalIntegration'.
+src/domain/automation/interfaces.ts(11,3): error TS2305: Module '"./types"' has no exported member 'ActionConfig'.
+src/domain/automation/interfaces.ts(12,3): error TS2305: Module '"./types"' has no exported member 'ConditionConfig'.
+src/domain/entities/Exam.ts(60,5): error TS2412: Type 'Date | undefined' is not assignable to type 'Date' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type 'Date'.
+src/domain/entities/Exam.ts(61,5): error TS2412: Type 'Date | undefined' is not assignable to type 'Date' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type 'Date'.
+src/domain/entities/Exam.ts(125,5): error TS2412: Type 'number | undefined' is not assignable to type 'number' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type 'number'.
+src/domain/entities/Exam.ts(152,46): error TS2345: Argument of type 'Question | undefined' is not assignable to parameter of type 'Question'.
+  Type 'undefined' is not assignable to type 'Question'.
+src/domain/entities/Exam.ts(168,5): error TS2375: Type '{ totalQuestions: number; status: ExamStatus; duration: number; createdAt: Date; startedAt: Date | undefined; completedAt: Date | undefined; isActive: boolean; canStart: boolean; canComplete: boolean; }' is not assignable to type 'ExamStatistics' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'startedAt' are incompatible.
+    Type 'Date | undefined' is not assignable to type 'Date'.
+      Type 'undefined' is not assignable to type 'Date'.
+src/domain/repositories/ExamRepository.ts(217,5): error TS2375: Type '{ totalExams: number; completedExams: number; averageScore: number; lastExamDate: string | undefined; }' is not assignable to type '{ totalExams: number; completedExams: number; averageScore: number; lastExamDate?: string; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'lastExamDate' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/infrastructure/automation/IntegrationAdapters.ts(6,10): error TS2614: Module '"../../services/geminiService"' has no exported member 'GeminiService'. Did you mean to use 'import GeminiService from "../../services/geminiService"' instead?
+src/infrastructure/automation/IntegrationAdapters.ts(7,10): error TS2724: '"../../services/supabaseService"' has no exported member named 'SupabaseService'. Did you mean 'UserService'?
+src/infrastructure/automation/IntegrationAdapters.ts(9,39): error TS2307: Cannot find module '../../services/fileValidationService' or its corresponding type declarations.
+src/infrastructure/automation/IntegrationAdapters.ts(10,35): error TS2307: Cannot find module '../../services/documentProcessor' or its corresponding type declarations.
+src/infrastructure/automation/IntegrationAdapters.ts(11,46): error TS2307: Cannot find module '../../services/enhancedPdfConversionService' or its corresponding type declarations.
+src/infrastructure/automation/IntegrationAdapters.ts(12,33): error TS2307: Cannot find module '../../services/processingQueue' or its corresponding type declarations.
+src/infrastructure/automation/IntegrationAdapters.ts(13,34): error TS2307: Cannot find module './AutomationEngine' or its corresponding type declarations.
+src/infrastructure/automation/IntegrationAdapters.ts(147,37): error TS2304: Cannot find name 'startTime'.
+src/infrastructure/automation/IntegrationAdapters.ts(205,37): error TS2304: Cannot find name 'startTime'.
+src/infrastructure/automation/IntegrationAdapters.ts(237,37): error TS2304: Cannot find name 'startTime'.
+src/infrastructure/automation/IntegrationAdapters.ts(269,37): error TS2304: Cannot find name 'startTime'.
+src/infrastructure/automation/IntegrationAdapters.ts(317,37): error TS2304: Cannot find name 'startTime'.
+src/infrastructure/automation/IntegrationAdapters.ts(349,37): error TS2304: Cannot find name 'startTime'.
+src/infrastructure/automation/IntegrationAdapters.ts(381,37): error TS2304: Cannot find name 'startTime'.
+src/infrastructure/automation/IntegrationAdapters.ts(397,23): error TS2554: Expected 1-3 arguments, but got 0.
+src/infrastructure/automation/IntegrationAdapters.ts(406,46): error TS2554: Expected 2-4 arguments, but got 1.
+src/infrastructure/automation/IntegrationAdapters.ts(425,37): error TS2304: Cannot find name 'startTime'.
+src/infrastructure/automation/IntegrationAdapters.ts(485,37): error TS2304: Cannot find name 'startTime'.
+src/infrastructure/automation/IntegrationAdapters.ts(517,37): error TS2304: Cannot find name 'startTime'.
+src/infrastructure/automation/IntegrationAdapters.ts(589,26): error TS2445: Property 'config' is protected and only accessible within class 'BaseAdapter' and its subclasses.
+src/infrastructure/automation/IntegrationAdapters.ts(590,24): error TS2445: Property 'circuitBreakerState' is protected and only accessible within class 'BaseAdapter' and its subclasses.
+src/infrastructure/automation/IntegrationAdapters.ts(591,27): error TS2445: Property 'failureCount' is protected and only accessible within class 'BaseAdapter' and its subclasses.
+src/infrastructure/automation/IntegrationAdapters.ts(601,15): error TS2445: Property 'config' is protected and only accessible within class 'BaseAdapter' and its subclasses.
+src/infrastructure/automation/IntegrationAdapters.ts(601,37): error TS2445: Property 'config' is protected and only accessible within class 'BaseAdapter' and its subclasses.
+src/infrastructure/automation/integrations/WebhookProcessor.ts(123,25): error TS2532: Object is possibly 'undefined'.
+src/infrastructure/automation/integrations/WebhookProcessor.ts(220,64): error TS2345: Argument of type '{ method: "POST"; headers: { 'Content-Type': string; 'X-Webhook-Event': string; 'X-Webhook-ID': `${string}-${string}-${string}-${string}-${string}`; 'X-Webhook-Signature': string; }; body: string; timeout: number; }' is not assignable to parameter of type 'string'.
+src/infrastructure/automation/integrations/WebhookProcessor.ts(223,24): error TS2339: Property 'status' does not exist on type 'ServiceResult<unknown>'.
+src/infrastructure/automation/integrations/WebhookProcessor.ts(225,25): error TS2339: Property 'headers' does not exist on type 'ServiceResult<unknown>'.
+src/infrastructure/automation/processors/FileInputProcessor.ts(2,39): error TS2307: Cannot find module '../../services/FileValidationService' or its corresponding type declarations.
+src/infrastructure/automation/processors/FileInputProcessor.ts(3,40): error TS2307: Cannot find module '../queue/ProcessingQueueService' or its corresponding type declarations.
+src/infrastructure/automation/processors/FileInputProcessor.ts(36,11): error TS2416: Property 'config' in type 'FileInputProcessor' is not assignable to the same property in base type 'InputProcessor'.
+  Type 'FileProcessorConfig' is missing the following properties from type '{ source: string; format: string; validation?: string[]; transformation?: string[]; batchSize?: number; pollingInterval?: number; }': source, format
+src/infrastructure/automation/processors/FileInputProcessor.ts(37,28): error TS2694: Namespace '"fs/promises"' has no exported member 'FSWatcher'.
+src/infrastructure/automation/processors/FileInputProcessor.ts(71,84): error TS2554: Expected 1-2 arguments, but got 3.
+src/infrastructure/automation/processors/FileInputProcessor.ts(71,91): error TS7006: Parameter 'eventType' implicitly has an 'any' type.
+src/infrastructure/automation/processors/FileInputProcessor.ts(71,102): error TS7006: Parameter 'filename' implicitly has an 'any' type.
+src/infrastructure/automation/processors/FileInputProcessor.ts(181,60): error TS2724: '"fs/promises"' has no exported member named 'Stats'. Did you mean 'stat'?
+src/infrastructure/automation/processors/FileInputProcessor.ts(200,61): error TS2724: '"fs/promises"' has no exported member named 'Stats'. Did you mean 'stat'?
+src/infrastructure/automation/processors/FileInputProcessor.ts(219,62): error TS2724: '"fs/promises"' has no exported member named 'Stats'. Did you mean 'stat'?
+src/infrastructure/httpClient.ts(323,5): error TS2412: Type 'string | undefined' is not assignable to type 'string' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type 'string'.
+src/infrastructure/queue/ProcessingQueueService.ts(1,10): error TS2724: '"../../shared/errors"' has no exported member named 'ServiceError'. Did you mean 'AIServiceError'?
+src/infrastructure/queue/ProcessingQueueService.ts(133,7): error TS2322: Type '{ url: string; } | undefined' is not assignable to type 'ConnectionOptions'.
+  Type 'undefined' is not assignable to type 'ConnectionOptions'.
+src/infrastructure/queue/ProcessingQueueService.ts(169,27): error TS2339: Property 'settings' does not exist on type 'Queue<any, any, string, any, any, string>'.
+src/infrastructure/queue/ProcessingQueueService.ts(171,9): error TS2559: Type 'number' has no properties in common with type 'KeepJobs'.
+src/infrastructure/queue/ProcessingQueueService.ts(172,9): error TS2559: Type 'number' has no properties in common with type 'KeepJobs'.
+src/infrastructure/queue/ProcessingQueueService.ts(289,30): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+src/infrastructure/queue/ProcessingQueueService.ts(290,30): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+src/routes/admin.ts(6,38): error TS2307: Cannot find module '../config/ConfigurationManager' or its corresponding type declarations.
+src/routes/admin.ts(19,36): error TS2339: Property 'verifyToken' does not exist on type 'typeof AuthService'.
+src/routes/admin.ts(58,52): error TS2379: Argument of type '{ name: string; startTime: Date | undefined; endTime: Date | undefined; limit: number | undefined; }' is not assignable to parameter of type '{ name?: string; startTime?: Date; endTime?: Date; labels?: Record<string, string>; limit?: number; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'startTime' are incompatible.
+    Type 'Date | undefined' is not assignable to type 'Date'.
+      Type 'undefined' is not assignable to type 'Date'.
+src/routes/admin.ts(76,50): error TS2379: Argument of type '{ name: string; status: any; startTime: Date | undefined; endTime: Date | undefined; limit: number | undefined; }' is not assignable to parameter of type '{ traceId?: string; name?: string; startTime?: Date; endTime?: Date; status?: "error" | "timeout" | "ok"; limit?: number; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'startTime' are incompatible.
+    Type 'Date | undefined' is not assignable to type 'Date'.
+      Type 'undefined' is not assignable to type 'Date'.
+src/routes/admin.ts(121,55): error TS7030: Not all code paths return a value.
+src/routes/admin.ts(148,62): error TS2379: Argument of type '{ status: string; workflowId: string; limit: number | undefined; }' is not assignable to parameter of type 'ExecutionFilter' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'limit' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+src/routes/admin.ts(159,56): error TS7030: Not all code paths return a value.
+src/routes/admin.ts(193,48): error TS7030: Not all code paths return a value.
+src/routes/admin.ts(196,42): error TS2339: Property 'getQueueInfo' does not exist on type 'TaskQueueManager'.
+src/routes/admin.ts(230,79): error TS2554: Expected 1-2 arguments, but got 3.
+src/routes/admin.ts(258,50): error TS7030: Not all code paths return a value.
+src/routes/admin.ts(313,11): error TS7034: Variable 'alerts' implicitly has type 'any[]' in some locations where its type cannot be determined.
+src/routes/admin.ts(314,14): error TS7005: Variable 'alerts' implicitly has an 'any[]' type.
+src/services/automation/AutomationAdminService.ts(231,9): error TS2741: Property 'output' is missing in type '{ id: string; workflowId: string; workflowName: string; status: "running"; startTime: Date; priority: number; retryCount: number; input: { sources: string[]; }; }' but required in type 'ExecutionInfo'.
+src/services/automation/AutomationAdminService.ts(241,9): error TS2741: Property 'output' is missing in type '{ id: string; workflowId: string; workflowName: string; status: "failed"; startTime: Date; endTime: Date; duration: number; priority: number; retryCount: number; error: string; input: { ...; }; }' but required in type 'ExecutionInfo'.
+src/services/workflow/engine/WorkflowEngine.ts(1,63): error TS2724: '"../../../shared/types"' has no exported member named 'WorkflowStepResult'. Did you mean 'WorkflowStep'?
+src/services/workflow/engine/WorkflowEngine.ts(1,83): error TS2724: '"../../../shared/types"' has no exported member named 'WorkflowState'. Did you mean 'WorkflowStep'?
+src/services/workflow/engine/WorkflowEngine.ts(2,32): error TS2307: Cannot find module '../processors/InputProcessor' or its corresponding type declarations.
+src/services/workflow/engine/WorkflowEngine.ts(3,37): error TS2307: Cannot find module '../rules/BusinessRulesEngine' or its corresponding type declarations.
+src/services/workflow/engine/WorkflowEngine.ts(4,33): error TS2307: Cannot find module '../generators/OutputGenerator' or its corresponding type declarations.
+src/services/workflow/engine/WorkflowEngine.ts(5,38): error TS2307: Cannot find module '../integrations/IntegrationComponent' or its corresponding type declarations.
+src/services/workflow/engine/WorkflowEngine.ts(6,41): error TS2307: Cannot find module '../execution/WorkflowExecutionEngine' or its corresponding type declarations.
+src/services/workflow/engine/WorkflowEngine.ts(59,7): error TS2322: Type 'number' is not assignable to type 'string'.
+src/services/workflow/engine/WorkflowEngine.ts(65,9): error TS2353: Object literal may only specify known properties, and 'version' does not exist in type '{ triggeredBy: string; correlationId?: string; executionTime?: number; stepResults?: Record<string, any>; }'.
+src/services/workflow/engine/WorkflowEngine.ts(77,17): error TS2339: Property 'endTime' does not exist on type 'WorkflowExecution'.
+src/services/workflow/engine/WorkflowEngine.ts(81,17): error TS2339: Property 'endTime' does not exist on type 'WorkflowExecution'.
+src/services/workflow/engine/WorkflowEngine.ts(82,17): error TS2551: Property 'errors' does not exist on type 'WorkflowExecution'. Did you mean 'error'?
+src/services/workflow/engine/WorkflowEngine.ts(118,5): error TS2322: Type '"paused"' is not assignable to type '"pending" | "running" | "completed" | "failed" | "cancelled"'.
+src/services/workflow/engine/WorkflowEngine.ts(128,23): error TS2367: This comparison appears to be unintentional because the types '"pending" | "running" | "completed" | "failed" | "cancelled"' and '"paused"' have no overlap.
+src/services/workflow/engine/WorkflowEngine.ts(149,58): error TS2367: This comparison appears to be unintentional because the types '"pending" | "completed" | "failed" | "cancelled"' and '"paused"' have no overlap.
+src/services/workflow/engine/WorkflowEngine.ts(154,15): error TS2339: Property 'endTime' does not exist on type 'WorkflowExecution'.
+src/services/workflow/engine/WorkflowEngine.ts(181,41): error TS18048: 'i' is possibly 'undefined'.
+src/services/workflow/engine/WorkflowEngine.ts(181,41): error TS2365: Operator '<' cannot be applied to types 'string' and 'number'.
+src/services/workflow/engine/WorkflowEngine.ts(181,68): error TS2356: An arithmetic operand must be of type 'any', 'number', 'bigint' or an enum type.
+src/services/workflow/engine/WorkflowEngine.ts(181,68): error TS18048: 'i' is possibly 'undefined'.
+src/services/workflow/engine/WorkflowEngine.ts(182,7): error TS2412: Type 'string | undefined' is not assignable to type 'string' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type 'string'.
+src/services/workflow/engine/WorkflowEngine.ts(183,35): error TS2538: Type 'undefined' cannot be used as an index type.
+src/services/workflow/engine/WorkflowEngine.ts(193,19): error TS2339: Property 'results' does not exist on type 'WorkflowExecution'.
+src/services/workflow/engine/WorkflowEngine.ts(200,19): error TS2551: Property 'errors' does not exist on type 'WorkflowExecution'. Did you mean 'error'?
+src/services/workflow/engine/WorkflowEngine.ts(230,93): error TS2339: Property 'context' does not exist on type 'WorkflowExecution'.
+src/services/workflow/engine/WorkflowEngine.ts(234,90): error TS2339: Property 'context' does not exist on type 'WorkflowExecution'.
+src/services/workflow/engine/WorkflowEngine.ts(238,95): error TS2339: Property 'context' does not exist on type 'WorkflowExecution'.
+src/services/workflow/engine/WorkflowEngine.ts(249,12): error TS2678: Type '"loop"' is not comparable to type '"input_processing" | "business_rule" | "output_generation" | "integration" | "conditional" | "parallel"'.
+src/services/workflow/engine/WorkflowEngine.ts(272,66): error TS2339: Property 'context' does not exist on type 'WorkflowExecution'.
+src/services/workflow/engine/WorkflowEngine.ts(285,15): error TS2739: Type '{ id: string; type: any; config: any; }' is missing the following properties from type 'WorkflowStep': name, position, enabled
+src/services/workflow/engine/WorkflowEngine.ts(306,47): error TS2339: Property 'context' does not exist on type 'WorkflowExecution'.
+src/services/workflow/engine/WorkflowEngine.ts(311,15): error TS2739: Type '{ id: string; type: any; config: any; }' is missing the following properties from type 'WorkflowStep': name, position, enabled
+src/services/workflow/engine/WorkflowEngine.ts(331,58): error TS2339: Property 'context' does not exist on type 'WorkflowExecution'.

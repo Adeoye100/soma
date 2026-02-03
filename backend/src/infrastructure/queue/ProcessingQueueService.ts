@@ -88,7 +88,16 @@ export class ProcessingQueueService {
     try {
       // Validate Redis connection if URL provided
       if (this.config.redisUrl) {
-        await this.validateRedisConnection(this.config.redisUrl);
+        // In development, we don't want to fail initialization if Redis is missing
+        try {
+          await this.validateRedisConnection(this.config.redisUrl);
+        } catch (error) {
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('⚠️ Redis connection validation failed in development, continuing with degraded queue functionality');
+          } else {
+            throw error;
+          }
+        }
       }
 
       this.isInitialized = true;
