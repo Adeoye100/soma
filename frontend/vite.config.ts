@@ -24,6 +24,23 @@ export default defineConfig(({ mode }) => {
       resolve: {
         alias: {
           '@': path.resolve(__dirname, '.'),
+          './txml': path.resolve(__dirname, 'node_modules/pptx2html/src/tXml.js'),
+        }
+      },
+      optimizeDeps: {
+        esbuildOptions: {
+          plugins: [
+            {
+              name: 'fix-pptx2html-case-sensitivity',
+              setup(build) {
+                build.onResolve({ filter: /^\.\/txml$/ }, args => {
+                  if (args.importer.includes('pptx2html')) {
+                    return { path: path.resolve(__dirname, 'node_modules/pptx2html/src/tXml.js') }
+                  }
+                })
+              }
+            }
+          ]
         }
       }
     };

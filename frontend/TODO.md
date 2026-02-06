@@ -1,10 +1,10 @@
 # TODO: Implement PDF Conversion for .pptx and Word Documents
 
 ## Tasks
-- [ ] Install dependencies: mammoth, html2pdf.js, pptx2html
-- [ ] Create utils/convertToPdf.ts with conversion function
-- [ ] Modify components/SetupScreen.tsx to integrate conversion
-- [ ] Update package.json with new dependencies
-- [ ] Test conversion functionality
-- [ ] Handle conversion errors gracefully
-- [ ] Update UI feedback if needed
+- [x] Install dependencies: mammoth, html2pdf.js, pptx2html
+- [x] Create utils/convertToPdf.ts with conversion function
+- [x] Modify components/SetupScreen.tsx to integrate conversion
+- [x] Update package.json with new dependencies
+- [x] Test conversion functionality
+- [x] Handle conversion errors gracefully
+- [x] Update UI feedback if needed

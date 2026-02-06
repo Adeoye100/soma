@@ -7,6 +7,7 @@ import Loader from './Loader';
 import InspirationCard from './InspirationCard';
 import ProfileCard from './ProfileCard';
 import ShaderBackground from './ShaderBackground';
+import { convertForExamProcessing, canConvertForExamProcessing } from '../utils/convertToPdf';
 
 interface SetupScreenProps {
   onExamStart: (questions: Question[], config: ExamConfig) => void;
@@ -111,6 +112,7 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [conversionProgress, setConversionProgress] = useState<{message: string, progress: number} | null>(null);
   
   // Calculate total time based on current config
   const totalTimeSeconds = calculateTotalTime(config.intensity, config.numQuestions);
@@ -119,7 +121,6 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
   const processFiles = async (files: File[]) => {
     const newMaterials: Material[] = [];
     const errors: string[] = [];
-    const warnings: string[] = [];
     
     for (const file of files) {
       // Validate file
@@ -130,25 +131,30 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
       }
       
       try {
-        const content = await fileToBase64(file);
-        const mimeType = getMimeType(file);
-        newMaterials.push({ name: file.name, content, mimeType });
+        let fileToProcess = file;
         
-        // Add warning for Office files that AI can't process
-        const officeExtensions = ['.doc', '.docx', '.pptx'];
-        const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-        if (officeExtensions.includes(fileExtension)) {
-          warnings.push(`⚠️ ${file.name}: AI cannot process Office files. Please convert to PDF for exam generation.`);
+        // Check if file needs conversion
+        const { canConvert } = canConvertForExamProcessing(file);
+        if (canConvert) {
+          setConversionProgress({ message: `Converting ${file.name} to PDF...`, progress: 0 });
+          fileToProcess = await convertForExamProcessing(file, (p) => {
+            setConversionProgress({ message: p.message, progress: p.progress });
+          });
+          setConversionProgress(null);
         }
+
+        const content = await fileToBase64(fileToProcess);
+        const mimeType = getMimeType(fileToProcess);
+        newMaterials.push({ name: fileToProcess.name, content, mimeType });
+        
       } catch (err) {
-        errors.push(`Failed to read file: ${file.name}`);
+        errors.push(`Failed to process file ${file.name}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        setConversionProgress(null);
       }
     }
     
-    // Combine errors and warnings
-    const allMessages = [...errors, ...warnings];
-    if (allMessages.length > 0) {
-      setError(allMessages.join('\n'));
+    if (errors.length > 0) {
+      setError(errors.join('\n'));
     } else {
       setError(null);
     }
@@ -242,6 +248,21 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
                 </div>
             )}
 
+            {conversionProgress && (
+              <div className="bg-blue-100 dark:bg-blue-900/30 border border-blue-400 text-blue-700 dark:text-blue-300 px-3 sm:px-4 py-3 rounded-lg relative mb-6 text-sm" role="alert">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-semibold">{conversionProgress.message}</span>
+                  <span>{conversionProgress.progress}%</span>
+                </div>
+                <div className="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-2">
+                  <div 
+                    className="bg-blue-600 dark:bg-blue-400 h-2 rounded-full transition-all duration-300" 
+                    style={{ width: `${conversionProgress.progress}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
               {/* File Upload Section */}
               <div>
@@ -267,7 +288,7 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
                       </label>
                       <p className="sm:pl-1">or drag and drop</p>
                     </div>
-                    <p className="text-xs leading-5 text-slate-500 dark:text-slate-500 mt-2">PDF, TXT, PNG, JPG up to 10MB (Note: Convert PPTX/DOCX to PDF for AI processing)</p>
+                    <p className="text-xs leading-5 text-slate-500 dark:text-slate-500 mt-2">PDF, DOCX, PPTX, TXT, PNG, JPG up to 10MB</p>
                   </div>
                 </div>
                  {materials.length > 0 && (
