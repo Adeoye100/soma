@@ -92,6 +92,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
     return Object.keys(newErrors).length === 0;
   };
 
+  const isFormFilled = formData.email.trim() !== '' && formData.password !== '';
+  const isButtonActive = isFormFilled && captchaVerified && !loading;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -235,7 +238,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
 
         <button 
           type="submit" 
-          disabled={loading || !captchaVerified}
+          disabled={!isButtonActive}
           className="w-full flex items-center justify-center gap-2 h-9 sm:h-10 rounded-md bg-primary-600 px-4 text-sm sm:text-base font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:bg-slate-400 disabled:cursor-not-allowed dark:disabled:bg-slate-600 transition-colors"
         >
           {loading ? (

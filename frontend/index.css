@@ -1,7 +1,5 @@
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* Animated gradient text */
 .animated-gradient-text {

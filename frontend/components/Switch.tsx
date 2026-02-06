@@ -7,10 +7,19 @@ interface SwitchProps {
 }
 
 const Switch: React.FC<SwitchProps> = ({ isChecked, onToggle }) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onToggle();
+  };
+
   return (
     <StyledWrapper>
       <label className="switch">
-        <input id="checkbox" type="checkbox" checked={isChecked} onChange={onToggle} />
+        <input 
+          id="checkbox" 
+          type="checkbox" 
+          checked={isChecked} 
+          onChange={handleChange} 
+        />
         <span className="slider">
           <div className="star star_1" />
           <div className="star star_2" />
@@ -119,6 +128,13 @@ const StyledWrapper = styled.div`
 
   .switch input:checked ~ .slider .cloud {
     opacity: 1;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 640px) {
+    .switch {
+      font-size: 14px;
+    }
   }
 `;
 

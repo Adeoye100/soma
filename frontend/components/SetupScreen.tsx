@@ -110,51 +110,77 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   
   // Calculate total time based on current config
   const totalTimeSeconds = calculateTotalTime(config.intensity, config.numQuestions);
   const formattedTime = formatTime(totalTimeSeconds);
 
+  const processFiles = async (files: File[]) => {
+    const newMaterials: Material[] = [];
+    const errors: string[] = [];
+    const warnings: string[] = [];
+    
+    for (const file of files) {
+      // Validate file
+      const validationError = validateFile(file);
+      if (validationError) {
+        errors.push(validationError);
+        continue;
+      }
+      
+      try {
+        const content = await fileToBase64(file);
+        const mimeType = getMimeType(file);
+        newMaterials.push({ name: file.name, content, mimeType });
+        
+        // Add warning for Office files that AI can't process
+        const officeExtensions = ['.doc', '.docx', '.pptx'];
+        const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+        if (officeExtensions.includes(fileExtension)) {
+          warnings.push(`⚠️ ${file.name}: AI cannot process Office files. Please convert to PDF for exam generation.`);
+        }
+      } catch (err) {
+        errors.push(`Failed to read file: ${file.name}`);
+      }
+    }
+    
+    // Combine errors and warnings
+    const allMessages = [...errors, ...warnings];
+    if (allMessages.length > 0) {
+      setError(allMessages.join('\n'));
+    } else {
+      setError(null);
+    }
+    
+    setMaterials(prev => [...prev, ...newMaterials]);
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const files = Array.from(e.target.files);
-      const newMaterials: Material[] = [];
-      const errors: string[] = [];
-      const warnings: string[] = [];
-      
-      for (const file of files) {
-        // Validate file
-        const validationError = validateFile(file);
-        if (validationError) {
-          errors.push(validationError);
-          continue;
-        }
-        
-        try {
-          const content = await fileToBase64(file);
-          const mimeType = getMimeType(file);
-          newMaterials.push({ name: file.name, content, mimeType });
-          
-          // Add warning for Office files that AI can't process
-          const officeExtensions = ['.doc', '.docx', '.pptx'];
-          const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-          if (officeExtensions.includes(fileExtension)) {
-            warnings.push(`⚠️ ${file.name}: AI cannot process Office files. Please convert to PDF for exam generation.`);
-          }
-        } catch (err) {
-          errors.push(`Failed to read file: ${file.name}`);
-        }
-      }
-      
-      // Combine errors and warnings
-      const allMessages = [...errors, ...warnings];
-      if (allMessages.length > 0) {
-        setError(allMessages.join('\n'));
-      } else {
-        setError(null);
-      }
-      
-      setMaterials(prev => [...prev, ...newMaterials]);
+      await processFiles(Array.from(e.target.files));
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      await processFiles(Array.from(e.dataTransfer.files));
     }
   };
 
@@ -220,9 +246,20 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
               {/* File Upload Section */}
               <div>
                 <label className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2 block">1. Upload Materials</label>
-                <div className="mt-2 flex justify-center rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 px-4 sm:px-6 py-6 sm:py-8">
+                <div 
+                  className={`mt-2 flex justify-center rounded-lg border-2 border-dashed px-4 sm:px-6 py-6 sm:py-8 transition-colors duration-200 ${
+                    isDragging 
+                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/10' 
+                      : 'border-slate-300 dark:border-slate-600'
+                  }`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
                   <div className="text-center">
-                    <UploadIcon className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-slate-400 dark:text-slate-500" />
+                    <UploadIcon className={`mx-auto h-10 w-10 sm:h-12 sm:w-12 transition-colors duration-200 ${
+                      isDragging ? 'text-primary-500' : 'text-slate-400 dark:text-slate-500'
+                    }`} />
                     <div className="mt-4 flex flex-col sm:flex-row text-xs sm:text-sm leading-6 text-slate-600 dark:text-slate-400 gap-1">
                       <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white dark:bg-slate-800 font-semibold text-primary-600 dark:text-primary-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-600 focus-within:ring-offset-2 dark:focus-within:ring-offset-slate-800 hover:text-primary-500">
                         <span>Upload files</span>
