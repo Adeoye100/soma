@@ -104,6 +104,7 @@ const calculateTotalTime = (intensity: TimeIntensity, numQuestions: number): num
 const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [config, setConfig] = useState<ExamConfig>({
+    title: '',
     type: ExamType.OBJECTIVE,
     difficulty: Difficulty.INTERMEDIATE,
     intensity: TimeIntensity.MODERATE,
@@ -201,6 +202,10 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!config.title.trim()) {
+      setError('Please provide a title for the exam.');
+      return;
+    }
     if (materials.length === 0) {
       setError('Please upload at least one course material file.');
       return;
@@ -264,9 +269,23 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
+              {/* Exam Title Section */}
+              <div>
+                <label htmlFor="title" className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2 block">1. Exam Title</label>
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  placeholder="e.g. Midterm Physics, React Advanced Quiz..."
+                  value={config.title}
+                  onChange={handleConfigChange}
+                  className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2.5 px-3 sm:px-4 text-sm sm:text-base focus:border-primary-500 focus:outline-none focus:ring-primary-500 transition-colors"
+                />
+              </div>
+
               {/* File Upload Section */}
               <div>
-                <label className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2 block">1. Upload Materials</label>
+                <label className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2 block">2. Upload Materials</label>
                 <div 
                   className={`mt-2 flex justify-center rounded-lg border-2 border-dashed px-4 sm:px-6 py-6 sm:py-8 transition-colors duration-200 ${
                     isDragging 
@@ -314,7 +333,7 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
 
               {/* Exam Configuration Section */}
               <div>
-                <label className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4 block">2. Configure Settings</label>
+                <label className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4 block">3. Configure Settings</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     {/* Exam Type */}
                     <div>

@@ -17,13 +17,26 @@ async function verifyKeys() {
     console.log(`Verifying key ${i + 1}: ${maskedKey}`);
     
     try {
-      const genAI = new GoogleGenAI(key);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const result = await model.generateContent("test");
-      const response = await result.response;
-      console.log(`✅ Key ${i + 1} is VALID.`);
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: "test" }] }]
+        })
+      });
+
+      if (response.ok) {
+        console.log(`✅ Key ${i + 1} is VALID.`);
+      } else {
+        const errorData = await response.json();
+        console.error(`❌ Key ${i + 1} is INVALID: ${response.status} ${response.statusText}`);
+        console.error(`   Error message: ${errorData.error ? errorData.error.message : JSON.stringify(errorData)}`);
+      }
     } catch (error) {
-      console.error(`❌ Key ${i + 1} is INVALID or hit an error: ${error.message}`);
+       console.error(`❌ Key ${i + 1} hit a network error: ${error.message}`);
     }
   }
 

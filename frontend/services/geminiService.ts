@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 import type { ExamConfig, Material, Question, UserAnswer, Evaluation } from '../types';
-import { ExamType } from '../types';
+import { ExamType, TimeIntensity } from '../types';
 
 
 /**
@@ -18,13 +18,22 @@ export const generateExam = async (config: ExamConfig, materials: Material[]): P
     headers['Authorization'] = `Bearer ${token}`;
   }
 
+  const payload = {
+    title: config.title,
+    type: config.type.toUpperCase().replace(' ', '_'),
+    difficulty: config.difficulty.toLowerCase(),
+    numQuestions: config.numQuestions,
+    timeLimit: Math.floor((config.intensity === TimeIntensity.RELAXED ? 180 : config.intensity === TimeIntensity.MODERATE ? 90 : 45) * config.numQuestions / 60),
+    materials: materials.map(m => ({
+      content: m.content,
+      mimeType: m.mimeType
+    }))
+  };
+
   const response = await fetch('/api/exam/generate', {
     method: 'POST',
     headers,
-    body: JSON.stringify({
-      ...config,
-      materials
-    })
+    body: JSON.stringify(payload)
   });
 
   if (!response.ok) {
