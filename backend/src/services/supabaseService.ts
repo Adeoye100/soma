@@ -78,8 +78,27 @@ const createSupabaseClient = (serviceKey?: string): SupabaseClient => {
   const supabaseUrl = config.supabaseUrl;
   const supabaseKey = serviceKey || config.supabaseServiceKey || config.supabaseAnonKey;
   
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error('Supabase URL and key are required');
+  const isValidUrl = (url: string) => {
+    try {
+      const parsed = new URL(url);
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  };
+
+  if (!supabaseUrl || !supabaseKey || !isValidUrl(supabaseUrl)) {
+    winston.warn('Supabase is not configured or URL is invalid. Using restricted mode.');
+    
+    // Return a proxy that throws an error only when accessed
+    return new Proxy({} as SupabaseClient, {
+      get: (_, prop) => {
+        if (prop === 'then') return undefined; // For async checks
+        return () => {
+          throw new Error(`Supabase client is not configured or URL is invalid. Cannot access property "${String(prop)}".`);
+        };
+      }
+    });
   }
 
   return createClient(supabaseUrl, supabaseKey, {

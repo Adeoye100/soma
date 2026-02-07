@@ -16,7 +16,8 @@ interface Config {
   bcryptRounds: number;
   
   // API Keys
-  geminiApiKeys: string[];
+  openRouterApiKeys: string[];
+  openRouterModel: string;
   
   // Rate Limiting
   rateLimitWindowMs: number;
@@ -61,6 +62,9 @@ interface Config {
   supabaseUrl: string;
   supabaseAnonKey: string;
   supabaseServiceKey: string;
+
+  // Development & Testing
+  mockExternalApis: boolean;
 
   // Automation Configuration
   automationEnabled: boolean;
@@ -114,7 +118,8 @@ export const config: Config = {
   bcryptRounds: getOptionalEnvVarAsNumber('BCRYPT_ROUNDS', 12),
   
   // API Keys
-  geminiApiKeys: getEnvVarAsArray('GEMINI_API_KEYS'),
+  openRouterApiKeys: getEnvVarAsArray('OPENROUTER_API_KEYS'),
+  openRouterModel: getOptionalEnvVar('OPENROUTER_MODEL', 'google/gemini-2.0-flash-001'),
   
   // Rate Limiting
   rateLimitWindowMs: getOptionalEnvVarAsNumber('RATE_LIMIT_WINDOW_MS', 900000), // 15 minutes
@@ -156,9 +161,12 @@ export const config: Config = {
   performanceMonitoring: getOptionalEnvVarAsBoolean('PERFORMANCE_MONITORING', true),
   
   // External Services
-  supabaseUrl: getRequiredEnvVar('SUPABASE_URL'),
-  supabaseAnonKey: getRequiredEnvVar('SUPABASE_ANON_KEY'),
+  supabaseUrl: getOptionalEnvVar('SUPABASE_URL', ''),
+  supabaseAnonKey: getOptionalEnvVar('SUPABASE_ANON_KEY', ''),
   supabaseServiceKey: getOptionalEnvVar('SUPABASE_SERVICE_KEY', ''),
+
+  // Development & Testing
+  mockExternalApis: getOptionalEnvVarAsBoolean('MOCK_EXTERNAL_APIS', false),
 
   // Automation Configuration
   automationEnabled: getOptionalEnvVarAsBoolean('AUTOMATION_ENABLED', true),
@@ -175,11 +183,25 @@ export const config: Config = {
 export const validateConfig = (): void => {
   const errors: string[] = [];
   
-  if (!config.geminiApiKeys.length) {
-    errors.push('At least one Gemini API key is required');
+  if (!config.openRouterApiKeys.length) {
+    errors.push('At least one OpenRouter API key is required');
   }
   
-  if (!config.supabaseUrl || !config.supabaseAnonKey) {
+  const isSupabaseConfigured = 
+    config.supabaseUrl && 
+    config.supabaseUrl !== 'your_supabase_url_here' && 
+    (() => {
+      try {
+        const url = new URL(config.supabaseUrl);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+      } catch {
+        return false;
+      }
+    })() &&
+    config.supabaseAnonKey && 
+    config.supabaseAnonKey !== 'your_supabase_anon_key_here';
+
+  if (!isSupabaseConfigured && !config.mockExternalApis && config.nodeEnv === 'production') {
     errors.push('Supabase URL and anon key are required');
   }
   

@@ -46,21 +46,43 @@ export class AuthService {
   private supabase: SupabaseClient;
 
   constructor() {
-    this.supabase = createClient(
-      config.supabaseUrl,
-      config.supabaseServiceKey || config.supabaseAnonKey,
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        },
-        global: {
-          headers: {
-            'X-Client-Info': 'smart-examination-backend'
+    const isSupabaseConfigured = 
+      config.supabaseUrl && 
+      config.supabaseUrl !== 'your_supabase_url_here' && 
+      config.supabaseUrl.startsWith('http');
+
+    if (isSupabaseConfigured) {
+      this.supabase = createClient(
+        config.supabaseUrl,
+        config.supabaseServiceKey || config.supabaseAnonKey,
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false
+          },
+          global: {
+            headers: {
+              'X-Client-Info': 'smart-examination-backend'
+            }
           }
         }
-      }
-    );
+      );
+    } else {
+      winston.warn('Supabase is not configured or URL is invalid. Using mock client or restricted mode.');
+      // Initialize with a placeholder or mock if needed. 
+      // For now, we'll use a dummy client that will fail on actual calls if not careful,
+      // but won't crash the constructor.
+      this.supabase = createClient(
+        'https://placeholder-url.supabase.co',
+        'placeholder-key',
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false
+          }
+        }
+      );
+    }
   }
 
   /**

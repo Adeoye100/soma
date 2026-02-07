@@ -355,7 +355,7 @@ export const examGenerationValidation = createValidationMiddleware({
       required: true,
       minLength: 3,
       maxLength: 100,
-      pattern: /^[a-zA-Z0-9\s\-\_\.]+$/
+      pattern: /^[a-zA-Z0-9\s\-\_\.\(\)\:\?\!\@\#\$\%\^\&\*]+$/
     },
     {
       field: 'type',
@@ -425,7 +425,7 @@ export const searchValidation = createValidationMiddleware({
       required: true,
       minLength: 2,
       maxLength: 500,
-      pattern: /^[a-zA-Z0-9\s\-\_\.\,\!\?\:\"\'\(\)\[\]]+$/
+      pattern: /^[a-zA-Z0-9\s\-\_\.\,\!\?\:\"\'\(\)\[\]\@\#\$\%\^\&\*\+\=]+$/
     }
   ],
   sanitize: true
