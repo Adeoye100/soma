@@ -5,12 +5,12 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import InspirationCard from './InspirationCard';
 import SupportCard from './SupportCard';
 import ForgotPasswordForm from './ForgotPasswordForm';
-import HCaptcha from '@hcaptcha/react-hcaptcha';
+// ...existing code...
 import { Avatar, AvatarImage, AvatarFallback } from './Avatar';
 import PasswordStrengthIndicator, { PasswordValidationState } from './PasswordStrengthIndicator';
 import ShaderBackground from './ShaderBackground';
 import InfoModal from './InfoModal';
-import { CaptchaService } from '../services/captchaService';
+// ...existing code...
 
 const LoginScreen: React.FC = () => {
   const location = useLocation();
@@ -26,8 +26,7 @@ const LoginScreen: React.FC = () => {
   const [signupSuccess, setSignupSuccess] = useState(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const [captchaVerified, setCaptchaVerified] = useState(false);
+  // ...existing code...
 
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [passwordValidation, setPasswordValidation] = useState<PasswordValidationState>({
@@ -94,22 +93,7 @@ const LoginScreen: React.FC = () => {
     }
   }, [location.state]);
 
-  // hCaptcha verification callback
-  const onCaptchaSuccess = useCallback((token: string) => {
-    setCaptchaToken(token);
-    setCaptchaVerified(true);
-  }, []);
-
-  const onCaptchaError = useCallback(() => {
-    setError('Captcha verification failed. Please try again.');
-    setCaptchaVerified(false);
-    setCaptchaToken(null);
-  }, []);
-
-  const onCaptchaExpired = useCallback(() => {
-    setCaptchaVerified(false);
-    setCaptchaToken(null);
-  }, []);
+  // ...existing code...
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,20 +108,7 @@ const LoginScreen: React.FC = () => {
       return;
     }
 
-    // Check captcha verification for both login and signup
-    const siteKey = import.meta.env.VITE_HCAPTCHA_SITE_KEY;
-    if (!siteKey) {
-      setError('Captcha not configured. Please contact support.');
-      setLoading(false);
-      return;
-    }
-
-    if (!captchaVerified || !captchaToken) {
-      setError('Please complete the captcha verification to continue.');
-      setLoading(false);
-      return;
-    }
-
+    // ...existing code...
     submitCredentials();
   };
 
@@ -163,17 +134,7 @@ const LoginScreen: React.FC = () => {
     };
 
     try {
-      // Verify captcha before proceeding
-      if (captchaToken) {
-        const isCaptchaValid = await CaptchaService.verifyToken(captchaToken);
-        if (!isCaptchaValid) {
-          setError('Captcha verification failed. Please try again.');
-          setCaptchaVerified(false);
-          setCaptchaToken(null);
-          setLoading(false);
-          return;
-        }
-      }
+      // ...existing code...
 
       let response;
       if (isLogin) {
@@ -236,7 +197,7 @@ const LoginScreen: React.FC = () => {
   };
 
   const avatarUrl = !isLogin
-    ? `https://api.dicebear.com/8.x/${gender === 'other' ? 'micah' : gender}/svg?seed=${username || 'default'}`
+    ? `https://api.dicebear.com/8.x/${gender === 'other' ? 'micah' : (gender === 'male' ? 'pixel-art' : 'avataaars')}/svg?seed=${username || 'default'}`
     : '';
 
 
@@ -378,20 +339,10 @@ const LoginScreen: React.FC = () => {
                       </div>
                     )}
 
-                    {/* hCaptcha Component */}
-                    {import.meta.env.VITE_HCAPTCHA_SITE_KEY && (
-                      <div className="flex justify-center">
-                        <HCaptcha
-                          sitekey={import.meta.env.VITE_HCAPTCHA_SITE_KEY}
-                          onVerify={onCaptchaSuccess}
-                          onError={onCaptchaError}
-                          onExpire={onCaptchaExpired}
-                        />
-                      </div>
-                    )}
+                    {/* ...captcha removed... */}
 
                     <div>
-                      <button type="submit" disabled={loading || !captchaVerified} className="w-full flex items-center justify-center gap-2 h-9 sm:h-10 rounded-md bg-primary-600 px-4 text-sm sm:text-base font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:bg-slate-400 disabled:cursor-not-allowed dark:disabled:bg-slate-600">
+                      <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 h-9 sm:h-10 rounded-md bg-primary-600 px-4 text-sm sm:text-base font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:bg-slate-400 disabled:cursor-not-allowed dark:disabled:bg-slate-600">
                         {loading ? 'Processing...' : (
                           <><SparklesIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                           <span>{isLogin ? 'Log In' : 'Sign Up'}</span></>

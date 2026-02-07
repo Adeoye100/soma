@@ -7,8 +7,6 @@ import { Avatar, AvatarImage, AvatarFallback } from '../Avatar';
 import PasswordStrengthIndicator, { PasswordValidationState } from '../PasswordStrengthIndicator';
 import { validateEmail, validatePassword, validateUsername, validateGender, calculatePasswordStrength, formatAuthError } from '../../utils/authValidation';
 import { SparklesIcon } from '../icons';
-import HCaptcha from '@hcaptcha/react-hcaptcha';
-import { CaptchaService } from '../../services/captchaService';
 
 interface SignupFormProps {
   onToggleForm: () => void;
@@ -32,8 +30,6 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleForm }) => {
     general?: string 
   }>({});
   const [loading, setLoading] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const [captchaVerified, setCaptchaVerified] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
 
   const passwordValidation = useMemo<PasswordValidationState>(() => {
@@ -78,27 +74,6 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleForm }) => {
     setErrors(prev => ({ ...prev, [field]: error || undefined }));
   };
 
-  // hCaptcha verification callbacks
-  const onCaptchaSuccess = (token: string) => {
-    setCaptchaToken(token);
-    setCaptchaVerified(true);
-    // Clear general error if it was captcha-related
-    if (errors.general?.includes('captcha')) {
-      setErrors(prev => ({ ...prev, general: undefined }));
-    }
-  };
-
-  const onCaptchaError = () => {
-    setErrors(prev => ({ ...prev, general: 'Captcha verification failed. Please try again.' }));
-    setCaptchaVerified(false);
-    setCaptchaToken(null);
-  };
-
-  const onCaptchaExpired = () => {
-    setCaptchaVerified(false);
-    setCaptchaToken(null);
-  };
-
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {};
     
@@ -128,13 +103,6 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleForm }) => {
       newErrors.gender = genderValidation.error;
     }
     
-    const siteKey = import.meta.env.VITE_HCAPTCHA_SITE_KEY;
-    if (!siteKey) {
-      newErrors.general = 'Captcha not configured. Please contact support.';
-    } else if (!captchaVerified || !captchaToken) {
-      newErrors.general = 'Please complete the captcha verification to continue.';
-    }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -145,7 +113,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleForm }) => {
     formData.confirmPassword !== '' &&
     formData.password === formData.confirmPassword &&
     isPasswordValid;
-  const isButtonActive = isFormFilled && captchaVerified && !loading;
+  const isButtonActive = isFormFilled && !loading;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -158,17 +126,6 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleForm }) => {
     setErrors({});
 
     try {
-      // Verify captcha before proceeding
-      if (captchaToken) {
-        const isCaptchaValid = await CaptchaService.verifyToken(captchaToken);
-        if (!isCaptchaValid) {
-          setErrors(prev => ({ ...prev, general: 'Captcha verification failed. Please try again.' }));
-          setCaptchaVerified(false);
-          setCaptchaToken(null);
-          return;
-        }
-      }
-
       const { data, error } = await supabase.auth.signUp({
         email: formData.email.trim().toLowerCase(),
         password: formData.password,
@@ -199,7 +156,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleForm }) => {
     }
   };
 
-  const avatarUrl = `https://api.dicebear.com/8.x/${formData.gender === 'other' ? 'micah' : formData.gender}/svg?seed=${formData.username || 'default'}`;
+  const avatarUrl = `https://api.dicebear.com/8.x/${formData.gender === 'other' ? 'micah' : (formData.gender === 'male' ? 'pixel-art' : 'avataaars')}/svg?seed=${formData.username || 'default'}`;
 
   if (signupSuccess) {
     return (
@@ -213,8 +170,6 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleForm }) => {
       </div>
     );
   }
-
-  const siteKey = import.meta.env.VITE_HCAPTCHA_SITE_KEY;
 
   return (
     <div>
@@ -347,18 +302,6 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleForm }) => {
             </p>
           )}
         </div>
-
-        {/* hCaptcha Component */}
-        {siteKey && (
-          <div className="flex justify-center">
-            <HCaptcha
-              sitekey={siteKey}
-              onVerify={onCaptchaSuccess}
-              onError={onCaptchaError}
-              onExpire={onCaptchaExpired}
-            />
-          </div>
-        )}
 
         <button 
           type="submit" 

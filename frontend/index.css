@@ -1,3 +1,60 @@
+/* --- Animated Dots for Document Upload Card ---
+.animated-dots-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+.animated-dot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #6366f1;
+  border-radius: 3px;
+  box-shadow: 0 1px 6px 0 #6366f133;
+  transition: background 0.2s;
+  animation: dot-move 2.2s linear infinite;
+}
+.animated-dot:hover {
+  animation-play-state: paused;
+  background: #f59e42;
+}
+/* Position dots around the card (12 positions, like a clock) */
+/*.animated-dot-1  { top: 0%;   left: 50%; transform: translate(-50%, -50%); }
+.animated-dot-2  { top: 12%;  left: 85%; transform: translate(-50%, -50%); }
+.animated-dot-3  { top: 30%;  left: 97%; transform: translate(-50%, -50%); }
+.animated-dot-4  { top: 50%;  left: 100%; transform: translate(-50%, -50%); }
+.animated-dot-5  { top: 70%;  left: 97%; transform: translate(-50%, -50%); }
+.animated-dot-6  { top: 88%;  left: 85%; transform: translate(-50%, -50%); }
+.animated-dot-7  { top: 100%; left: 50%; transform: translate(-50%, -50%); }
+.animated-dot-8  { top: 88%;  left: 15%; transform: translate(-50%, -50%); }
+.animated-dot-9  { top: 70%;  left: 3%;  transform: translate(-50%, -50%); }
+.animated-dot-10 { top: 50%;  left: 0%;  transform: translate(-50%, -50%); }
+.animated-dot-11 { top: 30%;  left: 3%;  transform: translate(-50%, -50%); }
+.animated-dot-12 { top: 12%;  left: 15%; transform: translate(-50%, -50%); }
+/* Animation for moving dots (pulse and orbit) */
+/*@keyframes dot-move {
+  0%   { transform: scale(1) translateY(0); opacity: 1; }
+  20%  { transform: scale(1.2) translateY(-6px); opacity: 0.85; }
+  50%  { transform: scale(1) translateY(0); opacity: 1; }
+  70%  { transform: scale(0.9) translateY(6px); opacity: 0.7; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+/* Stagger animation delays for each dot */
+/*.animated-dot-1  { animation-delay: 0s;   }
+.animated-dot-2  { animation-delay: 0.18s;}
+.animated-dot-3  { animation-delay: 0.36s;}
+.animated-dot-4  { animation-delay: 0.54s;}
+.animated-dot-5  { animation-delay: 0.72s;}
+.animated-dot-6  { animation-delay: 0.90s;}
+.animated-dot-7  { animation-delay: 1.08s;}
+.animated-dot-8  { animation-delay: 1.26s;}
+.animated-dot-9  { animation-delay: 1.44s;}
+.animated-dot-10 { animation-delay: 1.62s;}
+.animated-dot-11 { animation-delay: 1.80s;}
+.animated-dot-12 { animation-delay: 1.98s;} */
 
 @import "tailwindcss";
 

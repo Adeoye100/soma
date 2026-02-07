@@ -1,14 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '@/config';
+import { authService } from '@/services/authService';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
     email: string;
     role: string;
-    iat: number;
-    exp: number;
+    iat?: number;
+    exp?: number;
   };
 }
 
@@ -54,24 +55,22 @@ export const authMiddleware = async (
       return;
     }
 
-    // Verify token
-    const decoded = jwt.verify(token, config.jwtSecret) as JwtPayload;
+    // Verify token using Supabase service
+    const { user } = await authService.verifyToken(token);
 
     // Attach user information to request
     req.user = {
-      id: decoded.id,
-      email: decoded.email,
-      role: decoded.role,
-      iat: decoded.iat,
-      exp: decoded.exp
+      id: user.id,
+      email: user.email,
+      role: user.role || 'student'
     };
 
     // Add request ID for tracking
-    req.headers['x-user-id'] = decoded.id;
+    req.headers['x-user-id'] = user.id;
 
     next();
   } catch (error: any) {
-    if (error.name === 'TokenExpiredError') {
+    if (error.name === 'TokenExpiredError' || error.message?.includes('expired')) {
       res.status(401).json({
         error: 'Token expired',
         message: 'Your session has expired. Please login again.',
@@ -80,19 +79,10 @@ export const authMiddleware = async (
       return;
     }
 
-    if (error.name === 'JsonWebTokenError') {
-      res.status(401).json({
-        error: 'Invalid token',
-        message: 'The provided token is invalid or malformed.',
-        code: 'INVALID_TOKEN'
-      });
-      return;
-    }
-
-    res.status(500).json({
-      error: 'Authentication failed',
-      message: 'An error occurred during authentication verification.',
-      code: 'AUTH_ERROR'
+    res.status(401).json({
+      error: 'Invalid token',
+      message: 'The provided token is invalid or malformed.',
+      code: 'INVALID_TOKEN'
     });
   }
 };
@@ -121,17 +111,15 @@ export const optionalAuthMiddleware = async (
       return next();
     }
 
-    const decoded = jwt.verify(token, config.jwtSecret) as JwtPayload;
+    const { user } = await authService.verifyToken(token);
 
     req.user = {
-      id: decoded.id,
-      email: decoded.email,
-      role: decoded.role,
-      iat: decoded.iat,
-      exp: decoded.exp
+      id: user.id,
+      email: user.email,
+      role: user.role || 'student'
     };
 
-    req.headers['x-user-id'] = decoded.id;
+    req.headers['x-user-id'] = user.id;
     next();
   } catch (error) {
     // If token is invalid, just continue without user info

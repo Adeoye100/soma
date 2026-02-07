@@ -18,7 +18,7 @@ const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, user, onLogout, onO
   const userName = user.user_metadata.full_name || user.email;
   const userGender = user.user_metadata.gender || 'male';
   const customAvatarUrl = user.user_metadata.avatar_url; // Check for custom avatar URL
-  const avatarUrl = customAvatarUrl || `https://api.dicebear.com/8.x/${userGender === 'other' ? 'micah' : userGender}/svg?seed=${userName}`; // Prioritize custom, then generated
+  const avatarUrl = customAvatarUrl || `https://api.dicebear.com/8.x/${userGender === 'other' ? 'micah' : (userGender === 'male' ? 'pixel-art' : 'avataaars')}/svg?seed=${userName}`; // Prioritize custom, then generated
   const fallbackName = (userName || 'A').slice(0, 2).toUpperCase();
 
 

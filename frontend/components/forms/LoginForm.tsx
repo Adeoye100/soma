@@ -5,8 +5,6 @@ import EmailField from './EmailField';
 import PasswordField from './PasswordField';
 import { validateEmail, validatePassword, formatAuthError } from '../../utils/authValidation';
 import { SparklesIcon, GoogleIcon } from '../icons';
-import HCaptcha from '@hcaptcha/react-hcaptcha';
-import { CaptchaService } from '../../services/captchaService';
 
 interface LoginFormProps {
   onToggleForm: () => void;
@@ -22,8 +20,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
   });
   const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
   const [loading, setLoading] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const [captchaVerified, setCaptchaVerified] = useState(false);
 
   const handleInputChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, [field]: e.target.value }));
@@ -47,27 +43,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
     setErrors(prev => ({ ...prev, [field]: error || undefined }));
   };
 
-  // hCaptcha verification callbacks
-  const onCaptchaSuccess = (token: string) => {
-    setCaptchaToken(token);
-    setCaptchaVerified(true);
-    // Clear general error if it was captcha-related
-    if (errors.general?.includes('captcha')) {
-      setErrors(prev => ({ ...prev, general: undefined }));
-    }
-  };
-
-  const onCaptchaError = () => {
-    setErrors(prev => ({ ...prev, general: 'Captcha verification failed. Please try again.' }));
-    setCaptchaVerified(false);
-    setCaptchaToken(null);
-  };
-
-  const onCaptchaExpired = () => {
-    setCaptchaVerified(false);
-    setCaptchaToken(null);
-  };
-
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {};
     
@@ -81,19 +56,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
       newErrors.password = passwordValidation.error;
     }
     
-    const siteKey = import.meta.env.VITE_HCAPTCHA_SITE_KEY;
-    if (!siteKey) {
-      newErrors.general = 'Captcha not configured. Please contact support.';
-    } else if (!captchaVerified || !captchaToken) {
-      newErrors.general = 'Please complete the captcha verification to continue.';
-    }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const isFormFilled = formData.email.trim() !== '' && formData.password !== '';
-  const isButtonActive = isFormFilled && captchaVerified && !loading;
+  const isButtonActive = isFormFilled && !loading;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,17 +74,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
     setErrors({});
 
     try {
-      // Verify captcha before proceeding
-      if (captchaToken) {
-        const isCaptchaValid = await CaptchaService.verifyToken(captchaToken);
-        if (!isCaptchaValid) {
-          setErrors(prev => ({ ...prev, general: 'Captcha verification failed. Please try again.' }));
-          setCaptchaVerified(false);
-          setCaptchaToken(null);
-          return;
-        }
-      }
-
       const { error } = await supabase.auth.signInWithPassword({
         email: formData.email.trim().toLowerCase(),
         password: formData.password
@@ -156,8 +113,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
       setLoading(false);
     }
   };
-
-  const siteKey = import.meta.env.VITE_HCAPTCHA_SITE_KEY;
 
   return (
     <div>
@@ -223,18 +178,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
             Forgot password?
           </button>
         </div>
-
-        {/* hCaptcha Component */}
-        {siteKey && (
-          <div className="flex justify-center">
-            <HCaptcha
-              sitekey={siteKey}
-              onVerify={onCaptchaSuccess}
-              onError={onCaptchaError}
-              onExpire={onCaptchaExpired}
-            />
-          </div>
-        )}
 
         <button 
           type="submit" 
