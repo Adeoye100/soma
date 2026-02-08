@@ -11,30 +11,17 @@ import ResetPasswordForm from './components/ResetPasswordForm';
 import AuthCallback from './components/AuthCallback';
 // Removed SignUpScreen import - now handled by LoginScreen component
 
-type Theme = 'light' | 'dark';
-
 const App: React.FC = () => {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const savedTheme = localStorage.getItem('theme') as Theme | null;
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return savedTheme || (prefersDark ? 'dark' : 'light');
-  });
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loadingSession, setLoadingSession] = useState(true);
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
 
   useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-      document.body.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.body.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [theme]);
+    document.documentElement.classList.add('dark');
+    document.body.classList.add('dark');
+    localStorage.setItem('theme', 'dark');
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -62,8 +49,6 @@ const App: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const toggleTheme = () => setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
-
   const handleLogout = async () => {
     await supabase.auth.signOut();
   };
@@ -74,20 +59,20 @@ const App: React.FC = () => {
 
   if (loadingSession) {
     return (
-      <div className="flex items-center justify-center h-screen bg-slate-50 dark:bg-slate-900">
+      <div className="flex items-center justify-center h-screen bg-slate-900">
         <Loader text="Loading session..." />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen font-sans bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-50 transition-colors duration-300">
+    <div className="min-h-screen font-sans bg-slate-900 text-slate-50">
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route
             path="/login"
-            element={!session ? <AuthContainer theme={theme} toggleTheme={toggleTheme} /> : isPasswordRecovery ? <ResetPasswordForm /> : <Navigate to="/app" />}
+            element={!session ? <AuthContainer /> : isPasswordRecovery ? <ResetPasswordForm /> : <Navigate to="/app" />}
           />
           <Route
             path="/signup"
@@ -105,7 +90,7 @@ const App: React.FC = () => {
             path="/app"
             element={
               <ProtectedRoute session={session}>
-                <MainApp user={user!} onLogout={handleLogout} theme={theme} toggleTheme={toggleTheme} onAvatarUpdate={handleAvatarUpdate} />
+                <MainApp user={user!} onLogout={handleLogout} onAvatarUpdate={handleAvatarUpdate} />
               </ProtectedRoute>
             }
           />

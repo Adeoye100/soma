@@ -220,7 +220,7 @@ export const AdminAutomationDashboard: React.FC = () => {
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div 
-                  className="bg-blue-600 h-2 rounded-full" 
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
                   style={{ width: `${systemMetrics?.cpu || 0}%` }}
                 ></div>
               </div>
@@ -233,7 +233,7 @@ export const AdminAutomationDashboard: React.FC = () => {
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div 
-                  className="bg-green-600 h-2 rounded-full" 
+                  className="bg-green-600 h-2 rounded-full transition-all duration-300" 
                   style={{ width: `${systemMetrics?.memory || 0}%` }}
                 ></div>
               </div>
@@ -246,7 +246,7 @@ export const AdminAutomationDashboard: React.FC = () => {
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div 
-                  className="bg-yellow-600 h-2 rounded-full" 
+                  className="bg-yellow-600 h-2 rounded-full transition-all duration-300" 
                   style={{ width: `${systemMetrics?.disk || 0}%` }}
                 ></div>
               </div>
@@ -516,12 +516,12 @@ export const AdminAutomationDashboard: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-6 transition-colors duration-300">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Automation Dashboard</h1>
-          <p className="text-gray-600">Enterprise-grade automation monitoring and management</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2 transition-colors duration-300">Automation Dashboard</h1>
+          <p className="text-gray-600 transition-colors duration-300">Enterprise-grade automation monitoring and management</p>
         </div>
 
         {/* Navigation Tabs */}
@@ -537,7 +537,7 @@ export const AdminAutomationDashboard: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center space-x-2 px-3 py-2 text-sm font-medium rounded-md ${
+                className={`flex items-center space-x-2 px-3 py-2 text-sm font-medium rounded-md transition-colors duration-300 ${
                   activeTab === tab.id
                     ? 'bg-blue-100 text-blue-700'
                     : 'text-gray-500 hover:text-gray-700'
@@ -553,11 +553,11 @@ export const AdminAutomationDashboard: React.FC = () => {
         {/* Auto-refresh Controls */}
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <label className="text-sm font-medium">Auto-refresh:</label>
+            <label className="text-sm font-medium transition-colors duration-300">Auto-refresh:</label>
             <select
               value={refreshInterval}
               onChange={(e) => setRefreshInterval(Number(e.target.value))}
-              className="border rounded px-3 py-1 text-sm"
+              className="border rounded px-3 py-1 text-sm transition-colors duration-300"
             >
               <option value={10}>10s</option>
               <option value={30}>30s</option>

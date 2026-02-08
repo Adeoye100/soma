@@ -290,7 +290,7 @@ export class AuthService {
   private async getUserProfile(userId: string): Promise<any> {
     try {
       const { data, error } = await this.supabase
-        .from('users')
+        .from('public.users')
         .select('username, full_name, gender')
         .eq('id', userId)
         .single();

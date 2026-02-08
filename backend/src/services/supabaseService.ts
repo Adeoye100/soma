@@ -122,7 +122,7 @@ export class UserService {
   static async findByEmail(email: string): Promise<User | null> {
     try {
       const { data, error } = await supabaseAdmin
-        .from('users')
+        .from('public.users')
         .select('*')
         .eq('email', email)
         .single();
@@ -141,7 +141,7 @@ export class UserService {
   static async findById(id: string): Promise<User | null> {
     try {
       const { data, error } = await supabaseAdmin
-        .from('users')
+        .from('public.users')
         .select('*')
         .eq('id', id)
         .single();
@@ -160,7 +160,7 @@ export class UserService {
   static async create(userData: Partial<User>): Promise<User> {
     try {
       const { data, error } = await supabaseAdmin
-        .from('users')
+        .from('public.users')
         .insert([userData])
         .select()
         .single();
@@ -179,7 +179,7 @@ export class UserService {
   static async update(id: string, updates: Partial<User>): Promise<User> {
     try {
       const { data, error } = await supabaseAdmin
-        .from('users')
+        .from('public.users')
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
         .select()
@@ -202,7 +202,7 @@ export class ExamService {
   static async create(examData: Partial<Exam>): Promise<Exam> {
     try {
       const { data, error } = await supabaseAdmin
-        .from('exams')
+        .from('public.exams')
         .insert([examData])
         .select()
         .single();
@@ -229,7 +229,7 @@ export class ExamService {
       'details',
       async () => {
         const { data, error } = await supabaseAdmin
-          .from('exams')
+          .from('public.exams')
           .select('*')
           .eq('id', id)
           .single();
@@ -254,7 +254,7 @@ export class ExamService {
         const offset = (page - 1) * limit;
 
         const { data, error, count } = await supabaseAdmin
-          .from('exams')
+          .from('public.exams')
           .select('*', { count: 'exact' })
           .eq('user_id', userId)
           .order('created_at', { ascending: false })
@@ -273,7 +273,7 @@ export class ExamService {
   static async update(id: string, updates: Partial<Exam>): Promise<Exam> {
     try {
       const { data, error } = await supabaseAdmin
-        .from('exams')
+        .from('public.exams')
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
         .select()
@@ -297,25 +297,25 @@ export class ExamService {
     try {
       // Delete questions first (foreign key constraint)
       await supabaseAdmin
-        .from('questions')
+        .from('public.questions')
         .delete()
         .eq('exam_id', id);
 
       // Delete exam results
       await supabaseAdmin
-        .from('exam_results')
+        .from('public.exam_results')
         .delete()
         .eq('exam_id', id);
 
       // Delete exam attempts
       await supabaseAdmin
-        .from('exam_attempts')
+        .from('public.exam_attempts')
         .delete()
         .eq('exam_id', id);
 
       // Delete exam
       const { error } = await supabaseAdmin
-        .from('exams')
+        .from('public.exams')
         .delete()
         .eq('id', id);
 
@@ -337,7 +337,7 @@ export class QuestionService {
   static async createBulk(questions: Partial<Question>[]): Promise<Question[]> {
     try {
       const { data, error } = await supabaseAdmin
-        .from('questions')
+        .from('public.questions')
         .insert(questions)
         .select();
 
@@ -358,7 +358,7 @@ export class QuestionService {
       'questions',
       async () => {
         const { data, error } = await supabaseAdmin
-          .from('questions')
+          .from('public.questions')
           .select('*')
           .eq('exam_id', examId)
           .order('created_at', { ascending: true });
@@ -376,7 +376,7 @@ export class QuestionService {
   static async update(id: string, updates: Partial<Question>): Promise<Question> {
     try {
       const { data, error } = await supabaseAdmin
-        .from('questions')
+        .from('public.questions')
         .update(updates)
         .eq('id', id)
         .select()
@@ -396,7 +396,7 @@ export class QuestionService {
   static async delete(id: string): Promise<void> {
     try {
       const { error } = await supabaseAdmin
-        .from('questions')
+        .from('public.questions')
         .delete()
         .eq('id', id);
 
@@ -415,7 +415,7 @@ export class MaterialService {
   static async create(materialData: Partial<Material>): Promise<Material> {
     try {
       const { data, error } = await supabaseAdmin
-        .from('materials')
+        .from('public.materials')
         .insert([materialData])
         .select()
         .single();
@@ -436,7 +436,7 @@ export class MaterialService {
       const offset = (page - 1) * limit;
 
       const { data, error, count } = await supabaseAdmin
-        .from('materials')
+        .from('public.materials')
         .select('*', { count: 'exact' })
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
@@ -456,7 +456,7 @@ export class MaterialService {
   static async delete(id: string): Promise<void> {
     try {
       const { error } = await supabaseAdmin
-        .from('materials')
+        .from('public.materials')
         .delete()
         .eq('id', id);
 
@@ -475,7 +475,7 @@ export class ExamResultService {
   static async create(resultData: Partial<ExamResult>): Promise<ExamResult> {
     try {
       const { data, error } = await supabaseAdmin
-        .from('exam_results')
+        .from('public.exam_results')
         .insert([resultData])
         .select()
         .single();
@@ -496,7 +496,7 @@ export class ExamResultService {
       const offset = (page - 1) * limit;
 
       const { data, error, count } = await supabaseAdmin
-        .from('exam_results')
+        .from('public.exam_results')
         .select('*', { count: 'exact' })
         .eq('exam_id', examId)
         .order('created_at', { ascending: false })
@@ -518,7 +518,7 @@ export class ExamResultService {
       const offset = (page - 1) * limit;
 
       const { data, error, count } = await supabaseAdmin
-        .from('exam_results')
+        .from('public.exam_results')
         .select('*', { count: 'exact' })
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
@@ -538,7 +538,7 @@ export class ExamResultService {
   static async findById(id: string): Promise<ExamResult | null> {
     try {
       const { data, error } = await supabaseAdmin
-        .from('exam_results')
+        .from('public.exam_results')
         .select('*')
         .eq('id', id)
         .single();
@@ -560,7 +560,7 @@ export class ExamAttemptService {
   static async create(attemptData: Partial<ExamAttempt>): Promise<ExamAttempt> {
     try {
       const { data, error } = await supabaseAdmin
-        .from('exam_attempts')
+        .from('public.exam_attempts')
         .insert([attemptData])
         .select()
         .single();
@@ -579,7 +579,7 @@ export class ExamAttemptService {
   static async findActiveAttempt(examId: string, userId: string): Promise<ExamAttempt | null> {
     try {
       const { data, error } = await supabaseAdmin
-        .from('exam_attempts')
+        .from('public.exam_attempts')
         .select('*')
         .eq('exam_id', examId)
         .eq('user_id', userId)
@@ -600,7 +600,7 @@ export class ExamAttemptService {
   static async update(id: string, updates: Partial<ExamAttempt>): Promise<ExamAttempt> {
     try {
       const { data, error } = await supabaseAdmin
-        .from('exam_attempts')
+        .from('public.exam_attempts')
         .update(updates)
         .eq('id', id)
         .select()
@@ -620,7 +620,7 @@ export class ExamAttemptService {
   static async findById(id: string): Promise<ExamAttempt | null> {
     try {
       const { data, error } = await supabaseAdmin
-        .from('exam_attempts')
+        .from('public.exam_attempts')
         .select('*')
         .eq('id', id)
         .single();
