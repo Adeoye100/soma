@@ -89,6 +89,7 @@ const StyledWrapper = styled.div`
     border-radius: 1.125rem; /* 18px */
     border: 1px solid rgba(255, 255, 255, 0.2);
     overflow: hidden;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
   }
 
   .dark & .bg {

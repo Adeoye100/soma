@@ -7,10 +7,16 @@ import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 import ForgotPasswordForm from '../ForgotPasswordForm';
 import InfoModal from '../InfoModal';
+import Switch from '../Switch';
 
 type AuthMode = 'login' | 'signup' | 'forgot-password';
 
-const AuthContainer: React.FC = () => {
+interface AuthContainerProps {
+  theme: 'light' | 'dark';
+  toggleTheme: () => void;
+}
+
+const AuthContainer: React.FC<AuthContainerProps> = ({ theme, toggleTheme }) => {
   const location = useLocation();
   const [mode, setMode] = useState<AuthMode>('login');
   const [showTerms, setShowTerms] = useState(false);
@@ -56,7 +62,12 @@ const AuthContainer: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-transparent px-3 sm:px-4 md:px-6">
+    <div className="min-h-screen flex items-center justify-center bg-transparent px-3 sm:px-4 md:px-6 relative transition-colors duration-300">
+      {/* Theme toggle for auth pages */}
+      <div className="absolute top-4 right-4 z-20">
+        <Switch isChecked={theme === 'dark'} onToggle={toggleTheme} />
+      </div>
+
       <div className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-center">
         {/* Left side - Branding and Info */}
         <div className="hidden md:flex flex-col p-6 md:p-8">
@@ -66,7 +77,7 @@ const AuthContainer: React.FC = () => {
               Soma
             </h1>
           </div>
-          <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg mb-6">
+          <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg mb-6 transition-colors duration-300">
             Your personalized AI study partner. Generate exams from your course materials and master any subject.
           </p>
           <div className="hidden lg:block">

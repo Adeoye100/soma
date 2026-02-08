@@ -88,20 +88,20 @@ const ResetPasswordForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-slate-50 to-primary-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 px-4 py-12">
-      <div className="max-w-md w-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 animate-fade-in">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-slate-50 to-primary-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 px-4 py-12 transition-colors duration-300">
+      <div className="max-w-md w-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 animate-fade-in transition-colors duration-300">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+          <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2 transition-colors duration-300">
             Reset Your Password
           </h2>
-          <p className="text-slate-500 dark:text-slate-400">
+          <p className="text-slate-500 dark:text-slate-400 transition-colors duration-300">
             Enter your new password below
           </p>
         </div>
 
         {message && (
           <div
-            className={`px-4 py-3 rounded-lg text-sm text-center mb-6 ${
+            className={`px-4 py-3 rounded-lg text-sm text-center mb-6 transition-colors duration-300 ${
               isError
                 ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
                 : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
@@ -116,7 +116,7 @@ const ResetPasswordForm: React.FC = () => {
           <div>
             <label
               htmlFor="new-password"
-              className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 transition-colors duration-300"
             >
               New Password
             </label>
@@ -128,13 +128,13 @@ const ResetPasswordForm: React.FC = () => {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 disabled={loading}
-                className="block w-full h-11 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="block w-full h-11 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
                 placeholder="Enter new password"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors duration-300"
                 tabIndex={-1}
               >
                 {showPassword ? (
@@ -155,7 +155,7 @@ const ResetPasswordForm: React.FC = () => {
           <div>
             <label
               htmlFor="confirm-password"
-              className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 transition-colors duration-300"
             >
               Confirm New Password
             </label>
@@ -167,13 +167,13 @@ const ResetPasswordForm: React.FC = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={loading}
-                className="block w-full h-11 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="block w-full h-11 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
                 placeholder="Confirm new password"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors duration-300"
                 tabIndex={-1}
               >
                 {showConfirmPassword ? (
@@ -189,7 +189,7 @@ const ResetPasswordForm: React.FC = () => {
               </button>
             </div>
             {confirmPassword && newPassword !== confirmPassword && (
-              <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+              <p className="mt-2 text-sm text-red-600 dark:text-red-400 transition-colors duration-300">
                 Passwords do not match
               </p>
             )}
@@ -217,7 +217,7 @@ const ResetPasswordForm: React.FC = () => {
         <div className="mt-6 text-center">
           <button
             onClick={() => navigate('/login')}
-            className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
+            className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors duration-300"
           >
             &larr; Back to Login
           </button>

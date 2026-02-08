@@ -61,7 +61,7 @@ const StyledWrapper = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #2a2a2a;
+    background-color: #0ea5e9; /* Default: Light Mode (Blue) */
     transition: 0.4s;
     border-radius: 30px;
     overflow: hidden;
@@ -77,16 +77,17 @@ const StyledWrapper = styled.div`
     bottom: 0.5em;
     transition: 0.4s;
     transition-timing-function: cubic-bezier(0.81, -0.04, 0.38, 1.5);
-    box-shadow: inset 8px -4px 0px 0px #fff;
+    box-shadow: inset 15px -4px 0px 15px #ffcf48; /* Default: Sun */
   }
 
+  /* Checked: Dark Mode */
   .switch input:checked + .slider {
-    background-color: #00a6ff;
+    background-color: #2a2a2a; /* Dark */
   }
 
   .switch input:checked + .slider:before {
     transform: translateX(1.8em);
-    box-shadow: inset 15px -4px 0px 15px #ffcf48;
+    box-shadow: inset 8px -4px 0px 0px #eee; /* Moon */
   }
 
   .star {
@@ -96,6 +97,7 @@ const StyledWrapper = styled.div`
     width: 5px;
     transition: all 0.4s;
     height: 5px;
+    opacity: 0; /* Hidden by default (Light Mode) */
   }
 
   .star_1 {
@@ -114,7 +116,7 @@ const StyledWrapper = styled.div`
   }
 
   .switch input:checked ~ .slider .star {
-    opacity: 0;
+    opacity: 1; /* Visible in Dark Mode */
   }
 
   .cloud {
@@ -122,12 +124,12 @@ const StyledWrapper = styled.div`
     position: absolute;
     bottom: -1.4em;
     left: -1.1em;
-    opacity: 0;
+    opacity: 1; /* Visible by default (Light Mode) */
     transition: all 0.4s;
   }
 
   .switch input:checked ~ .slider .cloud {
-    opacity: 1;
+    opacity: 0; /* Hidden in Dark Mode */
   }
 
   /* Responsive adjustments */

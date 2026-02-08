@@ -284,11 +284,11 @@ const EnhancedSetupScreen: React.FC<EnhancedSetupScreenProps> = ({ onExamStart }
           <div className="sticky top-32 md:top-36 space-y-8">
             <InspirationCard />
             {processorStats && (
-              <div className="bg-white dark:bg-slate-800 rounded-lg p-4 shadow-lg">
-                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-4 shadow-lg transition-colors duration-300">
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 transition-colors duration-300">
                   System Status
                 </h3>
-                <div className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
+                <div className="space-y-1 text-xs text-slate-600 dark:text-slate-400 transition-colors duration-300">
                   <div>Queue: {processorStats.queueLength} files</div>
                   <div>Processing: {processorStats.isProcessing ? 'Yes' : 'No'}</div>
                   <div>Temp Files: {processorStats.tempFilesCount}</div>
@@ -304,12 +304,12 @@ const EnhancedSetupScreen: React.FC<EnhancedSetupScreenProps> = ({ onExamStart }
         <div className="w-full lg:flex-1">
           <ShaderBackground>
             <div className="p-4 sm:p-6 md:p-8">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-primary-600 dark:text-primary-400 mb-6">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-primary-600 dark:text-primary-400 mb-6 transition-colors duration-300">
                 Create Your Exam
               </h2>
 
               {error && (
-                <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 text-red-700 dark:text-red-300 px-3 sm:px-4 py-3 rounded-lg relative mb-6 text-sm" role="alert">
+                <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 text-red-700 dark:text-red-300 px-3 sm:px-4 py-3 rounded-lg relative mb-6 text-sm transition-colors duration-300" role="alert">
                   <strong className="font-bold">Error: </strong>
                   <span className="block sm:inline whitespace-pre-line">{error}</span>
                 </div>
@@ -318,14 +318,14 @@ const EnhancedSetupScreen: React.FC<EnhancedSetupScreenProps> = ({ onExamStart }
               <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
                 {/* File Upload Section */}
                 <div>
-                  <label className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2 block">
+                  <label className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2 block transition-colors duration-300">
                     1. Upload Materials
                   </label>
-                  <div className="mt-2 flex justify-center rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 px-4 sm:px-6 py-6 sm:py-8">
+                  <div className="mt-2 flex justify-center rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 px-4 sm:px-6 py-6 sm:py-8 transition-colors duration-300">
                     <div className="text-center">
-                      <UploadIcon className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-slate-400 dark:text-slate-500" />
-                      <div className="mt-4 flex flex-col sm:flex-row text-xs sm:text-sm leading-6 text-slate-600 dark:text-slate-400 gap-1">
-                        <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white dark:bg-slate-800 font-semibold text-primary-600 dark:text-primary-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-600 focus-within:ring-offset-2 dark:focus-within:ring-offset-slate-800 hover:text-primary-500">
+                      <UploadIcon className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-slate-400 dark:text-slate-500 transition-colors duration-300" />
+                      <div className="mt-4 flex flex-col sm:flex-row text-xs sm:text-sm leading-6 text-slate-600 dark:text-slate-400 gap-1 transition-colors duration-300">
+                        <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white dark:bg-slate-800 font-semibold text-primary-600 dark:text-primary-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-600 focus-within:ring-offset-2 dark:focus-within:ring-offset-slate-800 hover:text-primary-500 transition-colors duration-300">
                           <span>Upload files</span>
                           <input 
                             id="file-upload" 
@@ -339,7 +339,7 @@ const EnhancedSetupScreen: React.FC<EnhancedSetupScreenProps> = ({ onExamStart }
                         </label>
                         <p className="sm:pl-1">or drag and drop</p>
                       </div>
-                      <p className="text-xs leading-5 text-slate-500 dark:text-slate-500 mt-2">
+                      <p className="text-xs leading-5 text-slate-500 dark:text-slate-500 mt-2 transition-colors duration-300">
                         PDF, DOCX, PPTX, TXT, PNG, JPG up to 10MB (Automatic PDF conversion for Office files)
                       </p>
                     </div>
@@ -348,23 +348,23 @@ const EnhancedSetupScreen: React.FC<EnhancedSetupScreenProps> = ({ onExamStart }
                   {/* Processing Status */}
                   {processingFiles.length > 0 && (
                     <div className="mt-4">
-                      <h3 className="font-semibold text-sm sm:text-base mb-2">Processing Status:</h3>
+                      <h3 className="font-semibold text-sm sm:text-base mb-2 transition-colors duration-300">Processing Status:</h3>
                       <div className="space-y-2">
                         {processingFiles.map((fileStatus, index) => (
-                          <div key={index} className="flex items-center justify-between bg-slate-100 dark:bg-slate-700 p-3 rounded-md text-xs sm:text-sm">
+                          <div key={index} className="flex items-center justify-between bg-slate-100 dark:bg-slate-700 p-3 rounded-md text-xs sm:text-sm transition-colors duration-300">
                             <div className="flex items-center gap-2 min-w-0 flex-1">
                               <DocumentTextIcon className="h-4 w-4 sm:h-5 sm:w-5 text-slate-500 flex-shrink-0" />
                               <span className="font-medium truncate">{fileStatus.file.name}</span>
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0 ml-2">
                               {getFileStatusIcon(fileStatus.status)}
-                              <span className="text-xs text-slate-600 dark:text-slate-400">
+                              <span className="text-xs text-slate-600 dark:text-slate-400 transition-colors duration-300">
                                 {getFileStatusText(fileStatus)}
                               </span>
                               <button 
                                 type="button" 
                                 onClick={() => handleRemoveMaterial(index)} 
-                                className="text-slate-400 hover:text-red-500 flex-shrink-0 ml-1"
+                                className="text-slate-400 hover:text-red-500 flex-shrink-0 ml-1 transition-colors duration-300"
                               >
                                 <XCircleIcon className="h-4 w-4" />
                               </button>
@@ -378,13 +378,13 @@ const EnhancedSetupScreen: React.FC<EnhancedSetupScreenProps> = ({ onExamStart }
 
                 {/* Exam Configuration Section */}
                 <div>
-                  <label className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4 block">
+                  <label className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4 block transition-colors duration-300">
                     2. Configure Settings
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     {/* Exam Type */}
                     <div>
-                      <label htmlFor="type" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
+                      <label htmlFor="type" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors duration-300">
                         Type
                       </label>
                       <select 
@@ -392,7 +392,7 @@ const EnhancedSetupScreen: React.FC<EnhancedSetupScreenProps> = ({ onExamStart }
                         name="type" 
                         value={config.type} 
                         onChange={handleConfigChange} 
-                        className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-2 sm:px-3 text-xs sm:text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500"
+                        className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-2 sm:px-3 text-xs sm:text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 transition-colors duration-300"
                       >
                         {Object.values(ExamType).map(type => <option key={type}>{type}</option>)}
                       </select>
@@ -400,7 +400,7 @@ const EnhancedSetupScreen: React.FC<EnhancedSetupScreenProps> = ({ onExamStart }
 
                     {/* Difficulty */}
                     <div>
-                      <label htmlFor="difficulty" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
+                      <label htmlFor="difficulty" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors duration-300">
                         Difficulty
                       </label>
                       <select 
@@ -408,7 +408,7 @@ const EnhancedSetupScreen: React.FC<EnhancedSetupScreenProps> = ({ onExamStart }
                         name="difficulty" 
                         value={config.difficulty} 
                         onChange={handleConfigChange} 
-                        className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-2 sm:px-3 text-xs sm:text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500"
+                        className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-2 sm:px-3 text-xs sm:text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 transition-colors duration-300"
                       >
                         {Object.values(Difficulty).map(d => <option key={d}>{d}</option>)}
                       </select>
@@ -416,7 +416,7 @@ const EnhancedSetupScreen: React.FC<EnhancedSetupScreenProps> = ({ onExamStart }
 
                     {/* Time Intensity */}
                     <div>
-                      <label htmlFor="intensity" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
+                      <label htmlFor="intensity" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors duration-300">
                         Speed
                       </label>
                       <select 
@@ -424,7 +424,7 @@ const EnhancedSetupScreen: React.FC<EnhancedSetupScreenProps> = ({ onExamStart }
                         name="intensity" 
                         value={config.intensity} 
                         onChange={handleConfigChange} 
-                        className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-2 sm:px-3 text-xs sm:text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500"
+                        className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-2 sm:px-3 text-xs sm:text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 transition-colors duration-300"
                       >
                         {Object.values(TimeIntensity).map(i => (
                           <option key={i} value={i}>
@@ -436,7 +436,7 @@ const EnhancedSetupScreen: React.FC<EnhancedSetupScreenProps> = ({ onExamStart }
 
                     {/* Number of Questions */}
                     <div>
-                      <label htmlFor="numQuestions" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
+                      <label htmlFor="numQuestions" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors duration-300">
                         Questions
                       </label>
                       <input 
@@ -447,21 +447,21 @@ const EnhancedSetupScreen: React.FC<EnhancedSetupScreenProps> = ({ onExamStart }
                         max="50" 
                         value={config.numQuestions} 
                         onChange={handleConfigChange} 
-                        className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-2 sm:px-3 text-xs sm:text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500" 
+                        className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-2 sm:px-3 text-xs sm:text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 transition-colors duration-300" 
                       />
                     </div>
                   </div>
 
                   {/* Time Calculation Display */}
-                  <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                    <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
+                  <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg transition-colors duration-300">
+                    <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2 transition-colors duration-300">
                       ⏱️ Estimated Exam Time
                     </h3>
                     <div className="flex items-center gap-4">
-                      <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+                      <div className="text-2xl font-bold text-blue-900 dark:text-blue-100 transition-colors duration-300">
                         {formattedTime}
                       </div>
-                      <div className="text-sm text-blue-700 dark:text-blue-300">
+                      <div className="text-sm text-blue-700 dark:text-blue-300 transition-colors duration-300">
                         <div>Speed: {config.intensity}</div>
                         <div>Questions: {config.numQuestions}</div>
                         <div>Time per question: {formatTime(TIME_PER_INTENSITY[config.intensity])}</div>
@@ -475,7 +475,7 @@ const EnhancedSetupScreen: React.FC<EnhancedSetupScreenProps> = ({ onExamStart }
                   <button
                     type="submit"
                     disabled={isLoading || processingFiles.length === 0 || processingFiles.some(f => f.status !== 'completed')}
-                    className="flex items-center justify-center gap-2 w-full sm:w-auto rounded-md bg-primary-600 px-6 py-3 text-sm sm:text-base font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:bg-slate-400 disabled:cursor-not-allowed dark:disabled:bg-slate-600 transition-colors"
+                    className="flex items-center justify-center gap-2 w-full sm:w-auto rounded-md bg-primary-600 px-6 py-3 text-sm sm:text-base font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:bg-slate-400 disabled:cursor-not-allowed dark:disabled:bg-slate-600 transition-colors duration-300"
                   >
                     {processingFiles.some(f => f.status === 'processing') ? 'Processing Files...' : 'Generate Exam'}
                   </button>

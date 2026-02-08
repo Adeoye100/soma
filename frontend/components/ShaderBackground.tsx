@@ -7,7 +7,7 @@ interface ShaderBackgroundProps {
 
 const ShaderBackground: React.FC<ShaderBackgroundProps> = ({ children, className = '' }) => {
   return (
-    <div className={`bg-white/50 dark:bg-slate-800/30 backdrop-blur-2xl rounded-2xl shadow-lg ${className}`}>
+    <div className={`bg-white/50 dark:bg-slate-800/30 backdrop-blur-2xl rounded-2xl shadow-lg transition-colors duration-300 ${className}`}>
       <div className="rounded-[15px] h-full w-full">
         {children}
       </div>

@@ -27,9 +27,11 @@ const App: React.FC = () => {
   useEffect(() => {
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
+      document.body.classList.add('dark');
       localStorage.setItem('theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark');
       localStorage.setItem('theme', 'light');
     }
   }, [theme]);
@@ -79,13 +81,13 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen font-sans bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-50">
+    <div className="min-h-screen font-sans bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-50 transition-colors duration-300">
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route
             path="/login"
-            element={!session ? <AuthContainer /> : isPasswordRecovery ? <ResetPasswordForm /> : <Navigate to="/app" />}
+            element={!session ? <AuthContainer theme={theme} toggleTheme={toggleTheme} /> : isPasswordRecovery ? <ResetPasswordForm /> : <Navigate to="/app" />}
           />
           <Route
             path="/signup"
@@ -114,4 +116,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-

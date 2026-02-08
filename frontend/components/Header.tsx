@@ -23,7 +23,7 @@ const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, user, onLogout, onO
 
 
   return (
-    <header className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm sticky top-0 z-10 shadow-md shadow-slate-200/10 dark:shadow-slate-800/10">
+    <header className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm sticky top-0 z-10 shadow-md shadow-slate-200/10 dark:shadow-slate-800/10 transition-colors duration-300">
       <div className="container mx-auto px-3 sm:px-4 md:px-8 py-3 sm:py-4 flex justify-between items-center">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <BookOpenIcon className="h-6 w-6 sm:h-8 sm:w-8 text-primary-500 animated-book flex-shrink-0" />
@@ -40,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, user, onLogout, onO
           <Switch isChecked={theme === 'dark'} onToggle={toggleTheme} />
            <button
             onClick={onLogout}
-            className="p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500 flex-shrink-0"
+            className="p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500 flex-shrink-0 transition-colors duration-200"
             aria-label="Logout"
             title="Logout?"
           >

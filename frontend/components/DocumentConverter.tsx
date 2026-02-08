@@ -99,14 +99,14 @@ const DocumentConverter: React.FC<DocumentConverterProps> = ({
   };
 
   return (
-    <div className="document-converter p-6 bg-white rounded-lg shadow-lg max-w-md mx-auto">
-      <h2 className="text-xl font-semibold mb-4 text-gray-800">
+    <div className="document-converter p-6 bg-white rounded-lg shadow-lg max-w-md mx-auto transition-colors duration-300">
+      <h2 className="text-xl font-semibold mb-4 text-gray-800 transition-colors duration-300">
         Document Converter for Exam Processing
       </h2>
 
       {/* File Upload */}
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2 transition-colors duration-300">
           Select Document (.docx or .pptx)
         </label>
         <input
@@ -114,21 +114,21 @@ const DocumentConverter: React.FC<DocumentConverterProps> = ({
           accept=".docx,.pptx"
           onChange={handleFileSelect}
           disabled={isConverting}
-          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50 transition-colors duration-300"
         />
       </div>
 
       {/* File Information */}
       {selectedFile && (
-        <div className="mb-4 p-3 bg-gray-50 rounded-md">
+        <div className="mb-4 p-3 bg-gray-50 rounded-md transition-colors duration-300">
           <div className="text-sm">
-            <div className="font-medium text-gray-700">Selected file:</div>
-            <div className="text-gray-600">{selectedFile.name}</div>
-            <div className="text-gray-500">
+            <div className="font-medium text-gray-700 transition-colors duration-300">Selected file:</div>
+            <div className="text-gray-600 transition-colors duration-300">{selectedFile.name}</div>
+            <div className="text-gray-500 transition-colors duration-300">
               Size: {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
             </div>
             {estimatedTime > 0 && (
-              <div className="text-gray-500">
+              <div className="text-gray-500 transition-colors duration-300">
                 Estimated time: {formatTime(estimatedTime)}
               </div>
             )}
@@ -138,8 +138,8 @@ const DocumentConverter: React.FC<DocumentConverterProps> = ({
 
       {/* Validation Error */}
       {validationError && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-          <div className="text-sm text-red-600">{validationError}</div>
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md transition-colors duration-300">
+          <div className="text-sm text-red-600 transition-colors duration-300">{validationError}</div>
         </div>
       )}
 
@@ -147,12 +147,12 @@ const DocumentConverter: React.FC<DocumentConverterProps> = ({
       {progress && (
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-gray-700 transition-colors duration-300">
               {getStageIcon(progress.stage)} {progress.message}
             </span>
-            <span className="text-sm text-gray-500">{progress.progress}%</span>
+            <span className="text-sm text-gray-500 transition-colors duration-300">{progress.progress}%</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-gray-200 rounded-full h-2 transition-colors duration-300">
             <div
               className="bg-blue-600 h-2 rounded-full transition-all duration-300"
               style={{ width: `${progress.progress}%` }}
@@ -166,7 +166,7 @@ const DocumentConverter: React.FC<DocumentConverterProps> = ({
         type="button"
         onClick={handleConvert}
         disabled={!selectedFile || isConverting}
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors active:scale-95 active:shadow-lg"
+        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors active:scale-95 active:shadow-lg duration-300"
       >
         {isConverting ? (
           <span className="flex items-center justify-center">
@@ -183,7 +183,7 @@ const DocumentConverter: React.FC<DocumentConverterProps> = ({
      
 
       {/* Instructions */}
-      <div className="mt-4 text-xs text-gray-500">
+      <div className="mt-4 text-xs text-gray-500 transition-colors duration-300">
         <p><strong>Supported formats:</strong> Microsoft Word (.docx), PowerPoint (.pptx)</p>
         <p><strong>Maximum size:</strong> 10MB</p>
         <p><strong>Output:</strong> PDF optimized for exam processing</p>
@@ -210,7 +210,7 @@ const ExamDocumentProcessor: React.FC = () => {
   return (
     <div className="p-6">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">
+        <h1 className="text-3xl font-bold text-gray-800 mb-6 transition-colors duration-300">
           Exam Document Processing
         </h1>
 
@@ -223,19 +223,19 @@ const ExamDocumentProcessor: React.FC = () => {
         {/* Converted Files List */}
         {convertedFiles.length > 0 && (
           <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800 transition-colors duration-300">
               Converted Files ({convertedFiles.length})
             </h2>
             <div className="space-y-2">
               {convertedFiles.map((file, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-md">
+                <div key={index} className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-md transition-colors duration-300">
                   <div>
-                    <div className="font-medium text-green-800">{file.name}</div>
-                    <div className="text-sm text-green-600">
+                    <div className="font-medium text-green-800 transition-colors duration-300">{file.name}</div>
+                    <div className="text-sm text-green-600 transition-colors duration-300">
                       Size: {(file.size / (1024 * 1024)).toFixed(2)} MB
                     </div>
                   </div>
-                  <div className="text-green-600">
+                  <div className="text-green-600 transition-colors duration-300">
                     ✅ Ready for exam processing
                   </div>
                 </div>
@@ -247,13 +247,13 @@ const ExamDocumentProcessor: React.FC = () => {
         {/* Errors List */}
         {errors.length > 0 && (
           <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-4 text-red-800">
+            <h2 className="text-xl font-semibold mb-4 text-red-800 transition-colors duration-300">
               Errors ({errors.length})
             </h2>
             <div className="space-y-2">
               {errors.map((error, index) => (
-                <div key={index} className="p-3 bg-red-50 border border-red-200 rounded-md">
-                  <div className="text-sm text-red-600">{error}</div>
+                <div key={index} className="p-3 bg-red-50 border border-red-200 rounded-md transition-colors duration-300">
+                  <div className="text-sm text-red-600 transition-colors duration-300">{error}</div>
                 </div>
               ))}
             </div>
@@ -261,9 +261,9 @@ const ExamDocumentProcessor: React.FC = () => {
         )}
 
         {/* Instructions */}
-        <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-md">
-          <h3 className="font-semibold text-blue-800 mb-2">How it works:</h3>
-          <ol className="list-decimal list-inside text-sm text-blue-700 space-y-1">
+        <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-md transition-colors duration-300">
+          <h3 className="font-semibold text-blue-800 mb-2 transition-colors duration-300">How it works:</h3>
+          <ol className="list-decimal list-inside text-sm text-blue-700 space-y-1 transition-colors duration-300">
             <li>Select a Word document (.docx) or PowerPoint (.pptx) file</li>
             <li>The system validates the file type and size</li>
             <li>Click "Convert to PDF" to start the conversion process</li>

@@ -24,7 +24,7 @@ const PasswordStrengthIndicator: React.FC<PasswordStrengthIndicatorProps> = ({ v
 
   return (
     <div className="mt-4 space-y-1 animate-fade-in">
-      <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Password requirements:</p>
+      <p className="text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors duration-300">Password requirements:</p>
       <ul className="space-y-1 text-sm">
         {criteria.map((criterion, index) => (
           <li

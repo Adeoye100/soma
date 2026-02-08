@@ -100,10 +100,10 @@ const EnhancedExamHistoryDashboard: React.FC<EnhancedExamHistoryDashboardProps> 
             {icon}
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{title}</p>
-            <p className={`text-2xl font-bold text-${color}-600 dark:text-${color}-400`}>{value}</p>
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors duration-300">{title}</p>
+            <p className={`text-2xl font-bold text-${color}-600 dark:text-${color}-400 transition-colors duration-300`}>{value}</p>
             {subtitle && (
-              <p className="text-xs text-slate-500 dark:text-slate-400">{subtitle}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 transition-colors duration-300">{subtitle}</p>
             )}
           </div>
         </div>
@@ -119,14 +119,14 @@ const EnhancedExamHistoryDashboard: React.FC<EnhancedExamHistoryDashboardProps> 
   if (history.length === 0) {
     return (
       <div className="w-full max-w-4xl mx-auto">
-        <div className="bg-white dark:bg-slate-800 p-8 rounded-lg shadow-lg text-center">
+        <div className="bg-white dark:bg-slate-800 p-8 rounded-lg shadow-lg text-center transition-colors duration-300">
           <div className="w-32 h-32 mx-auto mb-6">
             <TypewriterLoader />
           </div>
-          <h3 className="text-2xl font-bold text-slate-700 dark:text-slate-300 mb-4">
+          <h3 className="text-2xl font-bold text-slate-700 dark:text-slate-300 mb-4 transition-colors duration-300">
             Welcome to Your Exam Dashboard
           </h3>
-          <p className="text-slate-600 dark:text-slate-400 mb-6">
+          <p className="text-slate-600 dark:text-slate-400 mb-6 transition-colors duration-300">
             Start your first exam to unlock comprehensive performance analytics and tracking!
           </p>
           <button
@@ -145,10 +145,10 @@ const EnhancedExamHistoryDashboard: React.FC<EnhancedExamHistoryDashboardProps> 
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-700 dark:text-slate-300">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-700 dark:text-slate-300 transition-colors duration-300">
             Exam Dashboard
           </h2>
-          <p className="text-slate-600 dark:text-slate-400">
+          <p className="text-slate-600 dark:text-slate-400 transition-colors duration-300">
             Track your progress and analyze performance trends
           </p>
         </div>
@@ -162,7 +162,7 @@ const EnhancedExamHistoryDashboard: React.FC<EnhancedExamHistoryDashboardProps> 
       </div>
 
       {/* Tab Navigation */}
-      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-1">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-1 transition-colors duration-300">
         <div className="flex flex-wrap">
           {[
             { id: 'overview', label: 'Overview', icon: TrophyIcon },
@@ -239,8 +239,8 @@ const EnhancedExamHistoryDashboard: React.FC<EnhancedExamHistoryDashboardProps> 
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg">
-            <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-4">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg transition-colors duration-300">
+            <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-4 transition-colors duration-300">
               Quick Actions
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -249,28 +249,28 @@ const EnhancedExamHistoryDashboard: React.FC<EnhancedExamHistoryDashboardProps> 
                 className="flex flex-col items-center gap-3 p-4 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all"
               >
                 <ChartBarIcon className="h-8 w-8 text-primary-600" />
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">View Analytics</span>
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300 transition-colors duration-300">View Analytics</span>
               </button>
               <button
                 onClick={() => setActiveTab('history')}
                 className="flex flex-col items-center gap-3 p-4 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all"
               >
                 <BookOpenIcon className="h-8 w-8 text-green-600" />
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Exam History</span>
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300 transition-colors duration-300">Exam History</span>
               </button>
               <button
                 onClick={onStartNewExam}
                 className="flex flex-col items-center gap-3 p-4 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all"
               >
                 <BookOpenIcon className="h-8 w-8 text-orange-600" />
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">New Exam</span>
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300 transition-colors duration-300">New Exam</span>
               </button>
               <button
                 onClick={onClearHistory}
                 className="flex flex-col items-center gap-3 p-4 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
               >
                 <XCircleIcon className="h-8 w-8 text-red-600" />
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Clear Data</span>
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300 transition-colors duration-300">Clear Data</span>
               </button>
             </div>
           </div>
@@ -280,16 +280,16 @@ const EnhancedExamHistoryDashboard: React.FC<EnhancedExamHistoryDashboardProps> 
       {activeTab === 'analytics' && (
         <div className="space-y-6">
           {/* Animated Analysis Header */}
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg transition-colors duration-300">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-16 h-16 flex items-center justify-center">
                 <TypewriterLoader />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-slate-700 dark:text-slate-300">
+                <h3 className="text-xl font-bold text-slate-700 dark:text-slate-300 transition-colors duration-300">
                   Performance Analysis
                 </h3>
-                <p className="text-slate-600 dark:text-slate-400">
+                <p className="text-slate-600 dark:text-slate-400 transition-colors duration-300">
                   Advanced insights into your learning progress
                 </p>
               </div>
@@ -306,7 +306,7 @@ const EnhancedExamHistoryDashboard: React.FC<EnhancedExamHistoryDashboardProps> 
       {activeTab === 'history' && (
         <div className="space-y-6">
           <div className="flex justify-center items-center mb-4">
-            <h3 className="text-xl font-bold text-slate-700 dark:text-slate-300 mr-auto">
+            <h3 className="text-xl font-bold text-slate-700 dark:text-slate-300 mr-auto transition-colors duration-300">
               Detailed Exam History
             </h3>
             <button

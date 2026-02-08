@@ -43,7 +43,7 @@ const Loader: React.FC<LoaderProps> = ({ text = 'Loading...' }) => {
             </li>
           </ul>
         </div>
-        <span>{text}</span>
+        <span className="text-slate-600 dark:text-slate-300 transition-colors duration-300">{text}</span>
       </div>
     </StyledWrapper>
   );

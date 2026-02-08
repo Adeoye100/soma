@@ -109,6 +109,7 @@ const ContentWrapper = styled.div`
   border-radius: 15px;
   backdrop-filter: blur(5px);
   animation: ${fadeIn} 1s ease-in-out;
+  transition: background-color 0.3s ease;
 `;
 
 const ButtonContainer = styled.div`

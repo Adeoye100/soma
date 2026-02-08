@@ -161,10 +161,10 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleForm }) => {
   if (signupSuccess) {
     return (
       <div className="text-center">
-        <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2 transition-colors duration-300">
           Check your inbox!
         </h2>
-        <p className="text-slate-500 dark:text-slate-400">
+        <p className="text-slate-500 dark:text-slate-400 transition-colors duration-300">
           We've sent a confirmation link to <strong>{formData.email}</strong>. Please click the link to complete your registration.
         </p>
       </div>
@@ -174,10 +174,10 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleForm }) => {
   return (
     <div>
       <div className="text-center mb-6">
-        <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2 transition-colors duration-300">
           Create Your Account
         </h2>
-        <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400">
+        <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 transition-colors duration-300">
           Sign up to get started.
         </p>
       </div>
@@ -190,14 +190,14 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleForm }) => {
       </div>
 
       {errors.general && (
-        <div className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg text-sm text-center mb-4" role="alert">
+        <div className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg text-sm text-center mb-4 transition-colors duration-300" role="alert">
           {errors.general}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         <div>
-          <label htmlFor="username" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
+          <label htmlFor="username" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors duration-300">
             Username <span className="text-red-500">*</span>
           </label>
           <input
@@ -210,20 +210,20 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleForm }) => {
             onChange={handleInputChange('username')}
             onBlur={handleInputBlur('username')}
             disabled={loading}
-            className={`mt-1 block h-9 sm:h-10 w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`mt-1 block h-9 sm:h-10 w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300 ${
               errors.username ? 'border-red-300 dark:border-red-600 focus:border-red-500 focus:ring-red-500' : ''
             }`}
             placeholder="Enter your username"
           />
           {errors.username && (
-            <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+            <p className="mt-1 text-xs text-red-600 dark:text-red-400 transition-colors duration-300">
               {errors.username}
             </p>
           )}
         </div>
 
         <div>
-          <label htmlFor="gender" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
+          <label htmlFor="gender" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors duration-300">
             Gender <span className="text-red-500">*</span>
           </label>
           <select
@@ -234,7 +234,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleForm }) => {
             onChange={handleInputChange('gender')}
             onBlur={handleInputBlur('gender')}
             disabled={loading}
-            className={`mt-1 block h-9 sm:h-10 w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`mt-1 block h-9 sm:h-10 w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300 ${
               errors.gender ? 'border-red-300 dark:border-red-600 focus:border-red-500 focus:ring-red-500' : ''
             }`}
           >
@@ -243,7 +243,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleForm }) => {
             <option value="other">Other</option>
           </select>
           {errors.gender && (
-            <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+            <p className="mt-1 text-xs text-red-600 dark:text-red-400 transition-colors duration-300">
               {errors.gender}
             </p>
           )}
@@ -278,7 +278,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleForm }) => {
         )}
 
         <div>
-          <label htmlFor="confirm-password" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
+          <label htmlFor="confirm-password" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors duration-300">
             Confirm Password <span className="text-red-500">*</span>
           </label>
           <input
@@ -291,13 +291,13 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleForm }) => {
             onChange={handleInputChange('confirmPassword')}
             onBlur={handleInputBlur('confirmPassword')}
             disabled={loading}
-            className={`mt-1 block h-9 sm:h-10 w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`mt-1 block h-9 sm:h-10 w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300 ${
               errors.confirmPassword ? 'border-red-300 dark:border-red-600 focus:border-red-500 focus:ring-red-500' : ''
             }`}
             placeholder="Confirm your password"
           />
           {errors.confirmPassword && (
-            <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+            <p className="mt-1 text-xs text-red-600 dark:text-red-400 transition-colors duration-300">
               {errors.confirmPassword}
             </p>
           )}
@@ -306,7 +306,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleForm }) => {
         <button 
           type="submit" 
           disabled={!isButtonActive}
-          className="w-full flex items-center justify-center gap-2 h-9 sm:h-10 rounded-md bg-primary-600 px-4 text-sm sm:text-base font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:bg-slate-400 disabled:cursor-not-allowed dark:disabled:bg-slate-600 transition-colors"
+          className="w-full flex items-center justify-center gap-2 h-9 sm:h-10 rounded-md bg-primary-600 px-4 text-sm sm:text-base font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:bg-slate-400 disabled:cursor-not-allowed dark:disabled:bg-slate-600 transition-colors duration-300"
         >
           {loading ? (
             'Processing...'
@@ -319,20 +319,20 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleForm }) => {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+      <p className="mt-6 text-center text-xs sm:text-sm text-slate-500 dark:text-slate-400 transition-colors duration-300">
         Already have an account?{' '}
         <button 
           onClick={onToggleForm}
-          className="font-semibold text-primary-600 hover:text-primary-500 disabled:opacity-50 transition-colors"
+          className="font-semibold text-primary-600 hover:text-primary-500 disabled:opacity-50 transition-colors duration-300"
           disabled={loading}
         >
           Log in
         </button>
       </p>
 
-      <div className="mt-4 text-center text-xs text-slate-500 dark:text-slate-400">
+      <div className="mt-4 text-center text-xs text-slate-500 dark:text-slate-400 transition-colors duration-300">
         By signing up, you agree to our{' '}
-        <button className="font-semibold text-primary-600 hover:text-primary-500">
+        <button className="font-semibold text-primary-600 hover:text-primary-500 transition-colors duration-300">
           Terms & Support
         </button>
       </div>

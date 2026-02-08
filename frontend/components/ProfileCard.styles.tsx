@@ -57,6 +57,7 @@ export const StyledWrapper = styled.div`
     font-weight: bold;
     font-size: 1rem;
     color: #333;
+    transition: color 0.3s ease;
   }
 
   .dark & .name {

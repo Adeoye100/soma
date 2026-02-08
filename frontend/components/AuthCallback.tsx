@@ -45,15 +45,15 @@ const AuthCallback: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
         <div className="text-center p-8 max-w-md">
-          <div className="text-red-600 dark:text-red-400 text-lg font-semibold mb-4">
+          <div className="text-red-600 dark:text-red-400 text-lg font-semibold mb-4 transition-colors duration-300">
             Authentication Error
           </div>
-          <p className="text-slate-600 dark:text-slate-300 mb-4">
+          <p className="text-slate-600 dark:text-slate-300 mb-4 transition-colors duration-300">
             {error}
           </p>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-slate-500 dark:text-slate-400 transition-colors duration-300">
             Redirecting to login page...
           </p>
         </div>
@@ -62,7 +62,7 @@ const AuthCallback: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
       <div className="text-center">
         <Loader text="Completing authentication..." />
       </div>

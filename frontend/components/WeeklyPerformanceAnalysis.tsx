@@ -181,11 +181,11 @@ const WeeklyPerformanceAnalysis: React.FC<WeeklyPerformanceAnalysisProps> = ({
 
   if (examHistory.length === 0) {
     return (
-      <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg">
-        <h3 className="text-xl font-bold text-center text-slate-700 dark:text-slate-300 mb-4">
+      <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg transition-colors duration-300">
+        <h3 className="text-xl font-bold text-center text-slate-700 dark:text-slate-300 mb-4 transition-colors duration-300">
           Weekly Performance Analysis
         </h3>
-        <p className="text-center text-slate-500 dark:text-slate-400">
+        <p className="text-center text-slate-500 dark:text-slate-400 transition-colors duration-300">
           Complete some exams to see your performance analytics!
         </p>
       </div>
@@ -195,8 +195,8 @@ const WeeklyPerformanceAnalysis: React.FC<WeeklyPerformanceAnalysisProps> = ({
   return (
     <div className="space-y-6">
       {/* Weekly Performance Overview */}
-      <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg">
-        <h3 className="text-xl font-bold text-slate-700 dark:text-slate-300 mb-6">
+      <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg transition-colors duration-300">
+        <h3 className="text-xl font-bold text-slate-700 dark:text-slate-300 mb-6 transition-colors duration-300">
           Weekly Performance Trend
         </h3>
         <div className="h-64">
@@ -233,8 +233,8 @@ const WeeklyPerformanceAnalysis: React.FC<WeeklyPerformanceAnalysisProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Topic Performance Radar */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg">
-          <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-4">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg transition-colors duration-300">
+          <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-4 transition-colors duration-300">
             Topic Performance Analysis
           </h3>
           <div className="h-64">
@@ -257,8 +257,8 @@ const WeeklyPerformanceAnalysis: React.FC<WeeklyPerformanceAnalysisProps> = ({
         </div>
 
         {/* Difficulty Distribution */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg">
-          <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-4">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg transition-colors duration-300">
+          <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-4 transition-colors duration-300">
             Exam Difficulty Distribution
           </h3>
           <div className="h-64">
@@ -285,8 +285,8 @@ const WeeklyPerformanceAnalysis: React.FC<WeeklyPerformanceAnalysisProps> = ({
       </div>
 
       {/* Time Investment Analysis */}
-      <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg">
-        <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-4">
+      <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg transition-colors duration-300">
+        <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-4 transition-colors duration-300">
           Time Investment Over Time
         </h3>
         <div className="h-64">
@@ -307,23 +307,23 @@ const WeeklyPerformanceAnalysis: React.FC<WeeklyPerformanceAnalysisProps> = ({
 
       {/* Performance Insights */}
       {performanceInsights.length > 0 && (
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg">
-          <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-4">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg transition-colors duration-300">
+          <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-4 transition-colors duration-300">
             Performance Insights & Feedback
           </h3>
           <div className="space-y-4">
             {performanceInsights.map((insight, index) => (
               <div
                 key={index}
-                className="flex items-start gap-3 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg"
+                className="flex items-start gap-3 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg transition-colors duration-300"
               >
                 {getInsightIcon(insight.type)}
                 <div>
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
+                  <p className="text-sm font-medium text-slate-800 dark:text-slate-100 transition-colors duration-300">
                     {insight.message}
                   </p>
                   {insight.topic && (
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 transition-colors duration-300">
                       Topic: {insight.topic}
                     </p>
                   )}
@@ -335,25 +335,25 @@ const WeeklyPerformanceAnalysis: React.FC<WeeklyPerformanceAnalysisProps> = ({
       )}
 
       {/* Detailed Exam History Table */}
-      <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg">
-        <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-4">
+      <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg transition-colors duration-300">
+        <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-4 transition-colors duration-300">
           Recent Exam Details
         </h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-200 dark:border-slate-700">
-                <th className="text-left py-2 text-slate-600 dark:text-slate-400">Date</th>
-                <th className="text-left py-2 text-slate-600 dark:text-slate-400">Score</th>
-                <th className="text-left py-2 text-slate-600 dark:text-slate-400">Difficulty</th>
-                <th className="text-left py-2 text-slate-600 dark:text-slate-400">Time</th>
-                <th className="text-left py-2 text-slate-600 dark:text-slate-400">Actions</th>
+                <th className="text-left py-2 text-slate-600 dark:text-slate-400 transition-colors duration-300">Date</th>
+                <th className="text-left py-2 text-slate-600 dark:text-slate-400 transition-colors duration-300">Score</th>
+                <th className="text-left py-2 text-slate-600 dark:text-slate-400 transition-colors duration-300">Difficulty</th>
+                <th className="text-left py-2 text-slate-600 dark:text-slate-400 transition-colors duration-300">Time</th>
+                <th className="text-left py-2 text-slate-600 dark:text-slate-400 transition-colors duration-300">Actions</th>
               </tr>
             </thead>
             <tbody>
               {examHistory.slice(0, 10).map((exam, index) => (
                 <tr key={index} className="border-b border-slate-100 dark:border-slate-700/50">
-                  <td className="py-2 text-slate-800 dark:text-slate-100">
+                  <td className="py-2 text-slate-800 dark:text-slate-100 transition-colors duration-300">
                     {new Date(exam.date || '').toLocaleDateString()}
                   </td>
                   <td className="py-2">
@@ -363,16 +363,16 @@ const WeeklyPerformanceAnalysis: React.FC<WeeklyPerformanceAnalysisProps> = ({
                       {Math.round(exam.score || 0)}%
                     </span>
                   </td>
-                  <td className="py-2 text-slate-600 dark:text-slate-400">
+                  <td className="py-2 text-slate-600 dark:text-slate-400 transition-colors duration-300">
                     {exam.config.difficulty}
                   </td>
-                  <td className="py-2 text-slate-600 dark:text-slate-400">
+                  <td className="py-2 text-slate-600 dark:text-slate-400 transition-colors duration-300">
                     {formatTime(Math.round(exam.timeTaken / 60))}
                   </td>
                   <td className="py-2">
                     <button
                       onClick={() => onViewDetailedResult?.(exam)}
-                      className="text-blue-600 hover:text-blue-500 text-xs font-medium"
+                      className="text-blue-600 hover:text-blue-500 text-xs font-medium transition-colors duration-300"
                     >
                       View Details
                     </button>

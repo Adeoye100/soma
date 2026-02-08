@@ -16,7 +16,7 @@ const ExamHistorySummary: React.FC<ExamHistorySummaryProps> = ({ history, onView
   return (
     <div className="w-full max-w-4xl mx-auto">
       <div className="flex justify-center items-center mb-4 relative">
-        <h3 className="text-lg font-semibold text-center text-slate-700 dark:text-slate-300">Recent Exam History</h3>
+        <h3 className="text-lg font-semibold text-center text-slate-700 dark:text-slate-300 transition-colors duration-300">Recent Exam History</h3>
         <button
           onClick={onClearHistory}
           className="absolute right-0 flex items-center gap-1 text-sm font-medium text-red-600 hover:text-red-500 dark:text-red-500 dark:hover:text-red-400 transition-colors"
@@ -37,19 +37,19 @@ const ExamHistorySummary: React.FC<ExamHistorySummaryProps> = ({ history, onView
               <div className="flex items-center gap-3">
                 <BookOpenIcon className="h-6 w-6 text-primary-500" />
                 <div>
-                  <p className="font-bold text-slate-800 dark:text-slate-100">
+                  <p className="font-bold text-slate-800 dark:text-slate-100 transition-colors duration-300">
                     Exam taken on {new Date(result.date).toLocaleDateString()}
                   </p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <p className="text-sm text-slate-500 dark:text-slate-400 transition-colors duration-300">
                     {result.totalQuestions} Questions
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="font-bold text-xl text-primary-600 dark:text-primary-400">
+                <p className="font-bold text-xl text-primary-600 dark:text-primary-400 transition-colors duration-300">
                   {result.score.toFixed(0)}%
                 </p>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Overall Score</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 transition-colors duration-300">Overall Score</p>
               </div>
             </div>
           </button>

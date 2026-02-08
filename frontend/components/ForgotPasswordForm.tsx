@@ -42,20 +42,20 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackToLogin }
 
   return (
     <div className="animate-fade-in">
-      <h2 className="text-2xl font-bold text-center text-slate-800 dark:text-slate-100 mb-2">Forgot Password?</h2>
-      <p className="text-center text-slate-500 dark:text-slate-400 mb-6">
+      <h2 className="text-2xl font-bold text-center text-slate-800 dark:text-slate-100 mb-2 transition-colors duration-300">Forgot Password?</h2>
+      <p className="text-center text-slate-500 dark:text-slate-400 mb-6 transition-colors duration-300">
         Enter your email to receive a reset link.
       </p>
 
       {message && (
-        <div className={`px-4 py-2 rounded-lg text-sm text-center mb-4 ${isError ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'}`} role="alert">
+        <div className={`px-4 py-2 rounded-lg text-sm text-center mb-4 transition-colors duration-300 ${isError ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'}`} role="alert">
           {message}
         </div>
       )}
 
       <form onSubmit={handlePasswordReset} className="space-y-6">
         <div>
-          <label htmlFor="reset-email" className="block text-sm font-medium text-slate-600 dark:text-slate-400">Email address</label>
+          <label htmlFor="reset-email" className="block text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors duration-300">Email address</label>
           <input
             id="reset-email"
             type="email"
@@ -63,18 +63,18 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackToLogin }
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
-            className="mt-1 block h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-3 text-base focus:border-primary-500 focus:outline-none focus:ring-primary-500 sm:text-sm"
+            className="mt-1 block h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-3 text-base focus:border-primary-500 focus:outline-none focus:ring-primary-500 sm:text-sm transition-colors duration-300"
           />
         </div>
         <div>
-          <button type="submit" disabled={loading} className="w-full flex justify-center items-center h-10 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:bg-slate-400 dark:disabled:bg-slate-600">
+          <button type="submit" disabled={loading} className="w-full flex justify-center items-center h-10 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:bg-slate-400 dark:disabled:bg-slate-600 transition-colors duration-300">
             {loading ? 'Sending...' : 'Send Reset Link'}
           </button>
         </div>
       </form>
 
       <div className="mt-6 text-center">
-        <button onClick={onBackToLogin} className="font-semibold text-sm text-primary-600 hover:text-primary-500">
+        <button onClick={onBackToLogin} className="font-semibold text-sm text-primary-600 hover:text-primary-500 transition-colors duration-300">
           &larr; Back to Login
         </button>
       </div>

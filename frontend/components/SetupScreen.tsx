@@ -244,7 +244,7 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
         </div>
         <div className="w-full lg:flex-1">
           <ShaderBackground><div className="p-4 sm:p-6 md:p-8">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-primary-600 dark:text-primary-400 mb-6">Create Your Exam</h2>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-primary-600 dark:text-primary-400 mb-6 transition-colors duration-300">Create Your Exam</h2>
 
              {error && (
                 <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 text-red-700 dark:text-red-300 px-3 sm:px-4 py-3 rounded-lg relative mb-6 text-sm" role="alert">
@@ -271,7 +271,7 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
             <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
               {/* Exam Title Section */}
               <div>
-                <label htmlFor="title" className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2 block">1. Exam Title</label>
+                <label htmlFor="title" className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2 block transition-colors duration-300">1. Exam Title</label>
                 <input
                   type="text"
                   id="title"
@@ -279,13 +279,13 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
                   placeholder="e.g. Midterm Physics, React Advanced Quiz..."
                   value={config.title}
                   onChange={handleConfigChange}
-                  className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2.5 px-3 sm:px-4 text-sm sm:text-base focus:border-primary-500 focus:outline-none focus:ring-primary-500 transition-colors"
+                  className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2.5 px-3 sm:px-4 text-sm sm:text-base focus:border-primary-500 focus:outline-none focus:ring-primary-500 transition-colors duration-300"
                 />
               </div>
 
               {/* File Upload Section */}
               <div>
-                <label className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2 block">2. Upload Materials</label>
+                <label className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2 block transition-colors duration-300">2. Upload Materials</label>
                 <div 
                   className={`mt-2 flex justify-center rounded-lg border-2 border-dashed px-4 sm:px-6 py-6 sm:py-8 transition-colors duration-200 ${
                     isDragging 
@@ -301,21 +301,21 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
                       isDragging ? 'text-primary-500' : 'text-slate-400 dark:text-slate-500'
                     }`} />
                     <div className="mt-4 flex flex-col sm:flex-row text-xs sm:text-sm leading-6 text-slate-600 dark:text-slate-400 gap-1">
-                      <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white dark:bg-slate-800 font-semibold text-primary-600 dark:text-primary-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-600 focus-within:ring-offset-2 dark:focus-within:ring-offset-slate-800 hover:text-primary-500">
+                      <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white dark:bg-slate-800 font-semibold text-primary-600 dark:text-primary-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-600 focus-within:ring-offset-2 dark:focus-within:ring-offset-slate-800 hover:text-primary-500 transition-colors duration-300">
                         <span>Upload files</span>
                         <input id="file-upload" name="file-upload" type="file" className="sr-only" multiple onChange={handleFileChange} accept=".pdf,.doc,.docx,.pptx,.txt,image/*" />
                       </label>
                       <p className="sm:pl-1">or drag and drop</p>
                     </div>
-                    <p className="text-xs leading-5 text-slate-500 dark:text-slate-500 mt-2">PDF, DOCX, PPTX, TXT, PNG, JPG up to 10MB</p>
+                    <p className="text-xs leading-5 text-slate-500 dark:text-slate-500 mt-2 transition-colors duration-300">PDF, DOCX, PPTX, TXT, PNG, JPG up to 10MB</p>
                   </div>
                 </div>
                  {materials.length > 0 && (
                    <div className="mt-4">
-                    <h3 className="font-semibold text-sm sm:text-base">Uploaded files:</h3>
+                    <h3 className="font-semibold text-sm sm:text-base transition-colors duration-300">Uploaded files:</h3>
                     <ul className="mt-2 space-y-2">
                       {materials.map((material, index) => (
-                        <li key={index} className="flex items-center justify-between bg-slate-100 dark:bg-slate-700 p-2 sm:p-3 rounded-md text-xs sm:text-sm">
+                        <li key={index} className="flex items-center justify-between bg-slate-100 dark:bg-slate-700 p-2 sm:p-3 rounded-md text-xs sm:text-sm transition-colors duration-300">
                             <div className="flex items-center gap-2 min-w-0">
                                 <DocumentTextIcon className="h-4 w-4 sm:h-5 sm:w-5 text-slate-500 flex-shrink-0"/>
                                 <span className="font-medium truncate">{material.name}</span>
@@ -333,26 +333,26 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
 
               {/* Exam Configuration Section */}
               <div>
-                <label className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4 block">3. Configure Settings</label>
+                <label className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4 block transition-colors duration-300">3. Configure Settings</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     {/* Exam Type */}
                     <div>
-                        <label htmlFor="type" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Type</label>
-                        <select id="type" name="type" value={config.type} onChange={handleConfigChange} className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-2 sm:px-3 text-xs sm:text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500">
+                        <label htmlFor="type" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors duration-300">Type</label>
+                        <select id="type" name="type" value={config.type} onChange={handleConfigChange} className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-2 sm:px-3 text-xs sm:text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 transition-colors duration-300">
                             {Object.values(ExamType).map(type => <option key={type}>{type}</option>)}
                         </select>
                     </div>
                     {/* Difficulty */}
                     <div>
-                        <label htmlFor="difficulty" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Difficulty</label>
-                        <select id="difficulty" name="difficulty" value={config.difficulty} onChange={handleConfigChange} className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-2 sm:px-3 text-xs sm:text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500">
+                        <label htmlFor="difficulty" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors duration-300">Difficulty</label>
+                        <select id="difficulty" name="difficulty" value={config.difficulty} onChange={handleConfigChange} className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-2 sm:px-3 text-xs sm:text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 transition-colors duration-300">
                             {Object.values(Difficulty).map(d => <option key={d}>{d}</option>)}
                         </select>
                     </div>
                     {/* Time Intensity */}
                     <div>
-                        <label htmlFor="intensity" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Speed</label>
-                        <select id="intensity" name="intensity" value={config.intensity} onChange={handleConfigChange} className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-2 sm:px-3 text-xs sm:text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500">
+                        <label htmlFor="intensity" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors duration-300">Speed</label>
+                        <select id="intensity" name="intensity" value={config.intensity} onChange={handleConfigChange} className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-2 sm:px-3 text-xs sm:text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 transition-colors duration-300">
                             {Object.values(TimeIntensity).map(i => (
                                 <option key={i} value={i}>
                                     {i} ({formatTime(TIME_PER_INTENSITY[i])}/question)
@@ -362,19 +362,19 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
                     </div>
                      {/* Number of Questions */}
                      <div>
-                        <label htmlFor="numQuestions" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Questions</label>
-                        <input type="number" id="numQuestions" name="numQuestions" min="1" max="50" value={config.numQuestions} onChange={handleConfigChange} className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-2 sm:px-3 text-xs sm:text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500" />
+                        <label htmlFor="numQuestions" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors duration-300">Questions</label>
+                        <input type="number" id="numQuestions" name="numQuestions" min="1" max="50" value={config.numQuestions} onChange={handleConfigChange} className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-2 sm:px-3 text-xs sm:text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 transition-colors duration-300" />
                     </div>
                 </div>
 
                 {/* Time Calculation Display */}
-                <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                  <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">⏱️ Estimated Exam Time</h3>
+                <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg transition-colors duration-300">
+                  <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2 transition-colors duration-300">⏱️ Estimated Exam Time</h3>
                   <div className="flex items-center gap-4">
-                    <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+                    <div className="text-2xl font-bold text-blue-900 dark:text-blue-100 transition-colors duration-300">
                       {formattedTime}
                     </div>
-                    <div className="text-sm text-blue-700 dark:text-blue-300">
+                    <div className="text-sm text-blue-700 dark:text-blue-300 transition-colors duration-300">
                       <div>Speed: {config.intensity}</div>
                       <div>Questions: {config.numQuestions}</div>
                       <div>Time per question: {formatTime(TIME_PER_INTENSITY[config.intensity])}</div>

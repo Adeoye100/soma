@@ -203,7 +203,7 @@ const LoginScreen: React.FC = () => {
 
   return (
 
-    <div className="min-h-screen flex items-center justify-center bg-transparent px-3 sm:px-4 md:px-6">
+    <div className="min-h-screen flex items-center justify-center bg-transparent px-3 sm:px-4 md:px-6 transition-colors duration-300">
       <div className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-center">
         <div className="hidden md:flex flex-col p-6 md:p-8">
           <div className="flex items-center gap-3 mb-4">
@@ -212,7 +212,7 @@ const LoginScreen: React.FC = () => {
                 Soma
               </h1>
           </div>
-          <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg mb-6">
+          <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg mb-6 transition-colors duration-300">
             Your personalized AI study partner. Generate exams from your course materials and master any subject.
           </p>
           <div className="hidden lg:block"><InspirationCard /></div>
@@ -225,8 +225,8 @@ const LoginScreen: React.FC = () => {
             ) : (
               signupSuccess ? (
                 <div className="text-center">
-                  <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">Check your inbox!</h2>
-                  <p className="text-slate-500 dark:text-slate-400">
+                  <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2 transition-colors duration-300">Check your inbox!</h2>
+                  <p className="text-slate-500 dark:text-slate-400 transition-colors duration-300">
                     We've sent a confirmation link to <strong>{email}</strong>. Please click the link to complete your registration.
                   </p>
                 </div>
@@ -241,11 +241,11 @@ const LoginScreen: React.FC = () => {
                     </Avatar>
                   </div>
                 )}
-                <h2 className="text-xl sm:text-2xl font-bold text-center text-slate-800 dark:text-slate-100 mb-2">{isLogin ? 'Welcome Back!' : 'Create Your Account'}</h2>
-                <p className="text-center text-sm sm:text-base text-slate-500 dark:text-slate-400 mb-6">{isLogin ? 'Log in to continue your learning journey.' : 'Sign up to get started.'}</p>
+                <h2 className="text-xl sm:text-2xl font-bold text-center text-slate-800 dark:text-slate-100 mb-2 transition-colors duration-300">{isLogin ? 'Welcome Back!' : 'Create Your Account'}</h2>
+                <p className="text-center text-sm sm:text-base text-slate-500 dark:text-slate-400 mb-6 transition-colors duration-300">{isLogin ? 'Log in to continue your learning journey.' : 'Sign up to get started.'}</p>
 
                 {error && (
-                    <div className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg text-sm text-center mb-4" role="alert">
+                    <div className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg text-sm text-center mb-4 transition-colors duration-300" role="alert">
                     {error}
                     </div>
                 )}
@@ -254,7 +254,7 @@ const LoginScreen: React.FC = () => {
                     {!isLogin && (
                         <>
                             <div>
-                            <label htmlFor="username" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Username</label>
+                            <label htmlFor="username" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors duration-300">Username</label>
                             <input
                                 id="username"
                                 name="username"
@@ -263,19 +263,19 @@ const LoginScreen: React.FC = () => {
                                 required
                                 value={username}
                                 onChange={e => setUsername(e.target.value)}
-                                className="mt-1 block h-9 sm:h-10 w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500"
+                                className="mt-1 block h-9 sm:h-10 w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 transition-colors duration-300"
                                 placeholder="Enter your username"
                             />
                             </div>
                         <div>
-                            <label htmlFor="gender" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Gender</label>
+                            <label htmlFor="gender" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors duration-300">Gender</label>
                             <select
                                 id="gender"
                                 name="gender"
                                 required
                                 value={gender}
                                 onChange={e => setGender(e.target.value)}
-                                className="mt-1 block h-9 sm:h-10 w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500"
+                                className="mt-1 block h-9 sm:h-10 w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 transition-colors duration-300"
                             >
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
@@ -284,7 +284,7 @@ const LoginScreen: React.FC = () => {
                         </>
                      )}
                     <div>
-                    <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Email address</label>
+                    <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors duration-300">Email address</label>
                     <input
                         id="email"
                         name="email"
@@ -293,11 +293,11 @@ const LoginScreen: React.FC = () => {
                         required
                         value={email}
                         onChange={e => setEmail(e.target.value)}
-                        className="mt-1 block h-9 sm:h-10 w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500"
+                        className="mt-1 block h-9 sm:h-10 w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 transition-colors duration-300"
                     />
                     </div>
                     <div>
-                    <label htmlFor="password" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Password</label>
+                    <label htmlFor="password" className="block text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 transition-colors duration-300">Password</label>
                     <input
                         id="password"
                         name="password"
@@ -314,7 +314,7 @@ const LoginScreen: React.FC = () => {
                             validatePassword(e.target.value);
                           }
                         }}
-                        className="mt-1 block h-9 sm:h-10 w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500"
+                        className="mt-1 block h-9 sm:h-10 w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 px-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 transition-colors duration-300"
                     />
                     </div>
                     {!isLogin && passwordFocused && <PasswordStrengthIndicator validation={passwordValidation} />}
@@ -327,14 +327,14 @@ const LoginScreen: React.FC = () => {
                             type="checkbox"
                             checked={rememberMe}
                             onChange={(e) => setRememberMe(e.target.checked)}
-                            className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500 dark:border-slate-600 dark:bg-slate-700 dark:focus:ring-offset-slate-800"
+                            className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500 dark:border-slate-600 dark:bg-slate-700 dark:focus:ring-offset-slate-800 transition-colors duration-300"
                           />
-                          <label htmlFor="remember-me" className="ml-2 block text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                          <label htmlFor="remember-me" className="ml-2 block text-xs sm:text-sm text-slate-700 dark:text-slate-300 transition-colors duration-300">
                             Remember me pal 👋!
                           </label>
                         </div>
                         <div className="text-xs sm:text-sm">
-                          <button type="button" onClick={() => setShowForgotPassword(true)} className="font-semibold text-primary-600 hover:text-primary-500">Forgot password?</button>
+                          <button type="button" onClick={() => setShowForgotPassword(true)} className="font-semibold text-primary-600 hover:text-primary-500 transition-colors duration-300">Forgot password?</button>
                         </div>
                       </div>
                     )}
@@ -342,7 +342,7 @@ const LoginScreen: React.FC = () => {
                     {/* ...captcha removed... */}
 
                     <div>
-                      <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 h-9 sm:h-10 rounded-md bg-primary-600 px-4 text-sm sm:text-base font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:bg-slate-400 disabled:cursor-not-allowed dark:disabled:bg-slate-600">
+                      <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 h-9 sm:h-10 rounded-md bg-primary-600 px-4 text-sm sm:text-base font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:bg-slate-400 disabled:cursor-not-allowed dark:disabled:bg-slate-600 transition-colors duration-300">
                         {loading ? 'Processing...' : (
                           <><SparklesIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                           <span>{isLogin ? 'Log In' : 'Sign Up'}</span></>
@@ -353,28 +353,28 @@ const LoginScreen: React.FC = () => {
 
                 <div className="relative my-6">
                   <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div className="w-full border-t border-slate-300 dark:border-slate-600" />
+                    <div className="w-full border-t border-slate-300 dark:border-slate-600 transition-colors duration-300" />
                   </div>
                   <div className="relative flex justify-center text-xs sm:text-sm">
-                    <span className="bg-white dark:bg-slate-800 px-2 text-slate-500 dark:text-slate-400">Or continue with</span>
+                    <span className="bg-white dark:bg-slate-800 px-2 text-slate-500 dark:text-slate-400 transition-colors duration-300">Or continue with</span>
                   </div>
                 </div>
 
                 <div>
-                  <button onClick={handleGoogleSignIn} disabled={loading} className="w-full inline-flex justify-center items-center gap-2 sm:gap-3 h-9 sm:h-10 px-4 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-slate-800 disabled:opacity-50">
+                  <button onClick={handleGoogleSignIn} disabled={loading} className="w-full inline-flex justify-center items-center gap-2 sm:gap-3 h-9 sm:h-10 px-4 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-slate-800 disabled:opacity-50 transition-colors duration-300">
                     <GoogleIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                     <span>Sign in with Google</span>
                   </button>
                 </div>
-                <p className="mt-6 text-center text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                <p className="mt-6 text-center text-xs sm:text-sm text-slate-500 dark:text-slate-400 transition-colors duration-300">
                     {isLogin ? "Don't have an account?" : "Already have an account?"}
-                    <button onClick={() => setIsLogin(!isLogin)} className="font-semibold text-primary-600 hover:text-primary-500 ml-1">
+                    <button onClick={() => setIsLogin(!isLogin)} className="font-semibold text-primary-600 hover:text-primary-500 ml-1 transition-colors duration-300">
                     {isLogin ? 'Sign up' : 'Log in'}
                     </button>
                 </p>
-                <div className="mt-4 text-center text-xs text-slate-500 dark:text-slate-400">
+                <div className="mt-4 text-center text-xs text-slate-500 dark:text-slate-400 transition-colors duration-300">
                   By signing up, you agree to our
-                  <button onClick={() => setShowTerms(true)} className="font-semibold text-primary-600 hover:text-primary-500 ml-1">
+                  <button onClick={() => setShowTerms(true)} className="font-semibold text-primary-600 hover:text-primary-500 ml-1 transition-colors duration-300">
                     Terms & Support
                   </button>
                 </div>

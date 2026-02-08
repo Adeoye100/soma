@@ -117,16 +117,16 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
   return (
     <div>
       <div className="text-center mb-6">
-        <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2 transition-colors duration-300">
           Welcome Back!
         </h2>
-        <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400">
+        <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 transition-colors duration-300">
           Log in to continue your learning journey.
         </p>
       </div>
 
       {errors.general && (
-        <div className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg text-sm text-center mb-4" role="alert">
+        <div className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg text-sm text-center mb-4 transition-colors duration-300" role="alert">
           {errors.general}
         </div>
       )}
@@ -163,16 +163,16 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
               checked={formData.rememberMe}
               onChange={(e) => setFormData(prev => ({ ...prev, rememberMe: e.target.checked }))}
               disabled={loading}
-              className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500 dark:border-slate-600 dark:bg-slate-700 dark:focus:ring-offset-slate-800 disabled:opacity-50"
+              className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500 dark:border-slate-600 dark:bg-slate-700 dark:focus:ring-offset-slate-800 disabled:opacity-50 transition-colors duration-300"
             />
-            <label htmlFor="remember-me" className="ml-2 block text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+            <label htmlFor="remember-me" className="ml-2 block text-xs sm:text-sm text-slate-700 dark:text-slate-300 transition-colors duration-300">
               Remember me! 👋
             </label>
           </div>
           <button 
             type="button" 
             onClick={onForgotPassword}
-            className="text-xs sm:text-sm font-semibold text-primary-600 hover:text-primary-500 disabled:opacity-50"
+            className="text-xs sm:text-sm font-semibold text-primary-600 hover:text-primary-500 disabled:opacity-50 transition-colors duration-300"
             disabled={loading}
           >
             Forgot password?
@@ -182,7 +182,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
         <button 
           type="submit" 
           disabled={!isButtonActive}
-          className="w-full flex items-center justify-center gap-2 h-9 sm:h-10 rounded-md bg-primary-600 px-4 text-sm sm:text-base font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:bg-slate-400 disabled:cursor-not-allowed dark:disabled:bg-slate-600 transition-colors"
+          className="w-full flex items-center justify-center gap-2 h-9 sm:h-10 rounded-md bg-primary-600 px-4 text-sm sm:text-base font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:bg-slate-400 disabled:cursor-not-allowed dark:disabled:bg-slate-600 transition-colors duration-300"
         >
           {loading ? (
             'Processing...'
@@ -197,27 +197,27 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
 
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center" aria-hidden="true">
-          <div className="w-full border-t border-slate-300 dark:border-slate-600" />
+          <div className="w-full border-t border-slate-300 dark:border-slate-600 transition-colors duration-300" />
         </div>
         <div className="relative flex justify-center text-xs sm:text-sm">
-          <span className="bg-white dark:bg-slate-800 px-2 text-slate-500 dark:text-slate-400">Or continue with</span>
+          <span className="bg-white dark:bg-slate-800 px-2 text-slate-500 dark:text-slate-400 transition-colors duration-300">Or continue with</span>
         </div>
       </div>
 
       <button 
         onClick={handleGoogleSignIn}
         disabled={loading}
-        className="w-full inline-flex justify-center items-center gap-2 sm:gap-3 h-9 sm:h-10 px-4 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-slate-800 disabled:opacity-50 transition-colors"
+        className="w-full inline-flex justify-center items-center gap-2 sm:gap-3 h-9 sm:h-10 px-4 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-slate-800 disabled:opacity-50 transition-colors duration-300"
       >
         <GoogleIcon className="h-4 w-4 sm:h-5 sm:w-5" />
         <span>Sign in with Google</span>
       </button>
 
-      <p className="mt-6 text-center text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+      <p className="mt-6 text-center text-xs sm:text-sm text-slate-500 dark:text-slate-400 transition-colors duration-300">
         Don't have an account?{' '}
         <button 
           onClick={onToggleForm}
-          className="font-semibold text-primary-600 hover:text-primary-500 disabled:opacity-50 transition-colors"
+          className="font-semibold text-primary-600 hover:text-primary-500 disabled:opacity-50 transition-colors duration-300"
           disabled={loading}
         >
           Sign up

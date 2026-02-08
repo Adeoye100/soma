@@ -119,7 +119,7 @@ const MainApp: React.FC<MainAppProps> = ({ user, onLogout, theme, toggleTheme, o
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-transparent">
+    <div className="flex flex-col min-h-screen bg-transparent transition-colors duration-300">
       {showInfoModal && <InfoModal onClose={() => setShowInfoModal(false)} />}
       {showProfileSettingsModal && <ProfileSettingsModal user={user} onClose={() => setShowProfileSettingsModal(false)} onAvatarUpdate={onAvatarUpdate} />}
       <Header theme={theme} toggleTheme={toggleTheme} user={user} onLogout={onLogout} onOpenProfileSettings={handleOpenProfileSettings} />
@@ -130,7 +130,7 @@ const MainApp: React.FC<MainAppProps> = ({ user, onLogout, theme, toggleTheme, o
         <div className="shader-gradient-background rounded-lg p-px">
             <button
                 onClick={() => setShowInfoModal(true)}
-                className="bg-white dark:bg-slate-800 text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium px-4 py-2 rounded-[7px] hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                className="bg-white dark:bg-slate-800 text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium px-4 py-2 rounded-[7px] hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors duration-300"
             >
                 FAQ & Terms
             </button>

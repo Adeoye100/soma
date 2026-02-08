@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 import type { ExamConfig, Material, Question, UserAnswer, Evaluation } from '../types';
-import { ExamType, TimeIntensity } from '../types';
+import { ExamType, TimeIntensity, Difficulty } from '../types';
 
 
 /**
@@ -18,10 +18,16 @@ export const generateExam = async (config: ExamConfig, materials: Material[]): P
     headers['Authorization'] = `Bearer ${token}`;
   }
 
+  const difficultyMap: Record<string, string> = {
+    [Difficulty.BEGINNER]: 'easy',
+    [Difficulty.INTERMEDIATE]: 'medium',
+    [Difficulty.ADVANCED]: 'hard',
+  };
+
   const payload = {
     title: config.title,
     type: config.type.toUpperCase().replace(' ', '_'),
-    difficulty: config.difficulty.toLowerCase(),
+    difficulty: difficultyMap[config.difficulty] || 'medium',
     numQuestions: config.numQuestions,
     timeLimit: Math.floor((config.intensity === TimeIntensity.RELAXED ? 180 : config.intensity === TimeIntensity.MODERATE ? 90 : 45) * config.numQuestions / 60),
     materials: materials.map(m => ({
