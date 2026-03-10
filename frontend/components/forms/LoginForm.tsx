@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../services/supabase';
+import { authService } from '../../services/authService';
 import EmailField from './EmailField';
 import PasswordField from './PasswordField';
 import { validateEmail, validatePassword, formatAuthError } from '../../utils/authValidation';
@@ -74,13 +75,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
     setErrors({});
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const result = await authService.login({
         email: formData.email.trim().toLowerCase(),
         password: formData.password
       });
 
-      if (error) {
-        throw error;
+      if (!result.success) {
+        throw result.error;
       }
 
       // Successful login - navigate to app

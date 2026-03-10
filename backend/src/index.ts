@@ -191,6 +191,18 @@ app.use(errorHandler);
 
 // 404 handler
 app.use('*', (req, res) => {
+  // If it's a GET request to the root, it might be a redirect from Supabase
+  // or a user just hitting the backend URL. In production we serve static files,
+  // but in development we can provide a more helpful message or redirect.
+  if (req.method === 'GET' && (req.originalUrl === '/' || req.originalUrl === '')) {
+    res.status(200).json({
+      message: 'Smart Examination Backend API is running',
+      status: 'healthy',
+      docs: '/api/health'
+    });
+    return;
+  }
+
   res.status(404).json({
     error: 'Route not found',
     message: `The requested endpoint ${req.originalUrl} does not exist.`

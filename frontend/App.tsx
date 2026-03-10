@@ -9,6 +9,9 @@ import ProtectedRoute from './components/ProtectedRoute';
 import LandingPage from './components/LandingPage';
 import ResetPasswordForm from './components/ResetPasswordForm';
 import AuthCallback from './components/AuthCallback';
+
+// Check if we're in development mode
+const isDev = import.meta.env.DEV;
 // Removed SignUpScreen import - now handled by LoginScreen component
 
 const App: React.FC = () => {
@@ -16,6 +19,35 @@ const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loadingSession, setLoadingSession] = useState(true);
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+
+  // Initialize session with error handling
+  const initializeSession = useCallback(async () => {
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        // Handle specific error types
+        if (error.message.includes('fetch') || error.message.includes('network') || error.message.includes('CORS')) {
+          console.warn('Network error during auth initialization, attempting to recover...');
+          setAuthError('network');
+        } else {
+          console.error('Auth error:', error.message);
+          setAuthError(error.message);
+        }
+      } else {
+        setSession(data.session);
+        setUser(data.session?.user ?? null);
+        setAuthError(null);
+      }
+    } catch (err: any) {
+      // Network or CORS errors will throw instead of returning error
+      console.warn('Network error during auth initialization:', err.message);
+      setAuthError('network');
+    } finally {
+      setLoadingSession(false);
+    }
+  }, []);
 
   useEffect(() => {
     document.documentElement.classList.add('dark');
@@ -24,30 +56,32 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoadingSession(false);
-    });
+    // Initialize session
+    initializeSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoadingSession(false);
-
-      // Handle authentication events and redirect to dashboard
+    // Set up auth state change listener with error handling
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // Handle auth events even if there was a network error
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        // User has successfully signed in (including OAuth), redirect to app
-        // The navigation will be handled by the component re-render with the new session
+        setSession(session);
+        setUser(session?.user ?? null);
+        setAuthError(null);
         setIsPasswordRecovery(false);
+      } else if (event === 'SIGNED_OUT') {
+        setSession(null);
+        setUser(null);
       } else if (event === 'PASSWORD_RECOVERY') {
-        // When user clicks password reset link, show reset password form
         setIsPasswordRecovery(true);
+      } else if (event === 'USER_UPDATED') {
+        setUser(session?.user ?? null);
       }
+      
+      // Always update loading state when we get any auth event
+      setLoadingSession(false);
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [initializeSession]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -55,6 +89,10 @@ const App: React.FC = () => {
 
   const handleAvatarUpdate = useCallback((newAvatarUrl: string) => {
     setUser(prevUser => (prevUser ? { ...prevUser, user_metadata: { ...prevUser.user_metadata, avatar_url: newAvatarUrl } } : prevUser));
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
   }, []);
 
   if (loadingSession) {
@@ -90,7 +128,13 @@ const App: React.FC = () => {
             path="/app"
             element={
               <ProtectedRoute session={session}>
-                <MainApp user={user!} onLogout={handleLogout} onAvatarUpdate={handleAvatarUpdate} />
+                <MainApp 
+                  user={user!} 
+                  onLogout={handleLogout} 
+                  theme={theme}
+                  toggleTheme={toggleTheme}
+                  onAvatarUpdate={handleAvatarUpdate} 
+                />
               </ProtectedRoute>
             }
           />

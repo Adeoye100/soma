@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '@/services/supabase';
+import { authService } from '../services/authService';
 
 interface ForgotPasswordFormProps {
   onBackToLogin: () => void;
@@ -25,11 +25,13 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackToLogin }
     setIsError(false);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/app`,
-      });
-      if (error) throw error;
-      setMessage('Password reset email sent! Please check your inbox.');
+      const { success, message, error } = await authService.forgotPassword(email, `${window.location.origin}/app`);
+      
+      if (!success) {
+        throw new Error(error?.message || 'Failed to send reset email');
+      }
+      
+      setMessage(message || 'Password reset email sent! Please check your inbox.');
       setEmail('');
     } catch (error: any) {
       setIsError(true);

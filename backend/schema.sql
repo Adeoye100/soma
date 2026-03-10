@@ -1,5 +1,5 @@
 -- Create the exams table
-CREATE TABLE IF NOT EXISTS public.exams (
+CREATE TABLE IF NOT EXISTS exams (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title TEXT NOT NULL,
     description TEXT,
@@ -13,9 +13,9 @@ CREATE TABLE IF NOT EXISTS public.exams (
 );
 
 -- Create the questions table
-CREATE TABLE IF NOT EXISTS public.questions (
+CREATE TABLE IF NOT EXISTS questions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    exam_id UUID NOT NULL REFERENCES public.exams(id) ON DELETE CASCADE,
+    exam_id UUID NOT NULL REFERENCES exams(id) ON DELETE CASCADE,
     question TEXT NOT NULL,
     options JSONB,
     correct_answer TEXT NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS public.questions (
 );
 
 -- Create the materials table
-CREATE TABLE IF NOT EXISTS public.materials (
+CREATE TABLE IF NOT EXISTS materials (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title TEXT NOT NULL,
     description TEXT,
@@ -36,9 +36,9 @@ CREATE TABLE IF NOT EXISTS public.materials (
 );
 
 -- Create the exam_results table
-CREATE TABLE IF NOT EXISTS public.exam_results (
+CREATE TABLE IF NOT EXISTS exam_results (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    exam_id UUID NOT NULL REFERENCES public.exams(id) ON DELETE CASCADE,
+    exam_id UUID NOT NULL REFERENCES exams(id) ON DELETE CASCADE,
     user_id UUID NOT NULL,
     score INTEGER NOT NULL,
     total_questions INTEGER NOT NULL,
@@ -50,9 +50,9 @@ CREATE TABLE IF NOT EXISTS public.exam_results (
 );
 
 -- Create the exam_attempts table
-CREATE TABLE IF NOT EXISTS public.exam_attempts (
+CREATE TABLE IF NOT EXISTS exam_attempts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    exam_id UUID NOT NULL REFERENCES public.exams(id) ON DELETE CASCADE,
+    exam_id UUID NOT NULL REFERENCES exams(id) ON DELETE CASCADE,
     user_id UUID NOT NULL,
     status TEXT NOT NULL CHECK (status IN ('in_progress', 'completed', 'abandoned')),
     started_at TIMESTAMPTZ DEFAULT NOW(),
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS public.exam_attempts (
 );
 
 -- Create the users table (if not handled by Supabase Auth)
-CREATE TABLE IF NOT EXISTS public.users (
+CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
     first_name TEXT,
@@ -73,9 +73,9 @@ CREATE TABLE IF NOT EXISTS public.users (
 );
 
 -- Enable RLS (Optional but recommended)
-ALTER TABLE public.exams ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.materials ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.exam_results ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.exam_attempts ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE exams ENABLE ROW LEVEL SECURITY;
+ALTER TABLE questions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE materials ENABLE ROW LEVEL SECURITY;
+ALTER TABLE exam_results ENABLE ROW LEVEL SECURITY;
+ALTER TABLE exam_attempts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;

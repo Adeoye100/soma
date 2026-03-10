@@ -9,6 +9,7 @@ export default defineConfig(({ mode }) => {
         port: 5173,
         host: '0.0.0.0',
         proxy: {
+          // Proxy API requests to backend
           '/api': {
             target: 'http://localhost:3000',
             changeOrigin: true,

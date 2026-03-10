@@ -29,7 +29,7 @@ Fixed authentication validation issues in the smart examination app to ensure pr
 - Added proper error logging for debugging
 
 ### 4. Simplified Authentication Flow
-- **Removed**: Complex hCaptcha integration that was causing validation issues
+- **Removed**: Complex integration that was causing validation issues
 - **Before**: Form submission → Captcha → Validation → Auth
 - **After**: Form submission → Validation → Auth (direct flow)
 
@@ -54,7 +54,7 @@ Fixed authentication validation issues in the smart examination app to ensure pr
 - Added `validateEmail()` function
 - Added `validateForm()` function
 - Enhanced `submitCredentials()` with better error handling
-- Removed hCaptcha dependencies
+- Removed unnecessary dependencies
 - Improved form submission logic
 - Enhanced success state handling
 
@@ -87,7 +87,7 @@ Fixed authentication validation issues in the smart examination app to ensure pr
 - **Simplified Code**: Removed complexity and redundancy
 - **Better Error Messages**: User-friendly error descriptions
 - **Consistent Behavior**: Unified login/signup experience
-- **Faster Authentication**: Removed unnecessary captcha step
+- **Faster Authentication**: Removed unnecessary steps
 
 ## Next Steps
 - Test the application with the development server

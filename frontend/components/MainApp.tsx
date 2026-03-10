@@ -15,10 +15,12 @@ type AppState = 'setup' | 'exam' | 'results';
 interface MainAppProps {
   user: User;
   onLogout: () => void;
+  theme: 'light' | 'dark';
+  toggleTheme: () => void;
   onAvatarUpdate: (newAvatarUrl: string) => void;
 }
 
-const MainApp: React.FC<MainAppProps> = ({ user, onLogout, onAvatarUpdate }) => {
+const MainApp: React.FC<MainAppProps> = ({ user, onLogout, theme, toggleTheme, onAvatarUpdate }) => {
   const [appState, setAppState] = useState<AppState>('setup');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [examConfig, setExamConfig] = useState<ExamConfig | null>(null);
@@ -120,7 +122,7 @@ const MainApp: React.FC<MainAppProps> = ({ user, onLogout, onAvatarUpdate }) => 
     <div className="flex flex-col min-h-screen bg-transparent">
       {showInfoModal && <InfoModal onClose={() => setShowInfoModal(false)} />}
       {showProfileSettingsModal && <ProfileSettingsModal user={user} onClose={() => setShowProfileSettingsModal(false)} onAvatarUpdate={onAvatarUpdate} />}
-      <Header user={user} onLogout={onLogout} onOpenProfileSettings={handleOpenProfileSettings} />
+      <Header theme={theme} toggleTheme={toggleTheme} user={user} onLogout={onLogout} onOpenProfileSettings={handleOpenProfileSettings} />
       <main className="flex-grow p-3 sm:p-4 md:p-6 lg:p-8">
         {renderContent()}
       </main>
@@ -128,7 +130,7 @@ const MainApp: React.FC<MainAppProps> = ({ user, onLogout, onAvatarUpdate }) => 
         <div className="shader-gradient-background rounded-lg p-px">
             <button
                 onClick={() => setShowInfoModal(true)}
-                className="bg-slate-800 text-xs sm:text-sm text-slate-300 font-medium px-4 py-2 rounded-[7px] hover:bg-slate-700"
+                className="bg-white dark:bg-slate-800 text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium px-4 py-2 rounded-[7px] hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             >
                 FAQ & Terms
             </button>

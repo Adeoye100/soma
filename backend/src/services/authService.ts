@@ -145,6 +145,7 @@ export class AuthService {
         email: credentials.email.toLowerCase().trim(),
         password: credentials.password,
         options: {
+          emailRedirectTo: `${config.corsOrigins[0]}/auth/callback`,
           data: {
             full_name: credentials.fullName.trim(),
             username: credentials.username.trim().toLowerCase().replace(/\s+/g, '_'),
@@ -290,7 +291,7 @@ export class AuthService {
   private async getUserProfile(userId: string): Promise<any> {
     try {
       const { data, error } = await this.supabase
-        .from('public.users')
+        .from('users')
         .select('username, full_name, gender')
         .eq('id', userId)
         .single();
@@ -362,6 +363,42 @@ export class AuthService {
       return jwt.verify(token, config.jwtSecret);
     } catch (error) {
       throw new AuthenticationError('Invalid token');
+    }
+  }
+
+  /**
+   * Reset password for user
+   */
+  async resetPassword(email: string, redirectTo?: string): Promise<void> {
+    try {
+      const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectTo || `${config.host}/reset-password`,
+      });
+
+      if (error) {
+        throw this.handleAuthError(error);
+      }
+    } catch (error) {
+      winston.error(`Password reset failed for ${email}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update user password
+   */
+  async updatePassword(password: string): Promise<void> {
+    try {
+      const { error } = await this.supabase.auth.updateUser({
+        password: password
+      });
+
+      if (error) {
+        throw this.handleAuthError(error);
+      }
+    } catch (error) {
+      winston.error('Update password failed:', error);
+      throw error;
     }
   }
 }

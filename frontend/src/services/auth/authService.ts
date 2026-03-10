@@ -507,6 +507,50 @@ export class AuthService {
   clearError(): void {
     this.updateState({ error: null });
   }
+
+  /**
+   * Initiate password reset process
+   */
+  async forgotPassword(email: string, redirectTo?: string): Promise<{ success: boolean; message?: string; error?: AuthError }> {
+    try {
+      const result = await apiClient.post<{ message: string }>(CONFIG.API.endpoints.auth.forgotPassword, { email, redirectTo });
+
+      if (!result.success) {
+        throw new Error(result.error?.message || 'Password reset request failed');
+      }
+
+      return { success: true, message: result.data?.message };
+    } catch (error: any) {
+      const authError: AuthError = {
+        code: error.code || 'FORGOT_PASSWORD_ERROR',
+        message: error.message || 'Password reset request failed',
+        details: error
+      };
+      return { success: false, error: authError };
+    }
+  }
+
+  /**
+   * Reset password with new password
+   */
+  async resetPassword(password: string): Promise<{ success: boolean; message?: string; error?: AuthError }> {
+    try {
+      const result = await apiClient.post<{ message: string }>(CONFIG.API.endpoints.auth.resetPassword, { password });
+
+      if (!result.success) {
+        throw new Error(result.error?.message || 'Password reset failed');
+      }
+
+      return { success: true, message: result.data?.message };
+    } catch (error: any) {
+      const authError: AuthError = {
+        code: error.code || 'RESET_PASSWORD_ERROR',
+        message: error.message || 'Password reset failed',
+        details: error
+      };
+      return { success: false, error: authError };
+    }
+  }
 }
 
 // Create and export singleton instance

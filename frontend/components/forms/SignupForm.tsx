@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../services/supabase';
+import { authService } from '../../services/authService';
 import EmailField from './EmailField';
 import PasswordField from './PasswordField';
 import { Avatar, AvatarImage, AvatarFallback } from '../Avatar';
@@ -126,26 +127,22 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleForm }) => {
     setErrors({});
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const result = await authService.signup({
         email: formData.email.trim().toLowerCase(),
         password: formData.password,
-        options: {
-          data: {
-            full_name: formData.username.trim(),
-            gender: formData.gender,
-            username: formData.username.trim().toLowerCase().replace(/\s+/g, '_')
-          },
-        },
+        username: formData.username.trim().toLowerCase().replace(/\s+/g, '_'),
+        fullName: formData.username.trim(),
+        gender: formData.gender
       });
 
-      if (error) {
-        throw error;
+      if (!result.success) {
+        throw result.error;
       }
 
-      if (data?.user && !data.session) {
+      if (result.data?.user && !result.data.session) {
         // Email confirmation required
         setSignupSuccess(true);
-      } else if (data?.session) {
+      } else if (result.data?.session) {
         // Auto-login after signup
         navigate('/app');
       }

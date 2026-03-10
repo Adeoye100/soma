@@ -20,6 +20,8 @@ export const API_CONFIG = {
       logout: '/auth/logout',
       refresh: '/auth/refresh',
       profile: '/auth/me',
+      forgotPassword: '/auth/forgot-password',
+      resetPassword: '/auth/reset-password',
     },
     exam: {
       generate: '/exam/generate',

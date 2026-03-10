@@ -25,11 +25,20 @@ router.post('/login', asyncHandler(async (req: Request, res: Response) => {
       return;
     }
 
-    if (!email.includes('@') || password.length < 6) {
+    if (!email.includes('@') || !email.includes('.')) {
       res.status(400).json({
         error: 'Validation Error',
-        message: 'Please provide a valid email and password',
-        code: 'INVALID_INPUT'
+        message: 'Please provide a valid email address',
+        code: 'INVALID_EMAIL'
+      });
+      return;
+    }
+
+    if (password.length < 8) {
+      res.status(400).json({
+        error: 'Validation Error',
+        message: 'Password must be at least 8 characters long',
+        code: 'WEAK_PASSWORD'
       });
       return;
     }
@@ -46,9 +55,9 @@ router.post('/login', asyncHandler(async (req: Request, res: Response) => {
     winston.error('Login route error:', error);
 
     if (error instanceof AuthenticationError) {
-      const status = error.message.includes('Invalid email') ? 400 :
-                    error.message.includes('Invalid credentials') ? 401 :
-                    error.message.includes('Email not confirmed') ? 403 : 401;
+      const status = error.message.includes('Invalid email') || error.details?.code === 'INVALID_EMAIL' ? 400 :
+                    error.message.includes('Invalid credentials') || error.details?.code === 'INVALID_CREDENTIALS' ? 401 :
+                    error.message.includes('Email not confirmed') || error.details?.code === 'EMAIL_NOT_CONFIRMED' ? 403 : 401;
 
       res.status(status).json({
         error: 'Authentication Failed',
@@ -85,7 +94,7 @@ router.post('/signup', asyncHandler(async (req: Request, res: Response) => {
       return;
     }
 
-    if (!email.includes('@')) {
+    if (!email.includes('@') || !email.includes('.')) {
       res.status(400).json({
         error: 'Validation Error',
         message: 'Please provide a valid email address',
@@ -153,7 +162,7 @@ router.post('/signup', asyncHandler(async (req: Request, res: Response) => {
 
     if (error instanceof AuthenticationError) {
       const status = error.message.includes('already in use') ? 409 :
-                    error.message.includes('Invalid email') ? 400 :
+                    error.message.includes('Invalid email') || error.details?.code === 'INVALID_EMAIL' ? 400 :
                     error.message.includes('Password') ? 400 : 400;
 
       res.status(status).json({
@@ -310,7 +319,7 @@ router.post('/logout', asyncHandler(async (req: Request, res: Response) => {
  */
 router.post('/forgot-password', asyncHandler(async (req: Request, res: Response) => {
   try {
-    const { email } = req.body;
+    const { email, redirectTo } = req.body;
 
     if (!email || !email.includes('@')) {
       res.status(400).json({
@@ -321,8 +330,8 @@ router.post('/forgot-password', asyncHandler(async (req: Request, res: Response)
       return;
     }
 
-    // For now, return success to prevent email enumeration
-    // In production, you would integrate with Supabase's password reset
+    await authService.resetPassword(email, redirectTo);
+
     res.status(200).json({
       success: true,
       message: 'If an account with that email exists, we have sent a password reset link.'
@@ -331,27 +340,28 @@ router.post('/forgot-password', asyncHandler(async (req: Request, res: Response)
   } catch (error) {
     winston.error('Forgot password route error:', error);
 
-    res.status(500).json({
-      error: 'Internal Server Error',
-      message: 'An unexpected error occurred',
-      code: 'FORGOT_PASSWORD_ERROR'
+    // If it's an AuthError from Supabase, still return 200 to prevent email enumeration
+    // but log it for debugging
+    res.status(200).json({
+      success: true,
+      message: 'If an account with that email exists, we have sent a password reset link.'
     });
   }
 }));
 
 /**
  * @route   POST /api/auth/reset-password
- * @desc    Reset password with token
+ * @desc    Reset password with new password
  * @access  Public
  */
 router.post('/reset-password', asyncHandler(async (req: Request, res: Response) => {
   try {
-    const { token, password } = req.body;
+    const { password } = req.body;
 
-    if (!token || !password) {
+    if (!password) {
       res.status(400).json({
         error: 'Validation Error',
-        message: 'Token and new password are required',
+        message: 'New password is required',
         code: 'MISSING_FIELDS'
       });
       return;
@@ -366,8 +376,11 @@ router.post('/reset-password', asyncHandler(async (req: Request, res: Response) 
       return;
     }
 
-    // For now, return success placeholder
-    // In production, you would verify the token and update the password
+    // This endpoint should be used with an authenticated user (after clicking reset link)
+    // Supabase handles the session via the link automatically if redirected back.
+    // However, if the user is not authenticated, this will fail.
+    await authService.updatePassword(password);
+
     res.status(200).json({
       success: true,
       message: 'Password has been reset successfully'
@@ -376,9 +389,18 @@ router.post('/reset-password', asyncHandler(async (req: Request, res: Response) 
   } catch (error) {
     winston.error('Reset password route error:', error);
 
+    if (error instanceof AuthenticationError) {
+      res.status(401).json({
+        error: 'Reset Password Failed',
+        message: error.message,
+        code: error.details?.code || 'RESET_PASSWORD_ERROR'
+      });
+      return;
+    }
+
     res.status(500).json({
       error: 'Internal Server Error',
-      message: 'An unexpected error occurred',
+      message: 'An unexpected error occurred during password reset',
       code: 'RESET_PASSWORD_ERROR'
     });
   }

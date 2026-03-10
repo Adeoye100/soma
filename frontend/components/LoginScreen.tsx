@@ -1,16 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { authService, LoginCredentials, SignupCredentials } from '../services/auth/authService';
+import { authService, LoginCredentials, SignupCredentials } from '../services/authService';
 import { BookOpenIcon, SparklesIcon, GoogleIcon } from './icons';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import InspirationCard from './InspirationCard';
 import SupportCard from './SupportCard';
 import ForgotPasswordForm from './ForgotPasswordForm';
-// ...existing code...
 import { Avatar, AvatarImage, AvatarFallback } from './Avatar';
 import PasswordStrengthIndicator, { PasswordValidationState } from './PasswordStrengthIndicator';
 import ShaderBackground from './ShaderBackground';
 import InfoModal from './InfoModal';
-// ...existing code...
 
 const LoginScreen: React.FC = () => {
   const location = useLocation();
@@ -26,7 +24,6 @@ const LoginScreen: React.FC = () => {
   const [signupSuccess, setSignupSuccess] = useState(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  // ...existing code...
 
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [passwordValidation, setPasswordValidation] = useState<PasswordValidationState>({
@@ -49,7 +46,6 @@ const LoginScreen: React.FC = () => {
   };
 
   const validateEmail = (email: string): boolean => {
-    // More robust email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email) && email.length <= 254;
   };
@@ -57,21 +53,18 @@ const LoginScreen: React.FC = () => {
   const validateForm = (): { isValid: boolean; errors: string[] } => {
     const errors: string[] = [];
 
-    // Email validation
     if (!email.trim()) {
       errors.push('Email is required');
     } else if (!validateEmail(email)) {
       errors.push('Please enter a valid email address');
     }
 
-    // Password validation
     if (!password) {
       errors.push('Password is required');
     } else if (!isLogin && password.length < 8) {
       errors.push('Password must be at least 8 characters');
     }
 
-    // Additional signup validations
     if (!isLogin) {
       if (!username.trim()) {
         errors.push('Username is required');
@@ -93,22 +86,18 @@ const LoginScreen: React.FC = () => {
     }
   }, [location.state]);
 
-  // ...existing code...
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    // Validate form before proceeding
     const validation = validateForm();
     if (!validation.isValid) {
-      setError(validation.errors[0]); // Show first error
+      setError(validation.errors[0]);
       setLoading(false);
       return;
     }
 
-    // ...existing code...
     submitCredentials();
   };
 
@@ -134,18 +123,14 @@ const LoginScreen: React.FC = () => {
     };
 
     try {
-      // ...existing code...
-
       let response;
       if (isLogin) {
-        // Use the new authentication service
         const loginCredentials: LoginCredentials = {
           email: email.trim().toLowerCase(),
           password
         };
         response = await authService.login(loginCredentials);
       } else {
-        // Use the new authentication service for signup
         const signupCredentials: SignupCredentials = {
           email: email.trim().toLowerCase(),
           password,
@@ -161,15 +146,11 @@ const LoginScreen: React.FC = () => {
       }
 
       if (isLogin) {
-        // Successful login - navigate to app
         navigate('/app');
       } else {
-        // Successful signup
         if (response.data?.requiresConfirmation) {
-          // Email confirmation required
           setSignupSuccess(true);
         } else if (response.data?.session) {
-          // Auto-login after signup
           navigate('/app');
         }
       }
@@ -184,8 +165,6 @@ const LoginScreen: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      // For now, show a message that Google sign-in is not yet implemented
-      // In a real implementation, this would be handled through the backend
       setError('Google sign-in is currently not available. Please use email and password to sign in.');
     } catch (err: any) {
       setError(
@@ -339,7 +318,6 @@ const LoginScreen: React.FC = () => {
                       </div>
                     )}
 
-                    {/* ...captcha removed... */}
 
                     <div>
                       <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 h-9 sm:h-10 rounded-md bg-primary-600 px-4 text-sm sm:text-base font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:bg-slate-400 disabled:cursor-not-allowed dark:disabled:bg-slate-600 transition-colors duration-300">
