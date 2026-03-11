@@ -4,8 +4,9 @@ import { supabase } from '../../services/supabase';
 import { authService } from '../../services/authService';
 import EmailField from './EmailField';
 import PasswordField from './PasswordField';
-import { validateEmail, validatePassword, formatAuthError } from '../../utils/authValidation';
+import { validateEmail, validatePassword, formatAuthError, validateRedirect } from '../../utils/authValidation';
 import { SparklesIcon, GoogleIcon } from '../icons';
+import { useSearchParams } from 'react-router-dom';
 
 interface LoginFormProps {
   onToggleForm: () => void;
@@ -14,6 +15,7 @@ interface LoginFormProps {
 
 const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword }) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -85,7 +87,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
       }
 
       // Successful login - navigate to app
-      navigate('/app');
+      const redirectTo = searchParams.get('redirect');
+      const safeRedirect = validateRedirect(redirectTo, '/app');
+      navigate(safeRedirect);
     } catch (err: any) {
       setErrors({ general: formatAuthError(err) });
     } finally {
@@ -98,10 +102,16 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
     setErrors({});
     
     try {
+      const redirectTo = searchParams.get('redirect');
+      const callbackUrl = new URL(`${window.location.origin}/auth/callback`);
+      if (redirectTo) {
+        callbackUrl.searchParams.set('redirect', redirectTo);
+      }
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: callbackUrl.toString()
         }
       });
       

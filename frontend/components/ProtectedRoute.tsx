@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { Session } from '@supabase/supabase-js';
 
 interface ProtectedRouteProps {
@@ -8,8 +8,11 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ session, children }) => {
+  const location = useLocation();
+
   if (!session) {
-    return <Navigate to="/login" replace />;
+    // Save the current path to redirect back after login
+    return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`} replace />;
   }
 
   return children;

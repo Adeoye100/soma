@@ -4,6 +4,7 @@ import { ProcessingQueueService } from '../queue/ProcessingQueueService';
 import { EventEmitter } from 'events';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { sanitizePath, sanitizeFileName, isPathTraversal } from '../../../shared/utils/pathUtils';
 
 export interface FileProcessorConfig {
   watchDirectory: string;
@@ -103,6 +104,14 @@ export class FileInputProcessor extends EventEmitter implements InputProcessor {
     
     try {
       const results: FileProcessingResult[] = [];
+
+      // Ensure the path is safe before any FS operation
+      // If it's already an absolute path and we want to allow it, we should verify it's within allowed directories.
+      // For now, let's assume it should be within watchDirectory if it's a relative path, 
+      // or we just validate it doesn't have traversal.
+      if (isPathTraversal(filePath)) {
+        throw new Error(`Invalid file path: path traversal detected in ${filePath}`);
+      }
 
       // Check file exists and validate
       const stats = await fs.stat(filePath);
@@ -238,9 +247,10 @@ export class FileInputProcessor extends EventEmitter implements InputProcessor {
       return;
     }
 
-    const filePath = path.join(this.config.watchDirectory, fileName);
-    
     try {
+      const safeFileName = sanitizeFileName(fileName);
+      const filePath = sanitizePath(this.config.watchDirectory, safeFileName);
+      
       const stats = await fs.stat(filePath);
       if (stats.isFile()) {
         await this.processingQueue.enqueue(async () => {
@@ -260,11 +270,16 @@ export class FileInputProcessor extends EventEmitter implements InputProcessor {
       const files = await fs.readdir(this.config.watchDirectory);
       
       for (const file of files) {
-        const filePath = path.join(this.config.watchDirectory, file);
-        const stats = await fs.stat(filePath);
-        
-        if (stats.isFile()) {
-          await this.processFile(filePath);
+        try {
+          const safeFileName = sanitizeFileName(file);
+          const filePath = sanitizePath(this.config.watchDirectory, safeFileName);
+          const stats = await fs.stat(filePath);
+          
+          if (stats.isFile()) {
+            await this.processFile(filePath);
+          }
+        } catch (fileError) {
+          console.error(`Error processing file ${file}:`, fileError);
         }
       }
     } catch (error) {
@@ -274,8 +289,9 @@ export class FileInputProcessor extends EventEmitter implements InputProcessor {
 
   private async archiveFile(filePath: string): Promise<void> {
     const fileName = path.basename(filePath);
+    const safeFileName = sanitizeFileName(fileName);
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const archivePath = path.join(this.config.archiveDirectory, `${timestamp}_${fileName}`);
+    const archivePath = sanitizePath(this.config.archiveDirectory, `${timestamp}_${safeFileName}`);
     
     await fs.rename(filePath, archivePath);
   }

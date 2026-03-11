@@ -172,3 +172,50 @@ export const formatAuthError = (error: any): string => {
     return error.message || 'An unexpected error occurred. Please try again.';
   }
 };
+
+/**
+ * Validates a redirect URL to prevent Open Redirect and XSS attacks.
+ * Only allowed internal routes are permitted.
+ * 
+ * @param redirect The redirect path to validate
+ * @param defaultRedirect The default path to use if the redirect is invalid
+ * @returns A safe, validated redirect path
+ */
+export const validateRedirect = (redirect: string | null | undefined, defaultRedirect: string = '/app'): string => {
+  if (!redirect) return defaultRedirect;
+
+  // List of allowed internal routes
+  const allowedRoutes = [
+    '/app',
+    '/dashboard',
+    '/profile',
+    '/settings',
+    '/exams',
+    '/history',
+    '/login',
+    '/signup'
+  ];
+
+  // Basic check: Must start with / and not be a protocol-relative URL (//)
+  // This prevents redirecting to external domains
+  if (!redirect.startsWith('/') || redirect.startsWith('//')) {
+    console.warn(`Blocked potentially unsafe redirect to: ${redirect}`);
+    return defaultRedirect;
+  }
+
+  // Optional: Check if the base path is in the allowed list
+  // Extract the base path (e.g., /app/settings -> /app)
+  const basePath = redirect.split('?')[0].split('#')[0];
+  
+  // If we want a strict check against allowedRoutes
+  const isAllowed = allowedRoutes.some(route => 
+    basePath === route || basePath.startsWith(`${route}/`)
+  );
+
+  if (isAllowed) {
+    return redirect;
+  }
+
+  console.warn(`Blocked unauthorized redirect path: ${redirect}`);
+  return defaultRedirect;
+};

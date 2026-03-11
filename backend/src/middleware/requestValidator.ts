@@ -332,20 +332,34 @@ export const sanitizeInput = (req: Request, res: Response, next: NextFunction): 
       .trim();
   };
 
-  // Recursively sanitize object properties
-  const sanitizeObject = (obj: any): any => {
+  // Recursively sanitize object properties with depth limit
+  const sanitizeObject = (obj: any, depth: number = 0): any => {
+    // Prevent excessive recursion (DoS protection)
+    if (depth > 20) {
+      throw new Error('Input nested too deeply');
+    }
+
     if (typeof obj === 'string') {
       return sanitizeString(obj);
     }
     
     if (Array.isArray(obj)) {
-      return obj.map(sanitizeObject);
+      // Limit array length (DoS protection)
+      if (obj.length > 1000) {
+        throw new Error('Input array too large');
+      }
+      return obj.map(item => sanitizeObject(item, depth + 1));
     }
     
     if (obj && typeof obj === 'object') {
+      // Limit number of keys (DoS protection)
+      if (Object.keys(obj).length > 100) {
+        throw new Error('Input object has too many properties');
+      }
+
       const sanitized: any = {};
       for (const [key, value] of Object.entries(obj)) {
-        sanitized[key] = sanitizeObject(value);
+        sanitized[key] = sanitizeObject(value, depth + 1);
       }
       return sanitized;
     }

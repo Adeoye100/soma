@@ -1,6 +1,7 @@
 import mammoth from 'mammoth';
 import html2pdf from 'html2pdf.js';
 import pptx2html from 'pptx2html';
+import DOMPurify from 'dompurify';
 import { 
   ConversionResult, 
   ProcessingProgress, 
@@ -269,9 +270,15 @@ export class EnhancedPdfConversionService {
   private async generatePdfBlob(htmlContent: string, filename: string, orientation: 'portrait' | 'landscape'): Promise<Blob> {
     return new Promise((resolve, reject) => {
       try {
+        // Sanitize HTML content to prevent XSS and PDF object injection
+        const cleanHtml = DOMPurify.sanitize(htmlContent);
+
+        // Validate image metadata to prevent DoS attacks
+        this.validateImageMetadata(cleanHtml);
+
         // Create a temporary container with enhanced styling
         const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = htmlContent;
+        tempDiv.innerHTML = cleanHtml;
         
         // Enhanced CSS for better formatting
         const style = document.createElement('style');
@@ -406,5 +413,29 @@ export class EnhancedPdfConversionService {
    */
   cleanup(): void {
     this.progressCallbacks.clear();
+  }
+
+  /**
+   * Validates image metadata to prevent DoS attacks
+   */
+  private validateImageMetadata(htmlContent: string): void {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlContent, 'text/html');
+    const images = doc.querySelectorAll('img');
+    
+    for (const img of images) {
+      const width = parseInt(img.getAttribute('width') || '0');
+      const height = parseInt(img.getAttribute('height') || '0');
+      
+      if (width > 5000 || height > 5000) {
+        throw new Error(`Image dimensions too large (${width}x${height}). Max allowed is 5000x5000.`);
+      }
+      
+      // Check for BMP images which are restricted
+      const src = img.getAttribute('src') || '';
+      if (src.toLowerCase().startsWith('data:image/bmp') || src.toLowerCase().endsWith('.bmp')) {
+        throw new Error('BMP images are not allowed for security reasons. Please use JPEG, PNG, or WebP.');
+      }
+    }
   }
 }

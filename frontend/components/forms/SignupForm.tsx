@@ -6,8 +6,9 @@ import EmailField from './EmailField';
 import PasswordField from './PasswordField';
 import { Avatar, AvatarImage, AvatarFallback } from '../Avatar';
 import PasswordStrengthIndicator, { PasswordValidationState } from '../PasswordStrengthIndicator';
-import { validateEmail, validatePassword, validateUsername, validateGender, calculatePasswordStrength, formatAuthError } from '../../utils/authValidation';
+import { validateEmail, validatePassword, validateUsername, validateGender, calculatePasswordStrength, formatAuthError, validateRedirect } from '../../utils/authValidation';
 import { SparklesIcon } from '../icons';
+import { useSearchParams } from 'react-router-dom';
 
 interface SignupFormProps {
   onToggleForm: () => void;
@@ -15,6 +16,7 @@ interface SignupFormProps {
 
 const SignupForm: React.FC<SignupFormProps> = ({ onToggleForm }) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -144,7 +146,9 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleForm }) => {
         setSignupSuccess(true);
       } else if (result.data?.session) {
         // Auto-login after signup
-        navigate('/app');
+        const redirectTo = searchParams.get('redirect');
+        const safeRedirect = validateRedirect(redirectTo, '/app');
+        navigate(safeRedirect);
       }
     } catch (err: any) {
       setErrors({ general: formatAuthError(err) });

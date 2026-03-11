@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../services/supabase';
+import { validateRedirect } from '../utils/authValidation';
 import Loader from './Loader';
 
 const AuthCallback: React.FC = () => {
@@ -25,8 +26,12 @@ const AuthCallback: React.FC = () => {
         }
 
         if (data.session) {
+          // Get original redirect if available
+          const redirectTo = searchParams.get('redirect');
+          const safeRedirect = validateRedirect(redirectTo, '/app');
+          
           // User is authenticated, redirect to app
-          navigate('/app', { replace: true });
+          navigate(safeRedirect, { replace: true });
         } else {
           // No session found, redirect to login
           navigate('/login', { replace: true });
