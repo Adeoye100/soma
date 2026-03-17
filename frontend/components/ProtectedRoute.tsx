@@ -1,21 +1,21 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { Session } from '@supabase/supabase-js';
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 
-interface ProtectedRouteProps {
-  session: Session | null;
-  children: React.ReactElement;
-}
+const ProtectedRoute: React.FC = () => {
+  const { session, loading } = useAuth();
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ session, children }) => {
-  const location = useLocation();
+  console.log('[ProtectedRoute] loading:', loading, 'session:', !!session);
 
-  if (!session) {
-    // Save the current path to redirect back after login
-    return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`} replace />;
+  if (loading) {
+    return <div role="status" aria-live="polite">Loading...</div>;
   }
 
-  return children;
+  if (!session) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

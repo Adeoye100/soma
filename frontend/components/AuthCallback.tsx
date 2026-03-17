@@ -12,7 +12,28 @@ const AuthCallback: React.FC = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Handle the OAuth callback
+        const providerError = searchParams.get('error_description') || searchParams.get('error');
+        if (providerError) {
+          setError(providerError);
+          setTimeout(() => {
+            navigate('/login', { replace: true });
+          }, 3000);
+          return;
+        }
+
+        // Explicitly exchange the PKCE authorization code when present.
+        const authCode = searchParams.get('code');
+        if (authCode) {
+          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(authCode);
+          if (exchangeError) {
+            setError(exchangeError.message);
+            setTimeout(() => {
+              navigate('/login', { replace: true });
+            }, 3000);
+            return;
+          }
+        }
+
         const { data, error } = await supabase.auth.getSession();
 
         if (error) {
@@ -46,7 +67,7 @@ const AuthCallback: React.FC = () => {
     };
 
     handleAuthCallback();
-  }, [navigate]);
+  }, [navigate, searchParams]);
 
   if (error) {
     return (

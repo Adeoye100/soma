@@ -298,7 +298,8 @@ async function convertDocxToPdf(file: File): Promise<File> {
 
     // Create a temporary element to hold the HTML
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlContent;
+    const cleanHtml = DOMPurify.sanitize(htmlContent);
+    tempDiv.innerHTML = cleanHtml;
     tempDiv.style.fontFamily = 'Arial, sans-serif';
     tempDiv.style.fontSize = '12px';
     tempDiv.style.lineHeight = '1.5';
@@ -334,7 +335,8 @@ async function convertPptxToPdf(file: File): Promise<File> {
 
     // Create a temporary element to hold the HTML
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlContent;
+    const cleanHtml = DOMPurify.sanitize(htmlContent);
+    tempDiv.innerHTML = cleanHtml;
     tempDiv.style.fontFamily = 'Arial, sans-serif';
     tempDiv.style.fontSize = '12px';
 

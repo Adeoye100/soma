@@ -25,7 +25,10 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackToLogin }
     setIsError(false);
 
     try {
-      const { success, message, error } = await authService.forgotPassword(email, `${window.location.origin}/app`);
+      const { success, message, error } = await authService.forgotPassword(
+        email,
+        `${window.location.origin}/reset-password`
+      );
       
       if (!success) {
         throw new Error(error?.message || 'Failed to send reset email');

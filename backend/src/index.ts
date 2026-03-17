@@ -129,7 +129,10 @@ if (config.helmetEnabled) {
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         scriptSrc: ["'self'"],
         imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: ["'self'", "https://api.supabase.co", "https://generativelanguage.googleapis.com"],
+        connectSrc: ["'self'", "https://*.supabase.co", "https://generativelanguage.googleapis.com"],
+        frameAncestors: ["'none'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
       },
     },
     hsts: {

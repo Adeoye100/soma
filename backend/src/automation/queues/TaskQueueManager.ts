@@ -72,9 +72,9 @@ export class TaskQueueManager {
   async createQueue(name: string, config: Partial<QueueConfig> = {}): Promise<Queue> {
     try {
       const queueConfig = {
-        connection: this.connection,
+        connection: this.connection as any,
         ...config
-      };
+      } as any;
 
       const queue = new Queue(name, queueConfig);
       this.queues.set(name, queue);
@@ -159,9 +159,9 @@ export class TaskQueueManager {
         concurrency: options.concurrency || 1,
         stalledInterval: options.stalledInterval || 30000,
         maxStalledCount: options.maxStalledCount || 1,
-        connection: this.connection,
+        connection: this.connection as any,
         ...options
-      };
+      } as any;
 
       const worker = new Worker(queueName, processor, workerOptions);
       this.workers.set(queueName, worker);

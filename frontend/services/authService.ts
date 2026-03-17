@@ -27,6 +27,37 @@ export interface AuthResponse {
 
 const API_URL = '/api/auth';
 
+const getAccessToken = async (): Promise<string | null> => {
+  const { data } = await supabase.auth.getSession();
+  return data.session?.access_token ?? null;
+};
+
+const getRedirectOrigin = (): string => {
+  if (import.meta.env.DEV) {
+    return 'http://localhost:5173';
+  }
+  return import.meta.env.VITE_APP_URL ?? window.location.origin;
+};
+
+export const signInWithGoogle = async (): Promise<void> => {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${getRedirectOrigin()}/auth/callback`,
+      skipBrowserRedirect: false,
+      queryParams: {
+        access_type: 'offline',
+        prompt: 'consent',
+      },
+    },
+  });
+
+  if (error) {
+    console.error('[OAuth] signInWithGoogle failed:', error.message);
+    throw new Error(error.message);
+  }
+};
+
 export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
@@ -48,7 +79,6 @@ export const authService = {
           access_token: data.data.session.access_token,
           refresh_token: data.data.session.refresh_token,
         });
-        localStorage.setItem('auth_token', data.data.session.access_token);
       }
 
       return { success: true, data: data.data };
@@ -77,7 +107,6 @@ export const authService = {
           access_token: data.data.session.access_token,
           refresh_token: data.data.session.refresh_token,
         });
-        localStorage.setItem('auth_token', data.data.session.access_token);
       }
 
       return { success: true, data: data.data };
@@ -88,7 +117,7 @@ export const authService = {
 
   async logout(): Promise<void> {
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = await getAccessToken();
       if (token) {
         await fetch(`${API_URL}/logout`, {
           method: 'POST',
@@ -100,12 +129,11 @@ export const authService = {
       }
     } finally {
       await supabase.auth.signOut();
-      localStorage.removeItem('auth_token');
     }
   },
 
   async getCurrentUser(): Promise<User | null> {
-    const token = localStorage.getItem('auth_token');
+    const token = await getAccessToken();
     if (!token) return null;
 
     try {
@@ -119,11 +147,9 @@ export const authService = {
       if (response.ok) {
         const data = await response.json();
         return data.data.user;
-      } else {
-        // Token invalid
-        localStorage.removeItem('auth_token');
-        return null;
       }
+
+      return null;
     } catch (error) {
       return null;
     }

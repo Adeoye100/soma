@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../services/supabase';
-import { authService } from '../../services/authService';
+import { authService, signInWithGoogle } from '@/services/authService';
 import EmailField from './EmailField';
 import PasswordField from './PasswordField';
 import { validateEmail, validatePassword, formatAuthError, validateRedirect } from '../../utils/authValidation';
@@ -23,6 +22,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
   });
   const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
   const [loading, setLoading] = useState(false);
+  const setError = (message: string | null) => setErrors(message ? { general: message } : {});
 
   const handleInputChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, [field]: e.target.value }));
@@ -98,28 +98,15 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
   };
 
   const handleGoogleSignIn = async () => {
-    setLoading(true);
-    setErrors({});
-    
     try {
-      const redirectTo = searchParams.get('redirect');
-      const callbackUrl = new URL(`${window.location.origin}/auth/callback`);
-      if (redirectTo) {
-        callbackUrl.searchParams.set('redirect', redirectTo);
-      }
-
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: callbackUrl.toString()
-        }
-      });
-      
-      if (error) {
-        throw error;
-      }
-    } catch (err: any) {
-      setErrors({ general: formatAuthError(err) });
+      setLoading(true);
+      setError(null);
+      await signInWithGoogle();
+    } catch (err) {
+      const message = err instanceof Error
+        ? err.message
+        : 'Google sign-in failed. Please retry.';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -128,16 +115,16 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
   return (
     <div>
       <div className="text-center mb-6">
-        <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2 transition-colors duration-300">
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-100 mb-2">
           Welcome Back!
         </h2>
-        <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 transition-colors duration-300">
+        <p className="text-sm sm:text-base text-slate-400">
           Log in to continue your learning journey.
         </p>
       </div>
 
       {errors.general && (
-        <div className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg text-sm text-center mb-4 transition-colors duration-300" role="alert">
+        <div className="bg-red-900/30 text-red-300 px-4 py-2 rounded-lg text-sm text-center mb-4" role="alert">
           {errors.general}
         </div>
       )}
@@ -174,16 +161,16 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
               checked={formData.rememberMe}
               onChange={(e) => setFormData(prev => ({ ...prev, rememberMe: e.target.checked }))}
               disabled={loading}
-              className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500 dark:border-slate-600 dark:bg-slate-700 dark:focus:ring-offset-slate-800 disabled:opacity-50 transition-colors duration-300"
+              className="h-4 w-4 rounded border-slate-600 bg-slate-700 text-primary-600 focus:ring-primary-500 focus:ring-offset-slate-800 disabled:opacity-50"
             />
-            <label htmlFor="remember-me" className="ml-2 block text-xs sm:text-sm text-slate-700 dark:text-slate-300 transition-colors duration-300">
+            <label htmlFor="remember-me" className="ml-2 block text-xs sm:text-sm text-slate-300">
               Remember me! 👋
             </label>
           </div>
           <button 
             type="button" 
             onClick={onForgotPassword}
-            className="text-xs sm:text-sm font-semibold text-primary-600 hover:text-primary-500 disabled:opacity-50 transition-colors duration-300"
+            className="text-xs sm:text-sm font-semibold text-primary-500 hover:text-primary-400 disabled:opacity-50 transition-colors"
             disabled={loading}
           >
             Forgot password?
@@ -193,13 +180,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
         <button 
           type="submit" 
           disabled={!isButtonActive}
-          className="w-full flex items-center justify-center gap-2 h-9 sm:h-10 rounded-md bg-primary-600 px-4 text-sm sm:text-base font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:bg-slate-400 disabled:cursor-not-allowed dark:disabled:bg-slate-600 transition-colors duration-300"
+          className="w-full flex items-center justify-center gap-2 h-10 rounded-md bg-primary-600 px-4 text-sm font-semibold text-white shadow-lg hover:bg-primary-500 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:bg-slate-600 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all"
         >
           {loading ? (
             'Processing...'
           ) : (
             <>
-              <SparklesIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+              <SparklesIcon className="h-5 w-5" />
               <span>Log In</span>
             </>
           )}
@@ -208,27 +195,27 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
 
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center" aria-hidden="true">
-          <div className="w-full border-t border-slate-300 dark:border-slate-600 transition-colors duration-300" />
+          <div className="w-full border-t border-slate-600" />
         </div>
-        <div className="relative flex justify-center text-xs sm:text-sm">
-          <span className="bg-white dark:bg-slate-800 px-2 text-slate-500 dark:text-slate-400 transition-colors duration-300">Or continue with</span>
+        <div className="relative flex justify-center text-sm">
+          <span className="bg-slate-800 px-2 text-slate-400">Or continue with</span>
         </div>
       </div>
 
       <button 
         onClick={handleGoogleSignIn}
         disabled={loading}
-        className="w-full inline-flex justify-center items-center gap-2 sm:gap-3 h-9 sm:h-10 px-4 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-slate-800 disabled:opacity-50 transition-colors duration-300"
+        className="w-full inline-flex justify-center items-center gap-3 h-10 px-4 border border-slate-600 rounded-md shadow-sm bg-slate-700 text-sm font-medium text-slate-200 hover:bg-slate-600 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 focus:ring-offset-slate-800 disabled:opacity-50 transition-all"
       >
-        <GoogleIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+        <GoogleIcon className="h-5 w-5" />
         <span>Sign in with Google</span>
       </button>
 
-      <p className="mt-6 text-center text-xs sm:text-sm text-slate-500 dark:text-slate-400 transition-colors duration-300">
+      <p className="mt-6 text-center text-sm text-slate-400">
         Don't have an account?{' '}
         <button 
           onClick={onToggleForm}
-          className="font-semibold text-primary-600 hover:text-primary-500 disabled:opacity-50 transition-colors duration-300"
+          className="font-semibold text-primary-500 hover:text-primary-400 disabled:opacity-50 transition-colors"
           disabled={loading}
         >
           Sign up

@@ -37,7 +37,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout, onOpenProfileSettings }
             onClick={onLogout}
             className="p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500 flex-shrink-0 transition-colors duration-200"
             aria-label="Logout"
-            title="Logout?"
+            title="Logout"
           >
             <LogoutIcon className="h-5 w-5 sm:h-6 sm:w-6" />
           </button>

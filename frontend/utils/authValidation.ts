@@ -184,7 +184,7 @@ export const formatAuthError = (error: any): string => {
 export const validateRedirect = (redirect: string | null | undefined, defaultRedirect: string = '/app'): string => {
   if (!redirect) return defaultRedirect;
 
-  // List of allowed internal routes
+  // List of allowed internal routes (exact or prefixes)
   const allowedRoutes = [
     '/app',
     '/dashboard',
@@ -196,10 +196,11 @@ export const validateRedirect = (redirect: string | null | undefined, defaultRed
     '/signup'
   ];
 
-  // Basic check: Must start with / and not be a protocol-relative URL (//)
-  // This prevents redirecting to external domains
+  // Robust check: Must start with / and not be a protocol-relative URL (//)
+  // This prevents redirecting to external domains (e.g., //google.com)
+  // and XSS via javascript: or data: URIs
   if (!redirect.startsWith('/') || redirect.startsWith('//')) {
-    console.warn(`Blocked potentially unsafe redirect to: ${redirect}`);
+    console.warn(`Blocked potentially unsafe or external redirect to: ${redirect}`);
     return defaultRedirect;
   }
 

@@ -84,17 +84,12 @@ const StyledWrapper = styled.div`
     z-index: 1;
     height: 100%;
     width: 100%;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(24px);
+    background: rgba(30, 41, 59, 0.3); /* dark:bg-slate-800 with opacity */
+    backdrop-filter: blur(32px);
     border-radius: 1.125rem; /* 18px */
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     overflow: hidden;
     transition: background-color 0.3s ease, border-color 0.3s ease;
-  }
-
-  .dark & .bg {
-    background: rgba(30, 41, 59, 0.3); /* dark:bg-slate-800 with opacity */
-    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 `;
 

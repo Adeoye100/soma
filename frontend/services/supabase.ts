@@ -54,14 +54,11 @@ const customFetch: typeof fetch = async (input: RequestInfo | URL, init?: Reques
 
 export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    // Auto-refresh token - with error handling for network failures
+    flowType: 'pkce',
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
-    // Use PKCE flow for better security and reliability
-    flowType: 'pkce',
   },
-  // Use custom fetch with retry logic
   global: {
     fetch: customFetch,
   },

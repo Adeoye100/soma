@@ -8,7 +8,8 @@ import { Session, User } from '@supabase/supabase-js';
 import ProtectedRoute from './components/ProtectedRoute';
 import LandingPage from './components/LandingPage';
 import ResetPasswordForm from './components/ResetPasswordForm';
-import AuthCallback from './components/AuthCallback';
+import AuthCallback from './pages/auth/callback';
+import { AuthProvider } from './context/AuthContext';
 
 // Check if we're in development mode
 const isDev = import.meta.env.DEV;
@@ -105,41 +106,44 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen font-sans bg-slate-900 text-slate-50">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route
-            path="/login"
-            element={!session ? <AuthContainer /> : isPasswordRecovery ? <ResetPasswordForm /> : <Navigate to="/app" />}
-          />
-          <Route
-            path="/signup"
-            element={!session ? <Navigate to="/login" state={{ showSignup: true }} /> : <Navigate to="/app" />}
-          />
-          <Route
-            path="/reset-password"
-            element={isPasswordRecovery ? <ResetPasswordForm /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/auth/callback"
-            element={<AuthCallback />}
-          />
-          <Route
-            path="/app"
-            element={
-              <ProtectedRoute session={session}>
-                <MainApp 
-                  user={user!} 
-                  onLogout={handleLogout} 
-                  theme={theme}
-                  toggleTheme={toggleTheme}
-                  onAvatarUpdate={handleAvatarUpdate} 
-                />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route
+              path="/login"
+              element={!session ? <AuthContainer /> : isPasswordRecovery ? <ResetPasswordForm /> : <Navigate to="/dashboard" />}
+            />
+            <Route
+              path="/signup"
+              element={!session ? <Navigate to="/login" state={{ showSignup: true }} /> : <Navigate to="/dashboard" />}
+            />
+            <Route
+              path="/reset-password"
+              element={isPasswordRecovery ? <ResetPasswordForm /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/auth/callback"
+              element={<AuthCallback />}
+            />
+            <Route element={<ProtectedRoute />}>
+              <Route
+                path="/dashboard"
+                element={
+                  <MainApp
+                    user={user!}
+                    onLogout={handleLogout}
+                    theme={theme}
+                    toggleTheme={toggleTheme}
+                    onAvatarUpdate={handleAvatarUpdate}
+                  />
+                }
+              />
+              <Route path="/app" element={<Navigate to="/dashboard" replace />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </div>
   );
 };
