@@ -25,7 +25,7 @@ export const generateExam = async (config: ExamConfig, materials: Material[]): P
   };
 
   const payload = {
-    title: config.title,
+    topics: config.topics,
     type: config.type.toUpperCase().replace(' ', '_'),
     difficulty: difficultyMap[config.difficulty] || 'medium',
     numQuestions: config.numQuestions,

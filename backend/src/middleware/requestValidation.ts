@@ -351,11 +351,10 @@ export function createValidationMiddleware(options: RequestValidationOptions) {
 export const examGenerationValidation = createValidationMiddleware({
   rules: [
     {
-      field: 'title',
+      field: 'topics',
       required: true,
-      minLength: 3,
-      maxLength: 100,
-      pattern: /^[a-zA-Z0-9\s\-\_\.\(\)\:\?\!\@\#\$\%\^\&\*]+$/
+      minLength: 2,
+      maxLength: 500,
     },
     {
       field: 'type',

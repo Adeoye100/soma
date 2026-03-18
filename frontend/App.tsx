@@ -10,6 +10,7 @@ import LandingPage from './components/LandingPage';
 import ResetPasswordForm from './components/ResetPasswordForm';
 import AuthCallback from './pages/auth/callback';
 import { AuthProvider } from './context/AuthContext';
+import { useSessionHeartbeat } from './src/hooks/useSessionHeartbeat';
 
 // Check if we're in development mode
 const isDev = import.meta.env.DEV;
@@ -22,6 +23,8 @@ const App: React.FC = () => {
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+
+  useSessionHeartbeat();
 
   // Initialize session with error handling
   const initializeSession = useCallback(async () => {

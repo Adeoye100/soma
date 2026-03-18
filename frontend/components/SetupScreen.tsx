@@ -104,7 +104,7 @@ const calculateTotalTime = (intensity: TimeIntensity, numQuestions: number): num
 const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [config, setConfig] = useState<ExamConfig>({
-    title: '',
+    topics: '',
     type: ExamType.OBJECTIVE,
     difficulty: Difficulty.INTERMEDIATE,
     intensity: TimeIntensity.MODERATE,
@@ -202,8 +202,13 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!config.title.trim()) {
-      setError('Please provide a title for the exam.');
+    const topicsArray = config.topics
+      .split(',')
+      .map(t => t.trim())
+      .filter(Boolean);
+    
+    if (topicsArray.length === 0) {
+      setError('Please enter at least one topic to continue.');
       return;
     }
     if (materials.length === 0) {
@@ -269,18 +274,53 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
-              {/* Exam Title Section */}
+              {/* Topics Section */}
               <div>
-                <label htmlFor="title" className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2 block transition-colors duration-300">1. Exam Title</label>
+                <label htmlFor="topics" className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2 block transition-colors duration-300">1. Topics to generate from</label>
                 <input
                   type="text"
-                  id="title"
-                  name="title"
-                  placeholder="e.g. Midterm Physics, React Advanced Quiz..."
-                  value={config.title}
+                  id="topics"
+                  name="topics"
+                  placeholder="e.g. Photosynthesis, Newton's Laws, Cell Division..."
+                  value={config.topics}
                   onChange={handleConfigChange}
                   className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2.5 px-3 sm:px-4 text-sm sm:text-base focus:border-primary-500 focus:outline-none focus:ring-primary-500 transition-colors duration-300"
                 />
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 transition-colors duration-300">
+                  Separate each topic with a comma. Questions will be drawn from these areas.
+                </p>
+                {(() => {
+                  const topicsArray = config.topics
+                    .split(',')
+                    .map(t => t.trim())
+                    .filter(Boolean);
+                  return (
+                    <>
+                      {topicsArray.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          {topicsArray.map((topic, index) => (
+                            <span
+                              key={index}
+                              className="bg-[#1e3a5f] text-[#93c5fd] rounded-full px-3 py-0.5 text-xs"
+                            >
+                              {topic}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {topicsArray.length > 0 && (
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                          {topicsArray.length} topic{topicsArray.length !== 1 ? 's' : ''} detected
+                        </p>
+                      )}
+                      {topicsArray.length === 1 && (
+                        <p className="text-xs text-amber-500 mt-2">
+                          Add more topics for a well-rounded exam
+                        </p>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
 
               {/* File Upload Section */}

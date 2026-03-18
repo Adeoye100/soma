@@ -20,7 +20,7 @@ export interface Question {
 }
 
 // Predefined question templates and topics
-const QUESTION_TEMPLATES = {
+const QUESTION_TEMPLATES: Record<string, Record<string, string[]>> = {
   OBJECTIVE: {
     easy: [
       "What is the definition of {topic}?",
@@ -75,45 +75,39 @@ const QUESTION_TEMPLATES = {
 };
 
 // Common topics in various subjects
-const COMMON_TOPICS = {
+const COMMON_TOPICS: Record<string, string[]> = {
   technology: ['algorithms', 'data structures', 'machine learning', 'databases', 'networks', 'security', 'cloud computing'],
   science: ['physics', 'chemistry', 'biology', 'mathematics', 'statistics', 'research methods'],
   business: ['management', 'finance', 'marketing', 'economics', 'strategy', 'operations'],
   general: ['communication', 'leadership', 'ethics', 'innovation', 'problem solving', 'analysis']
 };
 
+const STOP_WORDS: string[] = ['that', 'with', 'have', 'this', 'will', 'from', 'they', 'know', 'want', 'been', 'good', 'much', 'some', 'time', 'very', 'when', 'come', 'here', 'just', 'like', 'long', 'make', 'many', 'over', 'such', 'take', 'than', 'them', 'well', 'were'];
+
 export class CodeBasedExamService {
   /**
    * Extract topics from materials using simple text analysis
    */
   private extractTopicsFromMaterials(materials: Material[]): string[] {
-    const allText = materials.map(m => m.content).join(' ').toLowerCase();
+    const allText: string = materials.map(m => m.content || '').join(' ');
     const foundTopics: string[] = [];
+    
+    const words: string[] = allText.match(/\b\w{4,}\b/g) || [];
+    const wordCount: Record<string, number> = {};
 
-    // Simple keyword matching for common topics
-    Object.values(COMMON_TOPICS).flat().forEach(topic => {
-      if (allText.includes(topic.toLowerCase())) {
-        foundTopics.push(topic);
-      }
-    });
-
-    // Extract potential topics from text (words that appear frequently)
-    const words = allText.match(/\b\w{4,}\b/g) || [];
-    const wordCount: { [key: string]: number } = {};
-
-    words.forEach(word => {
-      if (!['that', 'with', 'have', 'this', 'will', 'from', 'they', 'know', 'want', 'been', 'good', 'much', 'some', 'time', 'very', 'when', 'come', 'here', 'just', 'like', 'long', 'make', 'many', 'over', 'such', 'take', 'than', 'them', 'well', 'were'].includes(word)) {
+    words.forEach((word: string) => {
+      if (!STOP_WORDS.includes(word)) {
         wordCount[word] = (wordCount[word] || 0) + 1;
       }
     });
 
     // Get top frequent words as additional topics
-    const sortedWords = Object.entries(wordCount)
-      .sort(([,a], [,b]) => b - a)
+    const sortedWords: string[] = Object.entries(wordCount)
+      .sort(([, a], [, b]) => b - a)
       .slice(0, 10)
-      .map(([word]) => word);
+      .map(([word]: [string, number]) => word);
 
-    return [...new Set([...foundTopics, ...sortedWords])].slice(0, 20); // Limit to 20 topics
+    return [...new Set([...foundTopics, ...sortedWords])].slice(0, 20);
   }
 
   /**
@@ -121,14 +115,16 @@ export class CodeBasedExamService {
    */
   private generateQuestionsFromTopics(topics: string[], config: ExamConfig): Question[] {
     const questions: Question[] = [];
-    const templates = QUESTION_TEMPLATES[config.type][config.difficulty];
+    const templates: string[] =
+      (QUESTION_TEMPLATES as Record<string, Record<string, string[]>>)
+        [config.type]?.[config.difficulty] ?? [];
 
-    for (let i = 0; i < config.numQuestions; i++) {
-      const topic = topics[i % topics.length] || 'general concepts';
-      const relatedTopic = topics[(i + 1) % topics.length] || 'related concepts';
-      const template = templates[i % templates.length] || templates[0];
+    for (let i: number = 0; i < config.numQuestions; i++) {
+      const topic: string = topics[i % topics.length] ?? 'general concepts';
+      const relatedTopic: string = topics[(i + 1) % topics.length] ?? 'related concepts';
+      const template: string = templates[i % templates.length] ?? templates[0] ?? '';
 
-      let questionText = '';
+      let questionText: string = '';
       if (template) {
         questionText = template
           .replace('{topic}', topic)
@@ -140,9 +136,9 @@ export class CodeBasedExamService {
 
       if (config.type === 'OBJECTIVE') {
         // Generate multiple choice options
-        const generatedOptions = this.generateOptions(topic, config.difficulty);
+        const generatedOptions: string[] = this.generateOptions(topic, config.difficulty);
         options = this.shuffleArray(generatedOptions);
-        correctAnswer = options[0] || 'Default answer'; // First option is correct after shuffle
+        correctAnswer = options[0] ?? 'Default answer'; // First option is correct after shuffle
       } else {
         // For written answers, provide a model answer
         correctAnswer = this.generateModelAnswer(topic, config.type, config.difficulty);
@@ -164,8 +160,8 @@ export class CodeBasedExamService {
    * Generate multiple choice options
    */
   private generateOptions(topic: string, difficulty: string): string[] {
-    const correctAnswer = `The correct understanding of ${topic}`;
-    const distractors = [
+    const correctAnswer: string = `The correct understanding of ${topic}`;
+    const distractors: string[] = [
       `A misunderstanding of ${topic}`,
       `An unrelated concept to ${topic}`,
       `A partial view of ${topic}`,
@@ -179,7 +175,7 @@ export class CodeBasedExamService {
    * Generate model answers for written questions
    */
   private generateModelAnswer(topic: string, type: string, difficulty: string): string {
-    const baseAnswer = `${topic} is a fundamental concept that involves understanding its core principles and applications.`;
+    const baseAnswer: string = `${topic} is a fundamental concept that involves understanding its core principles and applications.`;
 
     if (type === 'SHORT_ANSWER') {
       return difficulty === 'easy'
@@ -194,35 +190,46 @@ export class CodeBasedExamService {
    * Shuffle array utility
    */
   private shuffleArray(array: string[]): string[] {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      const temp = shuffled[i]!;
-      shuffled[i] = shuffled[j]!;
+    const shuffled: (string | undefined)[] = [...array];
+    for (let i: number = shuffled.length - 1; i > 0; i--) {
+      const j: number = Math.floor(Math.random() * (i + 1));
+      const temp: string | undefined = shuffled[i];
+      shuffled[i] = shuffled[j];
       shuffled[j] = temp;
     }
-    return shuffled;
+    return shuffled.filter((item): item is string => item !== undefined);
   }
 
   /**
    * Generate exam using code-based logic
    */
-  async generateExam(config: ExamConfig, materials: Material[]): Promise<Question[]> {
+  async generateExam(config: ExamConfig, materials: Material[], userTopics?: string): Promise<Question[]> {
     try {
       winston.info(`Generating ${config.type} exam with ${config.numQuestions} questions at ${config.difficulty} difficulty`);
 
-      // Extract topics from materials
-      const topics = this.extractTopicsFromMaterials(materials);
-
-      if (topics.length === 0) {
-        // Fallback topics if none found
-        topics.push(...COMMON_TOPICS.general.slice(0, 5));
+      // Use user-provided topics or extract from materials
+      let topics: string[];
+      
+      if (userTopics && userTopics.trim()) {
+        // Parse user-provided topics (comma-separated)
+        topics = userTopics.split(',')
+          .map((t: string) => t.trim())
+          .filter((t: string) => Boolean(t));
+        winston.info(`Using user-provided topics: ${topics.join(', ')}`);
+      } else {
+        // Extract topics from materials
+        topics = this.extractTopicsFromMaterials(materials);
+        
+        if (topics.length === 0) {
+          // Fallback topics if none found
+          topics.push(...(COMMON_TOPICS.general ?? []).slice(0, 5));
+        }
       }
 
-      winston.info(`Extracted ${topics.length} topics: ${topics.slice(0, 5).join(', ')}...`);
+      winston.info(`Using ${topics.length} topics: ${topics.slice(0, 5).join(', ')}...`);
 
       // Generate questions
-      const questions = this.generateQuestionsFromTopics(topics, config);
+      const questions: Question[] = this.generateQuestionsFromTopics(topics, config);
 
       winston.info(`Successfully generated ${questions.length} questions`);
 

@@ -25,7 +25,7 @@ router.post('/generate',
   examValidation.createExam,
   asyncHandler(async (req, res) => {
   const { 
-    title, 
+    topics, 
     description, 
     type, 
     difficulty, 
@@ -35,16 +35,16 @@ router.post('/generate',
   } = req.body;
 
   try {
-    winston.info(`Generating exam: ${title} for user`);
+    winston.info(`Generating exam with topics: ${topics} for user`);
 
     // Generate questions using code-based logic
     const config = { type, difficulty, numQuestions };
-    const generatedQuestions = await codeBasedExamService.generateExam(config, materials);
+    const generatedQuestions = await codeBasedExamService.generateExam(config, materials, topics);
 
     // Create exam record in database
     const examData = {
-      title,
-      description,
+      title: topics.split(',').map((t: string) => t.trim()).slice(0, 3).join(', ') + (topics.split(',').length > 3 ? '...' : ''),
+      description: `Exam covering ${topics.split(',').map((t: string) => t.trim()).length} topics`,
       type,
       difficulty,
       num_questions: numQuestions,
