@@ -27,7 +27,7 @@ export interface ExamConfig {
 
 export interface Material {
   name: string;
-  content: string; // base64
+  content: string; // plain text extracted from file
   mimeType: string;
 }
 

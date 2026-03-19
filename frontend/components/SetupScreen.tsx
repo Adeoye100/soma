@@ -8,6 +8,7 @@ import InspirationCard from './InspirationCard';
 import ProfileCard from './ProfileCard';
 import ShaderBackground from './ShaderBackground';
 import { convertForExamProcessing, canConvertForExamProcessing } from '../utils/convertToPdf';
+import { extractTextFromFile } from '../utils/extractText';
 
 interface SetupScreenProps {
   onExamStart: (questions: Question[], config: ExamConfig) => void;
@@ -124,7 +125,6 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
     const errors: string[] = [];
     
     for (const file of files) {
-      // Validate file
       const validationError = validateFile(file);
       if (validationError) {
         errors.push(validationError);
@@ -132,25 +132,11 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
       }
       
       try {
-        let fileToProcess = file;
-        
-        // Check if file needs conversion
-        const { canConvert } = canConvertForExamProcessing(file);
-        if (canConvert) {
-          setConversionProgress({ message: `Converting ${file.name} to PDF...`, progress: 0 });
-          fileToProcess = await convertForExamProcessing(file, (p) => {
-            setConversionProgress({ message: p.message, progress: p.progress });
-          });
-          setConversionProgress(null);
-        }
-
-        const content = await fileToBase64(fileToProcess);
-        const mimeType = getMimeType(fileToProcess);
-        newMaterials.push({ name: fileToProcess.name, content, mimeType });
+        const textContent = await extractTextFromFile(file);
+        newMaterials.push({ name: file.name, content: textContent, mimeType: file.type });
         
       } catch (err) {
         errors.push(`Failed to process file ${file.name}: ${err instanceof Error ? err.message : 'Unknown error'}`);
-        setConversionProgress(null);
       }
     }
     

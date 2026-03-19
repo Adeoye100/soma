@@ -12,6 +12,98 @@ import { DocumentProcessingQueue } from './processingQueue';
 import { loggingService } from './loggingService';
 import { tempFileManager } from './tempFileManager';
 
+const MAX_CONTENT_CHARS = 50_000;
+
+async function extractPdfText(file: File | Blob): Promise<string> {
+  try {
+    const pdfjsLib = await import('pdfjs-dist');
+    
+    if (pdfjsLib.version && parseInt(pdfjsLib.version.split('.')[0]) >= 4) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+    } else {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version || '2.16.105'}/pdf.worker.min.js`;
+    }
+    
+    const arrayBuffer = await file.arrayBuffer();
+    const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+    const pdf = await loadingTask.promise;
+    
+    const textParts: string[] = [];
+    const numPages = pdf.numPages;
+    
+    for (let i = 1; i <= numPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      
+      let pageText = '';
+      for (const item of textContent.items as Array<{ str?: string }>) {
+        if (item.str) {
+          pageText += item.str + ' ';
+        }
+      }
+      
+      textParts.push(pageText.trim());
+    }
+    
+    const fullText = textParts.join('\n\n').trim();
+    
+    if (!fullText || fullText.length < 10) {
+      loggingService.warn('DocumentProcessor', `PDF ${file instanceof File ? file.name : 'blob'} appears to contain minimal text (may be scanned images)`);
+      return `[Content from ${file instanceof File ? file.name : 'PDF'} - This PDF contains scanned images rather than selectable text. Exam questions will be based on limited content.]`;
+    }
+    
+    return fullText;
+  } catch (err) {
+    loggingService.warn('DocumentProcessor', `Failed to extract text from PDF`, err);
+    return `[Content from PDF - Text extraction failed. The file may be corrupted, password-protected, or contain scanned images.]`;
+  }
+}
+
+async function extractTextFromFile(file: File): Promise<string> {
+  const mimeType = file.type.toLowerCase();
+  const fileName = file.name.toLowerCase();
+  
+  if (mimeType === 'text/plain' || mimeType === 'text/markdown' || 
+      fileName.endsWith('.txt') || fileName.endsWith('.md')) {
+    return await file.text();
+  }
+  
+  if (mimeType === 'application/pdf' || fileName.endsWith('.pdf')) {
+    return extractPdfText(file);
+  }
+  
+  if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      fileName.endsWith('.docx')) {
+    try {
+      const mammoth = await import('mammoth');
+      const result = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+      return result.value || `[Content from ${file.name} - DOCX was empty]`;
+    } catch (err) {
+      loggingService.warn('DocumentProcessor', `Failed to extract text from DOCX: ${file.name}`, err);
+      return `[Content from ${file.name} - DOCX extraction failed]`;
+    }
+  }
+  
+  if (mimeType === 'application/vnd.ms-powerpoint' || 
+      mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
+      fileName.endsWith('.ppt') || fileName.endsWith('.pptx')) {
+    try {
+      const mammoth = await import('mammoth');
+      const result = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+      return result.value || `[Content from ${file.name} - PowerPoint was empty]`;
+    } catch (err) {
+      loggingService.warn('DocumentProcessor', `PPTX text extraction failed: ${file.name}`, err);
+      return `[Content from ${file.name} - PowerPoint extraction not fully supported]`;
+    }
+  }
+  
+  if (mimeType.startsWith('image/')) {
+    return `[Image content from ${file.name} - Image text cannot be extracted client-side. Consider using OCR tools to convert images to text first.]`;
+  }
+  
+  return await file.text().catch(() => `[Content from ${file.name} - Unable to extract text]`);
+}
+
 export class RobustDocumentProcessor implements DocumentProcessor {
   private config: DocumentProcessingConfig;
   private validationService: FileValidationService;
@@ -273,20 +365,39 @@ export class RobustDocumentProcessor implements DocumentProcessor {
     
     for (const file of files) {
       try {
+        let text: string;
+        let sourceFile: File | Blob = file;
+        
         const result = await this.processFile(file);
         
-        const fileToProcess = result.pdfFile || result.originalFile;
-        const content = await this.fileToBase64(fileToProcess);
+        if (result.success && result.pdfFile) {
+          sourceFile = result.pdfFile;
+          loggingService.debug('DocumentProcessor', `Extracting text from converted PDF for ${file.name}`);
+        }
+        
+        if (sourceFile.type === 'application/pdf' || (sourceFile as File).name?.toLowerCase().endsWith('.pdf')) {
+          text = await extractPdfText(sourceFile);
+        } else {
+          text = await extractTextFromFile(sourceFile as File);
+        }
+        
+        const safeText = text.length > MAX_CONTENT_CHARS
+          ? text.slice(0, MAX_CONTENT_CHARS)
+          : text;
+        
+        if (text.length > MAX_CONTENT_CHARS) {
+          loggingService.warn('DocumentProcessor', 
+            `Content from ${file.name} truncated from ${text.length} to ${MAX_CONTENT_CHARS} chars`);
+        }
         
         materials.push({
           name: file.name,
-          content,
-          mimeType: 'application/pdf' // Always PDF after processing
+          content: safeText,
+          mimeType: file.type
         });
         
       } catch (error) {
         loggingService.error('DocumentProcessor', `Failed to convert file to material: ${file.name}`, error);
-        // Skip failed files
       }
     }
 
