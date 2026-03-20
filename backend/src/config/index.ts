@@ -3,40 +3,49 @@ import dotenv from 'dotenv';
 // Load environment variables from .env file
 dotenv.config();
 
+interface FileUploadConfig {
+  uploadPath: string;
+  maxFileSize: number;
+  tempPath: string;
+  quarantinePath: string;
+  allowedMimeTypes: string[];
+  allowedExtensions: string[];
+  malwareScanningEnabled: boolean;
+  malwareScanEndpoint?: string;
+  ocrLanguage: string;
+  ocrEnhancement: boolean;
+  maxParsingTime: number;
+  cleanupTempFiles: boolean;
+}
+
 interface Config {
   nodeEnv: string;
   port: number;
   host: string;
   
-  // Security Configuration
   jwtSecret: string;
   jwtRefreshSecret: string;
   jwtExpiresIn: string;
   jwtRefreshExpiresIn: string;
   bcryptRounds: number;
   
-  // API Keys
   openRouterApiKeys: string[];
   openRouterModel: string;
   
-  // Rate Limiting
   rateLimitWindowMs: number;
   rateLimitMaxRequests: number;
   redisUrl: string;
   queueMaxConcurrent: number;
   queueMaxQueueSize: number;
   
-  // CORS Configuration
   corsOrigins: string[];
   corsCredentials: boolean;
   
-  // Logging Configuration
   logLevel: string;
   logFilePath: string;
   logMaxSize: string;
   logMaxFiles: number;
   
-  // Database Configuration
   dbHost: string;
   dbPort: number;
   dbName: string;
@@ -44,29 +53,19 @@ interface Config {
   dbPassword: string;
   dbSsl: boolean;
   
-  // File Upload Configuration
-  maxFileSize: number;
-  uploadPath: string;
-  allowedFileTypes: string[];
-  
-  // Security Headers
   helmetEnabled: boolean;
   hstsMaxAge: number;
   
-  // Monitoring
   healthCheckInterval: number;
   metricsEnabled: boolean;
   performanceMonitoring: boolean;
   
-  // External Services
   supabaseUrl: string;
   supabaseAnonKey: string;
   supabaseServiceKey: string;
 
-  // Development & Testing
   mockExternalApis: boolean;
 
-  // Automation Configuration
   automationEnabled: boolean;
   automationMaxConcurrentWorkflows: number;
   automationWorkflowTimeout: number;
@@ -75,6 +74,8 @@ interface Config {
   automationCircuitBreakerEnabled: boolean;
   automationRetryMaxAttempts: number;
   automationMonitoringEnabled: boolean;
+
+  fileUpload: FileUploadConfig;
 }
 
 const getRequiredEnvVar = (name: string): string => {
@@ -105,40 +106,33 @@ const getEnvVarAsArray = (name: string): string[] => {
 };
 
 export const config: Config = {
-  // Server Configuration
   nodeEnv: getOptionalEnvVar('NODE_ENV', 'development'),
   port: getOptionalEnvVarAsNumber('PORT', 3000),
   host: getOptionalEnvVar('HOST', 'localhost'),
   
-  // Security Configuration
   jwtSecret: getRequiredEnvVar('JWT_SECRET'),
   jwtRefreshSecret: getRequiredEnvVar('JWT_REFRESH_SECRET'),
   jwtExpiresIn: getOptionalEnvVar('JWT_EXPIRES_IN', '15m'),
   jwtRefreshExpiresIn: getOptionalEnvVar('JWT_REFRESH_EXPIRES_IN', '7d'),
   bcryptRounds: getOptionalEnvVarAsNumber('BCRYPT_ROUNDS', 12),
   
-  // API Keys
   openRouterApiKeys: getEnvVarAsArray('OPENROUTER_API_KEYS'),
   openRouterModel: getOptionalEnvVar('OPENROUTER_MODEL', 'google/gemini-2.0-flash-001'),
   
-  // Rate Limiting
-  rateLimitWindowMs: getOptionalEnvVarAsNumber('RATE_LIMIT_WINDOW_MS', 900000), // 15 minutes
+  rateLimitWindowMs: getOptionalEnvVarAsNumber('RATE_LIMIT_WINDOW_MS', 900000),
   rateLimitMaxRequests: getOptionalEnvVarAsNumber('RATE_LIMIT_MAX_REQUESTS', 100),
   redisUrl: getOptionalEnvVar('REDIS_URL', 'redis://localhost:6379'),
   queueMaxConcurrent: getOptionalEnvVarAsNumber('QUEUE_MAX_CONCURRENT', 5),
   queueMaxQueueSize: getOptionalEnvVarAsNumber('QUEUE_MAX_QUEUE_SIZE', 100),
   
-  // CORS Configuration
   corsOrigins: getEnvVarAsArray('CORS_ORIGIN'),
   corsCredentials: getOptionalEnvVarAsBoolean('CORS_CREDENTIALS', true),
   
-  // Logging Configuration
   logLevel: getOptionalEnvVar('LOG_LEVEL', 'info'),
   logFilePath: getOptionalEnvVar('LOG_FILE_PATH', 'logs/app.log'),
   logMaxSize: getOptionalEnvVar('LOG_MAX_SIZE', '10m'),
   logMaxFiles: getOptionalEnvVarAsNumber('LOG_MAX_FILES', 5),
   
-  // Database Configuration
   dbHost: getOptionalEnvVar('DB_HOST', 'localhost'),
   dbPort: getOptionalEnvVarAsNumber('DB_PORT', 5432),
   dbName: getOptionalEnvVar('DB_NAME', 'smart_examination'),
@@ -146,40 +140,60 @@ export const config: Config = {
   dbPassword: getOptionalEnvVar('DB_PASSWORD', ''),
   dbSsl: getOptionalEnvVarAsBoolean('DB_SSL', false),
   
-  // File Upload Configuration
-  maxFileSize: getOptionalEnvVarAsNumber('MAX_FILE_SIZE', 10485760), // 10MB
-  uploadPath: getOptionalEnvVar('UPLOAD_PATH', './uploads'),
-  allowedFileTypes: getEnvVarAsArray('ALLOWED_FILE_TYPES'),
-  
-  // Security Headers
   helmetEnabled: getOptionalEnvVarAsBoolean('HELMET_ENABLED', true),
-  hstsMaxAge: getOptionalEnvVarAsNumber('HSTS_MAX_AGE', 31536000), // 1 year
+  hstsMaxAge: getOptionalEnvVarAsNumber('HSTS_MAX_AGE', 31536000),
   
-  // Monitoring
   healthCheckInterval: getOptionalEnvVarAsNumber('HEALTH_CHECK_INTERVAL', 30000),
   metricsEnabled: getOptionalEnvVarAsBoolean('METRICS_ENABLED', true),
   performanceMonitoring: getOptionalEnvVarAsBoolean('PERFORMANCE_MONITORING', true),
   
-  // External Services
   supabaseUrl: getOptionalEnvVar('SUPABASE_URL', ''),
   supabaseAnonKey: getOptionalEnvVar('SUPABASE_ANON_KEY', ''),
   supabaseServiceKey: getOptionalEnvVar('SUPABASE_SERVICE_KEY', ''),
 
-  // Development & Testing
   mockExternalApis: getOptionalEnvVarAsBoolean('MOCK_EXTERNAL_APIS', false),
 
-  // Automation Configuration
   automationEnabled: getOptionalEnvVarAsBoolean('AUTOMATION_ENABLED', true),
   automationMaxConcurrentWorkflows: getOptionalEnvVarAsNumber('AUTOMATION_MAX_CONCURRENT_WORKFLOWS', 10),
-  automationWorkflowTimeout: getOptionalEnvVarAsNumber('AUTOMATION_WORKFLOW_TIMEOUT', 300000), // 5 minutes
-  automationHealthCheckInterval: getOptionalEnvVarAsNumber('AUTOMATION_HEALTH_CHECK_INTERVAL', 60000), // 1 minute
-  automationMetricsRetention: getOptionalEnvVarAsNumber('AUTOMATION_METRICS_RETENTION', 86400000), // 24 hours
+  automationWorkflowTimeout: getOptionalEnvVarAsNumber('AUTOMATION_WORKFLOW_TIMEOUT', 300000),
+  automationHealthCheckInterval: getOptionalEnvVarAsNumber('AUTOMATION_HEALTH_CHECK_INTERVAL', 60000),
+  automationMetricsRetention: getOptionalEnvVarAsNumber('AUTOMATION_METRICS_RETENTION', 86400000),
   automationCircuitBreakerEnabled: getOptionalEnvVarAsBoolean('AUTOMATION_CIRCUIT_BREAKER_ENABLED', true),
   automationRetryMaxAttempts: getOptionalEnvVarAsNumber('AUTOMATION_RETRY_MAX_ATTEMPTS', 3),
-  automationMonitoringEnabled: getOptionalEnvVarAsBoolean('AUTOMATION_MONITORING_ENABLED', true)
+  automationMonitoringEnabled: getOptionalEnvVarAsBoolean('AUTOMATION_MONITORING_ENABLED', true),
+
+  // File upload configuration — see src/middleware/upload.ts
+  fileUpload: {
+    uploadPath: getOptionalEnvVar('UPLOAD_PATH', './uploads'),
+    maxFileSize: getOptionalEnvVarAsNumber('MAX_FILE_SIZE', 10485760),
+    tempPath: getOptionalEnvVar('TEMP_PATH', './temp'),
+    quarantinePath: getOptionalEnvVar('QUARANTINE_PATH', './quarantine'),
+    allowedMimeTypes: [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'text/plain',
+      'image/png',
+      'image/jpeg',
+    ],
+    allowedExtensions: [
+      '.pdf',
+      '.docx',
+      '.pptx',
+      '.txt',
+      '.png',
+      '.jpg',
+      '.jpeg',
+    ],
+    malwareScanningEnabled: getOptionalEnvVarAsBoolean('MALWARE_SCANNING_ENABLED', true),
+    malwareScanEndpoint: getOptionalEnvVar('MALWARE_SCAN_ENDPOINT', ''),
+    ocrLanguage: getOptionalEnvVar('OCR_LANGUAGE', 'eng'),
+    ocrEnhancement: getOptionalEnvVarAsBoolean('OCR_ENHANCEMENT', true),
+    maxParsingTime: getOptionalEnvVarAsNumber('MAX_PARSING_TIME', 120000),
+    cleanupTempFiles: getOptionalEnvVarAsBoolean('CLEANUP_TEMP_FILES', true),
+  },
 };
 
-// Validation
 export const validateConfig = (): void => {
   const errors: string[] = [];
   

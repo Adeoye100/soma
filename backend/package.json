@@ -29,6 +29,14 @@
   "author": "Adeoye Opeyemi",
   "license": "MIT",
   "dependencies": {
+    "pdf-parse": "^1.1.1",
+    "mammoth": "^1.8.0",
+    "adm-zip": "^0.5.16",
+    "chardet": "^2.0.0",
+    "tesseract.js": "^5.1.1",
+    "sharp": "^0.33.5",
+    "mime-types": "^2.1.35",
+    "multer": "^1.4.5-lts.1",
     "@google/genai": "^1.44.0",
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/auto-instrumentations-node": "^0.67.3",
@@ -56,6 +64,9 @@
     "winston": "^3.19.0"
   },
   "devDependencies": {
+    "@types/multer": "^1.4.12",
+    "@types/mime-types": "^2.1.4",
+    "@types/adm-zip": "^0.5.7",
     "@types/bcryptjs": "^2.4.6",
     "@types/compression": "^1.8.1",
     "@types/cors": "^2.8.19",

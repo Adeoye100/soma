@@ -26,6 +26,7 @@ import materialRoutes from '@/routes/material';
 import resultRoutes from '@/routes/result';
 import healthRoutes from '@/routes/health';
 import automationRoutes from '@/routes/automation';
+import fileUploadRoutes from '@/routes/fileUpload';
 
 // Import automation framework
 import { initializeAutomationFramework, checkAutomationHealth } from '@/automation';
@@ -178,6 +179,7 @@ app.use('/api/exam', authMiddleware, examRoutes);
 app.use('/api/material', authMiddleware, materialRoutes);
 app.use('/api/result', authMiddleware, resultRoutes);
 app.use('/api/automation', automationRoutes);
+app.use('/api/files', authMiddleware, fileUploadRoutes);
 
 // Serve static files in production
 if (config.nodeEnv === 'production') {
@@ -261,8 +263,8 @@ const startServer = async (): Promise<void> => {
       logger.info(`🚀 Smart Examination Backend server started on ${host}:${port}`);
       logger.info(`📊 Environment: ${config.nodeEnv}`);
       logger.info(`🔒 JWT Expiration: ${config.jwtExpiresIn}`);
-      logger.info(`📁 Upload Path: ${config.uploadPath}`);
-      logger.info(`📝 Max File Size: ${config.maxFileSize} bytes`);
+      logger.info(`📁 Upload Path: ${config.fileUpload.uploadPath}`);
+      logger.info(`📝 Max File Size: ${config.fileUpload.maxFileSize} bytes`);
     });
     
     // Listen for termination signals
