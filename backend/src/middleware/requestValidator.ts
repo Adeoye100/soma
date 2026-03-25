@@ -190,8 +190,15 @@ export const examValidation = {
       .notEmpty()
       .withMessage('Material content is required'),
     body('materials.*.mimeType')
-      .isIn(['application/pdf', 'text/plain', 'image/png', 'image/jpeg', 'image/jpg', 'image/webp'])
-      .withMessage('Unsupported file type'),
+      .isIn([
+        'application/pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'text/plain',
+        'image/png',
+        'image/jpeg',
+      ])
+      .withMessage('Unsupported file type. Allowed: application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.presentationml.presentation, text/plain, image/png, image/jpeg'),
     checkValidationResult
   ],
   

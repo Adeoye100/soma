@@ -292,17 +292,25 @@ export class AuthService {
     try {
       const { data, error } = await this.supabase
         .from('users')
-        .select('username, full_name, gender')
+        .select('id, email, username, full_name, gender, avatar_url, role')
         .eq('id', userId)
         .single();
 
-      if (error && error.code !== 'PGRST116') {
-        throw new DatabaseError(`Error fetching user profile: ${error.message}`, { error });
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return null;
+        }
+        if (error.code === 'PGRST205') {
+          winston.warn(`Table 'public.users' does not exist. Run migration 001_create_public_users.sql`, { userId });
+          return null;
+        }
+        winston.error('Error fetching user profile:', { userId, error: error.message });
+        return null;
       }
 
       return data;
     } catch (error) {
-      winston.error('Error fetching user profile:', error);
+      winston.error('Unexpected error fetching user profile:', { userId, error });
       return null;
     }
   }

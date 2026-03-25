@@ -24,14 +24,15 @@ router.post('/generate',
   examGenerationValidation,
   examValidation.createExam,
   asyncHandler(async (req, res) => {
-  const { 
-    topics, 
-    description, 
-    type, 
-    difficulty, 
-    numQuestions, 
-    timeLimit, 
-    materials 
+  const {
+    title,
+    topics,
+    description,
+    type,
+    difficulty,
+    numQuestions,
+    timeLimit,
+    materials
   } = req.body;
 
   try {
@@ -43,8 +44,8 @@ router.post('/generate',
 
     // Create exam record in database
     const examData = {
-      title: topics.split(',').map((t: string) => t.trim()).slice(0, 3).join(', ') + (topics.split(',').length > 3 ? '...' : ''),
-      description: `Exam covering ${topics.split(',').map((t: string) => t.trim()).length} topics`,
+      title: title || topics.split(',').map((t: string) => t.trim()).slice(0, 3).join(', ') + (topics.split(',').length > 3 ? '...' : ''),
+      description: description || `Exam covering ${topics.split(',').map((t: string) => t.trim()).length} topics`,
       type,
       difficulty,
       num_questions: numQuestions,

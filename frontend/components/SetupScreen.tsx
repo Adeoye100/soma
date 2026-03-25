@@ -105,6 +105,7 @@ const calculateTotalTime = (intensity: TimeIntensity, numQuestions: number): num
 const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [config, setConfig] = useState<ExamConfig>({
+    title: '',
     topics: '',
     type: ExamType.OBJECTIVE,
     difficulty: Difficulty.INTERMEDIATE,
@@ -120,32 +121,48 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
   const totalTimeSeconds = calculateTotalTime(config.intensity, config.numQuestions);
   const formattedTime = formatTime(totalTimeSeconds);
 
+  const ALLOWED_MIME_TYPES = [
+    'application/pdf',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'text/plain',
+    'image/png',
+    'image/jpeg',
+  ];
+
   const processFiles = async (files: File[]) => {
     const newMaterials: Material[] = [];
     const errors: string[] = [];
-    
+
     for (const file of files) {
+      if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+        errors.push(
+          `"${file.name}" is not a supported file type. ` +
+          `Please upload PDF, DOCX, PPTX, TXT, PNG, or JPG.`
+        );
+        continue;
+      }
+
       const validationError = validateFile(file);
       if (validationError) {
         errors.push(validationError);
         continue;
       }
-      
+
       try {
         const textContent = await extractTextFromFile(file);
         newMaterials.push({ name: file.name, content: textContent, mimeType: file.type });
-        
       } catch (err) {
         errors.push(`Failed to process file ${file.name}: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-    
+
     if (errors.length > 0) {
       setError(errors.join('\n'));
     } else {
       setError(null);
     }
-    
+
     setMaterials(prev => [...prev, ...newMaterials]);
   };
 
@@ -188,11 +205,22 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const trimmedTitle = (config.title || '').trim();
+    if (!trimmedTitle || trimmedTitle.length < 3) {
+      setError('Please enter an exam title of at least 3 characters.');
+      return;
+    }
+    if (trimmedTitle.length > 100) {
+      setError('Exam title must be 100 characters or fewer.');
+      return;
+    }
+
     const topicsArray = config.topics
       .split(',')
       .map(t => t.trim())
       .filter(Boolean);
-    
+
     if (topicsArray.length === 0) {
       setError('Please enter at least one topic to continue.');
       return;
@@ -201,6 +229,13 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
       setError('Please upload at least one course material file.');
       return;
     }
+
+    const invalidMaterial = materials.find(m => !m.mimeType || m.mimeType.trim() === '');
+    if (invalidMaterial) {
+      setError(`File "${invalidMaterial.name}" has no recognized type. Please re-upload.`);
+      return;
+    }
+
     setError(null);
     setIsLoading(true);
     try {
@@ -260,9 +295,28 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
+              {/* Title Section */}
+              <div>
+                <label htmlFor="title" className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2 block transition-colors duration-300">
+                  1. Exam Title
+                </label>
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  placeholder="e.g. Database Systems Mid-Semester Exam..."
+                  value={config.title}
+                  onChange={handleConfigChange}
+                  className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 py-2.5 px-3 sm:px-4 text-sm sm:text-base focus:border-primary-500 focus:outline-none focus:ring-primary-500 transition-colors duration-300"
+                />
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 transition-colors duration-300">
+                  Give your exam a descriptive title (3–100 characters).
+                </p>
+              </div>
+
               {/* Topics Section */}
               <div>
-                <label htmlFor="topics" className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2 block transition-colors duration-300">1. Topics to generate from</label>
+                <label htmlFor="topics" className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2 block transition-colors duration-300">2. Topics to generate from</label>
                 <input
                   type="text"
                   id="topics"
@@ -311,7 +365,7 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
 
               {/* File Upload Section */}
               <div>
-                <label className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2 block transition-colors duration-300">2. Upload Materials</label>
+                <label className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2 block transition-colors duration-300">3. Upload Materials</label>
                 <div 
                   className={`mt-2 flex justify-center rounded-lg border-2 border-dashed px-4 sm:px-6 py-6 sm:py-8 transition-colors duration-200 ${
                     isDragging 
@@ -359,7 +413,7 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
 
               {/* Exam Configuration Section */}
               <div>
-                <label className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4 block transition-colors duration-300">3. Configure Settings</label>
+                <label className="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4 block transition-colors duration-300">4. Configure Settings</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     {/* Exam Type */}
                     <div>

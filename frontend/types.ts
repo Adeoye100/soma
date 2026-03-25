@@ -18,7 +18,9 @@ export enum TimeIntensity {
 }
 
 export interface ExamConfig {
+  title: string;
   topics: string;
+  description?: string;
   type: ExamType;
   difficulty: Difficulty;
   intensity: TimeIntensity;

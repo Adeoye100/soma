@@ -32,11 +32,17 @@ export const generateExam = async (config: ExamConfig, materials: Material[]): P
       console.warn(`[ExamGen] Content for "${m.name}" truncated from ${safeContent.length} to ${MAX_CONTENT_CHARS} chars`);
       safeContent = safeContent.slice(0, MAX_CONTENT_CHARS);
     }
-    return { content: safeContent };
+    return {
+      content: safeContent,
+      mimeType: m.mimeType,
+      filename: m.name,
+    };
   });
 
   const payload = {
+    title: config.title?.trim(),
     topics: config.topics,
+    description: config.description || '',
     type: config.type.toUpperCase().replace(' ', '_'),
     difficulty: difficultyMap[config.difficulty] || 'medium',
     numQuestions: config.numQuestions,

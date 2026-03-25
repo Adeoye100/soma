@@ -105,6 +105,7 @@ export class SecureFileProcessor {
     });
     this.sanitizer = new TextSanitizer();
 
+    const isDev = process.env.NODE_ENV !== 'production';
     this.logger = winston.createLogger({
       level: 'info',
       format: winston.format.combine(
@@ -117,6 +118,11 @@ export class SecureFileProcessor {
         new winston.transports.File({ filename: 'logs/file-processing-error.log', level: 'error', maxsize: 10000000, maxFiles: 10 })
       ]
     });
+    if (this.logger.transports.length === 0 || isDev) {
+      this.logger.add(new winston.transports.Console({
+        format: winston.format.combine(winston.format.colorize(), winston.format.simple())
+      }));
+    }
   }
 
   async processUpload(

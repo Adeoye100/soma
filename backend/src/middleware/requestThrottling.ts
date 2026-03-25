@@ -405,10 +405,25 @@ export function createThrottlingMiddleware(options: ThrottlingOptions) {
  * Specialized throttling configurations
  */
 
+const isDev = process.env.NODE_ENV === 'development';
+
+// ⚠️ Throttle is environment-aware.
+// Development: 100 requests/60s — for testing only.
+// Production:  1 request/1s    — enforced strictly.
+// Never disable throttle entirely — it is a security boundary.
+const userWindowMs    = isDev ? parseInt(process.env.THROTTLE_USER_WINDOW_MS    ?? '60000') : 10000;
+const userMaxRequests = isDev ? parseInt(process.env.THROTTLE_USER_MAX_REQUESTS ?? '100')   : 1;
+
+const aiWindowMs      = isDev ? parseInt(process.env.THROTTLE_AI_WINDOW_MS      ?? '60000') : 15000;
+const aiMaxRequests   = isDev ? parseInt(process.env.THROTTLE_AI_MAX_REQUESTS   ?? '100')   : 1;
+
+const searchWindowMs  = isDev ? parseInt(process.env.THROTTLE_SEARCH_WINDOW_MS   ?? '60000') : 5000;
+const searchMaxReqs   = isDev ? parseInt(process.env.THROTTLE_SEARCH_MAX_REQUESTS ?? '50')   : 3;
+
 // User request throttling (5-10 seconds between requests)
 export const userRequestThrottler = createThrottlingMiddleware({
-  windowMs: 10000, // 10 seconds
-  maxRequests: 1, // One request per window
+  windowMs: userWindowMs,
+  maxRequests: userMaxRequests,
   blockOnExceed: true,
   onThrottleTriggered: (req, retryAfter, reason) => {
     winston.warn(`User request throttling triggered for ${req.user?.id || req.ip}`, {
@@ -422,8 +437,8 @@ export const userRequestThrottler = createThrottlingMiddleware({
 
 // AI generation specific throttling (stricter for AI endpoints)
 export const aiGenerationThrottler = createThrottlingMiddleware({
-  windowMs: 15000, // 15 seconds for AI operations
-  maxRequests: 1,
+  windowMs: aiWindowMs,
+  maxRequests: aiMaxRequests,
   blockOnExceed: true,
   onThrottleTriggered: (req, retryAfter, reason) => {
     winston.warn(`AI generation throttling triggered for ${req.user?.id || req.ip}`, {
@@ -437,8 +452,8 @@ export const aiGenerationThrottler = createThrottlingMiddleware({
 
 // Search/thinking throttling (more lenient for search operations)
 export const searchThrottler = createThrottlingMiddleware({
-  windowMs: 5000, // 5 seconds for search operations
-  maxRequests: 3, // Allow 3 searches per 5 seconds
+  windowMs: searchWindowMs,
+  maxRequests: searchMaxReqs,
   blockOnExceed: true,
   onThrottleTriggered: (req, retryAfter, reason) => {
     winston.warn(`Search throttling triggered for ${req.user?.id || req.ip}`, {

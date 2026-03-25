@@ -34,9 +34,13 @@ export interface User {
 }
 
 export interface ExamConfig {
+  title: string;
+  topics: string;
+  description?: string;
   type: 'OBJECTIVE' | 'SHORT_ANSWER' | 'ESSAY';
   difficulty: 'easy' | 'medium' | 'hard';
   numQuestions: number;
+  timeLimit?: number;
 }
 
 export interface Material {
