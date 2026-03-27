@@ -5,7 +5,7 @@ import { userRequestThrottler, aiGenerationThrottler } from '@/middleware/reques
 import { examGenerationValidation, answerSubmissionValidation } from '@/middleware/requestValidation';
 import { generateExam, evaluateAnswer } from '@/services/geminiService';
 import { codeBasedExamService } from '@/services/CodeBasedExamService';
-import { codeBasedEvaluationService } from '@/services/CodeBasedEvaluationService';
+import { codeBasedEvaluationService, Question as EvaluationQuestion } from '@/services/CodeBasedEvaluationService';
 import { ExamService, QuestionService } from '@/services/supabaseService';
 import { cacheService } from '@/infrastructure/cache';
 import { config } from '@/config';
@@ -103,29 +103,31 @@ router.post('/generate',
     // Invalidate any cached exam lists for this user
     await cacheService.invalidateUserCache(exam.user_id);
 
-    // Create questions in database with schema-compliant column names
+    // Create questions in database using the SAME JWT-authenticated client
     const questionsData = generatedQuestions.map((question, index) => ({
       exam_id: exam.id,
       question_text: question.question,
-      question_type: question.type || 'OBJECTIVE',
-      options: question.options || null,
+      question_type: 'OBJECTIVE',
+      options: question.options ?? [],
       correct_answer: question.correctAnswer,
-      explanation: question.explanation || null,
-      difficulty: question.difficulty || 'medium',
+      explanation: null,
+      difficulty: 'medium' as const,
+      topic: question.topic ?? 'General',
       order_index: index,
-      points: question.points || 10,
-      user_id: userId,
-      created_at: new Date().toISOString()
+      points: 10,
+      user_id: userId
     }));
 
-    let createdQuestions;
-    try {
-      createdQuestions = await QuestionService.createBulk(questionsData as any);
-    } catch (err: any) {
-      winston.error('Failed to create questions:', err);
-      // Clean up the exam since questions failed
+    const { data: createdQuestions, error: questionsError } = await userSupabase
+      .from('questions')
+      .insert(questionsData)
+      .select();
+
+    if (questionsError) {
+      winston.error('Failed to create questions:', questionsError);
+      // Rollback: delete the exam since questions failed
       await userSupabase.from('exams').delete().eq('id', exam.id);
-      res.status(500).json({ error: 'Failed to save questions', message: err.message });
+      res.status(500).json({ error: 'Failed to save questions', message: questionsError.message });
       return;
     }
 
@@ -207,9 +209,9 @@ router.get('/:id', asyncHandler(async (req: Request, res: Response) => {
           },
           questions: questions.map(q => ({
             id: q.id,
-            question: q.question,
+            question: q.question_text,
             options: q.options,
-            topic: q.topic
+            topic: q.topic ?? null
             // Don't return correct answers for security
           }))
         };
@@ -326,11 +328,11 @@ router.post('/:id/answer',
     }
 
     // Evaluate answer using code-based logic
-    const codeQuestion = {
-      question: question.question,
+    const codeQuestion: EvaluationQuestion = {
+      question: question.question ?? question.question_text,
       options: question.options || [],
       correctAnswer: question.correct_answer,
-      topic: question.topic
+      topic: question.topic ?? 'General'
     };
 
     const userAnswer = { answer };
@@ -393,11 +395,11 @@ router.post('/:id/complete', examValidation.completeExam, asyncHandler(async (re
       const question = questions.find(q => q.id === userAnswer.questionId);
       if (!question) continue;
 
-      const codeQuestion = {
-        question: question.question,
+      const codeQuestion: EvaluationQuestion = {
+        question: question.question ?? question.question_text,
         options: question.options || [],
         correctAnswer: question.correct_answer,
-        topic: question.topic
+        topic: question.topic ?? 'General'
       };
 
       const evaluation = await codeBasedEvaluationService.evaluateAnswer(codeQuestion, { answer: userAnswer.answer });

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Soma Kinetic | User Feedback &amp; Insights</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(17, 19, 24, 0.8);
+            backdrop-filter: blur(12px);
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0c0e12;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #23262c;
+            border-radius: 10px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "surface": "#0c0e12",
+                "secondary-fixed": "#6bff8f",
+                "primary-fixed-dim": "#8a85ff",
+                "on-secondary-fixed": "#004a1d",
+                "primary-container": "#9995ff",
+                "surface-variant": "#23262c",
+                "surface-bright": "#292c33",
+                "error-container": "#a70138",
+                "secondary-dim": "#5bf083",
+                "on-secondary-fixed-variant": "#006a2d",
+                "on-secondary": "#005f28",
+                "tertiary": "#ffb148",
+                "outline-variant": "#46484d",
+                "on-surface": "#f6f6fc",
+                "tertiary-container": "#f8a010",
+                "on-primary-fixed": "#000000",
+                "on-tertiary-fixed": "#2a1700",
+                "on-error": "#490013",
+                "error-dim": "#d73357",
+                "on-error-container": "#ffb2b9",
+                "secondary-container": "#006e2f",
+                "primary-fixed": "#9995ff",
+                "surface-tint": "#a8a4ff",
+                "surface-container": "#171a1f",
+                "tertiary-dim": "#e79400",
+                "on-primary": "#1e009f",
+                "error": "#ff6e84",
+                "tertiary-fixed": "#f8a010",
+                "inverse-surface": "#f9f9ff",
+                "inverse-primary": "#5044e3",
+                "secondary-fixed-dim": "#5bf083",
+                "on-tertiary-container": "#4a2c00",
+                "surface-container-high": "#1d2025",
+                "on-background": "#f6f6fc",
+                "on-primary-container": "#16007d",
+                "surface-dim": "#0c0e12",
+                "background": "#0c0e12",
+                "surface-container-low": "#111318",
+                "secondary": "#6bff8f",
+                "tertiary-fixed-dim": "#e79400",
+                "outline": "#74757a",
+                "primary": "#a8a4ff",
+                "inverse-on-surface": "#53555a",
+                "surface-container-lowest": "#000000",
+                "on-tertiary-fixed-variant": "#563400",
+                "on-secondary-container": "#e4ffe2",
+                "on-primary-fixed-variant": "#1d0098",
+                "primary-dim": "#675df9",
+                "on-tertiary": "#573500",
+                "surface-container-highest": "#23262c",
+                "on-surface-variant": "#aaabb0"
+              },
+              fontFamily: {
+                "headline": ["Space Grotesk"],
+                "body": ["Inter"],
+                "label": ["Inter"]
+              },
+              borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body overflow-x-hidden">
+<!-- Sidebar Navigation (SideNavBar) -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-[#111318] dark:bg-[#111318] backdrop-blur-md opacity-90 border-r border-white/10 shadow-2xl flex flex-col h-full py-8 px-4 z-50 font-['Space_Grotesk'] tracking-tight">
+<div class="mb-10 px-2">
+<h1 class="text-2xl font-bold tracking-tighter text-[#f6f6fc]">Command Center</h1>
+<p class="text-xs text-on-surface-variant/60 uppercase tracking-widest mt-1">EdTech Admin</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-[#f6f6fc]/60 hover:bg-white/5 hover:text-[#f6f6fc] transition-all rounded-xl group" href="#">
+<span class="material-symbols-outlined group-hover:scale-105 duration-200">dashboard</span>
+<span class="font-medium">Overview</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#f6f6fc]/60 hover:bg-white/5 hover:text-[#f6f6fc] transition-all rounded-xl group" href="#">
+<span class="material-symbols-outlined group-hover:scale-105 duration-200">group</span>
+<span class="font-medium">Users</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-[#a8a4ff]/10 text-[#a8a4ff] border-r-2 border-[#a8a4ff] rounded-xl group" href="#">
+<span class="material-symbols-outlined group-hover:scale-105 duration-200">rate_review</span>
+<span class="font-medium">Feedback</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#f6f6fc]/60 hover:bg-white/5 hover:text-[#f6f6fc] transition-all rounded-xl group" href="#">
+<span class="material-symbols-outlined group-hover:scale-105 duration-200">settings</span>
+<span class="font-medium">Settings</span>
+</a>
+</nav>
+<div class="mt-auto px-2">
+<button class="w-full py-3 bg-gradient-to-br from-primary to-primary-dim text-on-primary-fixed font-bold rounded-xl shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity">
+                Generate Report
+            </button>
+<div class="mt-6 flex items-center gap-3 px-2">
+<img alt="Admin Avatar" class="w-10 h-10 rounded-full border border-primary/20" data-alt="professional headshot of an African male administrator in a modern office setting with soft bokeh background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCH3yFWqWQWeslWaviFGLaRFeg3D6NRAZFzVmbY0I8Br7wumBkhTZY1hD_L4Wivc_1gJBMTFbAwiuGDn2n0f-254tZY2mjGhVvz9BnT0aZ-U48iWCfvGwk12aIW4ThMfjASJKMHmyHa5-l97uBdCrN9KrnUNS5oRFIQmYfBxEd0y_e5spik1rIc2q-s-Bu6BGUDAr2gI9RX6mcPhU9DHYtntfkT7JOGJfySAl0RdSySV_fa4-8KFRXtbnv4O8OygmzgjBAXtnhgVq0A"/>
+<div>
+<p class="text-sm font-bold text-on-surface leading-tight">Admin Unit</p>
+<p class="text-xs text-on-surface-variant">Soma Kinetic HQ</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Header (TopAppBar) -->
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] h-16 bg-[#0c0e12]/80 dark:bg-[#0c0e12]/80 backdrop-blur-lg flex justify-between items-center px-8 w-full z-40 font-['Inter'] text-sm font-medium tonal-transition-via-whitespace">
+<div class="flex items-center gap-6 w-1/2">
+<div class="relative w-full max-w-md group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-lg pl-10 pr-4 py-2 text-on-surface focus:ring-1 focus:ring-[#a8a4ff]/40 transition-all placeholder:text-on-surface-variant/50" placeholder="Search feedback, student IDs..." type="text"/>
+</div>
+<div class="h-6 w-px bg-white/10"></div>
+<span class="text-xl font-bold font-['Space_Grotesk'] text-[#f6f6fc]">The Command Interface</span>
+</div>
+<div class="flex items-center gap-6">
+<button class="relative p-2 text-on-surface-variant hover:text-white transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full border-2 border-background"></span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-white transition-colors">
+<span class="material-symbols-outlined">help</span>
+</button>
+<div class="flex items-center gap-3 pl-4 border-l border-white/10 cursor-pointer group">
+<div class="text-right">
+<p class="text-sm font-semibold text-[#f6f6fc] group-hover:text-primary transition-colors">Adeoye Opeyemi</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Super Admin</p>
+</div>
+<img alt="Adeoye Opeyemi" class="w-8 h-8 rounded-lg object-cover ring-2 ring-primary/20" data-alt="portrait of a confident tech professional with a warm smile and sharp suit, clean corporate background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOdw7WV8Rgdgf59Ix-NK764znufx0miWy8EfdjEBjXxflzCImhD15rXshg6cwMsD7F_E6bcMq4nKUiMobl3IYCE9O8Gd_56LAIYhzKIFOBrpUVLOGiudCvifwW4sjr8-t8HKLPfpBFTOb8pXOubI_nlQz5XOhFSkxwKDyMMUuGhac-rHJZJjCZT2XFowooVZJXWlv3qj8n7S9kMN8xjo8INLSMXjrw3BH6hAfi1FOneDOxTOnz_v-vRza40oFrhpvMEfSz6Ie2busC"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-24 px-8 pb-12 min-h-screen grid grid-cols-12 gap-8">
+<!-- Center Content: Feedback Feed -->
+<div class="col-span-12 lg:col-span-9 space-y-8">
+<!-- Hero Title & Quick Stats -->
+<section class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<h2 class="font-headline text-4xl font-bold tracking-tight text-on-surface">Student Insights &amp; Feedback</h2>
+<p class="text-on-surface-variant mt-2 font-body max-w-xl">Aggregated qualitative data from the Soma Kinetic ecosystem. Manage curriculum reports and technical UX issues.</p>
+</div>
+<div class="bg-surface-container-high px-6 py-4 rounded-xl flex items-center gap-4 border border-white/5">
+<div class="p-3 bg-secondary/10 rounded-lg">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">sentiment_very_satisfied</span>
+</div>
+<div>
+<p class="text-3xl font-headline font-bold text-secondary">85%</p>
+<p class="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant">Positive Sentiment</p>
+</div>
+</div>
+</section>
+<!-- Analytics Metric Nodes -->
+<section class="grid grid-cols-3 gap-6">
+<div class="bg-surface-container-low p-5 rounded-xl border border-white/5 hover:scale-[1.01] transition-all">
+<p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Total Feedback</p>
+<div class="flex items-baseline gap-2">
+<h3 class="text-3xl font-headline font-bold text-on-surface">1,284</h3>
+<span class="text-xs text-secondary font-medium">+12% vs last mo.</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-5 rounded-xl border border-white/5 hover:scale-[1.01] transition-all">
+<p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Avg. Response Time</p>
+<div class="flex items-baseline gap-2">
+<h3 class="text-3xl font-headline font-bold text-on-surface">2.4<span class="text-lg">hrs</span></h3>
+<span class="text-xs text-error font-medium">-0.2 hrs change</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-5 rounded-xl border border-white/5 hover:scale-[1.01] transition-all">
+<p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Resolved Issues</p>
+<div class="flex items-baseline gap-2">
+<h3 class="text-3xl font-headline font-bold text-on-surface">912</h3>
+<div class="w-16 h-1 bg-surface-variant rounded-full overflow-hidden self-center">
+<div class="w-[71%] h-full bg-primary"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Feedback List -->
+<section class="space-y-6">
+<!-- Feedback Card 1 -->
+<article class="bg-surface-container-low p-6 rounded-xl border border-white/5 hover:bg-surface-container-high transition-colors group">
+<div class="flex justify-between items-start mb-6">
+<div class="flex gap-4">
+<div class="relative">
+<img alt="Kofi Mensah" class="w-12 h-12 rounded-full border-2 border-primary/20" data-alt="close-up of a young West African male student wearing a smart casual polo shirt, looking academic and serious" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkGQ0AvidZR_WobHyDlsxofhTK3sYfmBdKx9OKuhcTIXH9CAQK3ReAXzOn3BfATctMYWohLAvcKFZ5SlZGOQQOB7jgh4HnT88iRHWGtm21PE5tGJEQfhJwphA-Rf74lU2bNDgohCY5g4lMGDHmd4Wfcft5SnXJMMbd4MX3DMJl9E62Hj7gsx3JZKTFLqtuETO43QOzHChQ5RKvQiQKKcP_GIMb80wmsR7b7AtPuuOIEexhV3dnsM_Ih6Q-u741NZM7FGovrTLDpoSQ"/>
+<span class="absolute -bottom-1 -right-1 bg-blue-500 text-white rounded-full p-0.5 border-2 border-surface-container-low">
+<span class="material-symbols-outlined text-[10px] block" style="font-variation-settings: 'FILL' 1;">check</span>
+</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Kofi Mensah</h4>
+<p class="text-xs text-on-surface-variant">ID: SM204 • Grade 11 Science</p>
+</div>
+</div>
+<div class="flex gap-2">
+<span class="px-3 py-1 bg-error/10 text-error text-[10px] font-bold uppercase tracking-widest rounded-full">Negative</span>
+<span class="px-3 py-1 bg-surface-variant text-on-surface-variant text-[10px] font-bold uppercase tracking-widest rounded-full">Pending Review</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="md:col-span-3">
+<div class="inline-block px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest rounded mb-3">Curriculum Error</div>
+<p class="text-on-surface/90 leading-relaxed mb-4">
+                                The Physics Module 4 (Quantum Mechanics) has a calculation error in the practice quiz on slide 12. The formula for Planck's constant uses 'h' but the answer key expects 'hbar'. This is causing confusion among the study group.
+                            </p>
+<div class="flex gap-4 items-center">
+<div class="relative w-24 h-24 rounded-lg overflow-hidden border border-white/10 group-hover:border-primary/40 transition-colors">
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white">zoom_in</span>
+</div>
+<img class="w-full h-full object-cover" data-alt="screenshot of a digital education platform showing a complex physics equation with red annotation circles highlighting a typo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXGfg0Fcp2U7D4kB_P_JBnThM6wbxZsLbR2MmtR2Cggv8EiMN9OVSIHHDmygx_ikiNIyntnKif6IEzSCV3DA3JmrXMzazYu1nDexdijGf0-HpL2xDb2fUD2mkV5pK9TX3Pcg_I9mWGnuJcfIcNXwLmPODBl4-4kKF_eO5lhfsqsn55HUPH_eG-3d6UUYTLXtUNlkUAq710fSBMsC3q80wcgmhBLyDJjco-SwYxHUPNz0EaEJ0ZAWp_IoZEd4FIUmmHQFxAEU3_LEE-"/>
+</div>
+<button class="text-primary text-sm font-semibold hover:underline flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">image</span>
+                                    View Full Size
+                                </button>
+</div>
+</div>
+<div class="flex flex-col justify-end gap-3">
+<button class="w-full py-2.5 bg-primary text-on-primary-fixed text-sm font-bold rounded-lg hover:bg-primary-fixed-dim transition-colors">Assign to Dept</button>
+<button class="w-full py-2.5 border border-outline-variant text-on-surface text-sm font-bold rounded-lg hover:bg-white/5 transition-colors">Dismiss</button>
+</div>
+</div>
+</article>
+<!-- Feedback Card 2 -->
+<article class="bg-surface-container-low p-6 rounded-xl border border-white/5 hover:bg-surface-container-high transition-colors group">
+<div class="flex justify-between items-start mb-6">
+<div class="flex gap-4">
+<div class="relative">
+<img alt="Zainab Al-Mansoori" class="w-12 h-12 rounded-full border-2 border-primary/20" data-alt="portrait of a young woman wearing a colorful headscarf, bright and enthusiastic expression, studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASGnq_uGPupn7R6AxG9ok6fCAr0mmytlO6m5NwT9xMBv2_fqLB2fd5fasy8R8lHmj27mBTwW74AiRb-pbMu2Jo_OI5pCVKV_mtraiPIBBaDf2t_erH159F7yREFZo1bFzkEALqx9hQrYK9UPAnTsfIEle5XK8gqpLvzARV5k9QHNiP2NfW3IgRhe9VxKP6CeOaeEz7jMrxh1urx1CySvLCQc13LpxZtfwdFwpyCD45w20Y87eAXNcoH4Tvwgk2kOn6Y99ezxd32QqX"/>
+<span class="absolute -bottom-1 -right-1 bg-blue-500 text-white rounded-full p-0.5 border-2 border-surface-container-low">
+<span class="material-symbols-outlined text-[10px] block" style="font-variation-settings: 'FILL' 1;">check</span>
+</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Zainab Al-Mansoori</h4>
+<p class="text-xs text-on-surface-variant">ID: SM552 • Grade 12 Literature</p>
+</div>
+</div>
+<div class="flex gap-2">
+<span class="px-3 py-1 bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-widest rounded-full">Positive</span>
+<span class="px-3 py-1 bg-secondary-container/30 text-secondary-dim text-[10px] font-bold uppercase tracking-widest rounded-full">Resolved</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="md:col-span-3">
+<div class="inline-block px-2 py-0.5 bg-tertiary/10 text-tertiary text-[10px] font-bold uppercase tracking-widest rounded mb-3">Suggestion</div>
+<p class="text-on-surface/90 leading-relaxed mb-2">
+                                Loving the new dark mode! It would be even better if we could schedule it to turn on automatically at 7 PM. Helps with my late-night reading sessions. Great work team!
+                            </p>
+</div>
+<div class="flex flex-col justify-end">
+<div class="text-right">
+<p class="text-[10px] text-on-surface-variant uppercase font-bold mb-1">Response sent</p>
+<p class="text-xs font-medium text-secondary italic">"Thank you Zainab! Scheduled themes are coming in v4.2."</p>
+</div>
+</div>
+</div>
+</article>
+<!-- Feedback Card 3 -->
+<article class="bg-surface-container-low p-6 rounded-xl border border-white/5 hover:bg-surface-container-high transition-colors group">
+<div class="flex justify-between items-start mb-6">
+<div class="flex gap-4">
+<div class="relative">
+<img alt="Tunde Okoro" class="w-12 h-12 rounded-full border-2 border-primary/20" data-alt="candid shot of a young man with glasses working on a laptop, soft light coming from a nearby window" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdnFvoZwC9kf7IAdtdDMLrQ1h9fTQBRZ9aOTe5KV5yyk_ogwv0Y6xvkU7TNnxNFqM_10CCS5SwuLTnREZZ0yEsrU-mZWcR_hkGjrYeyMnaGe1dIeytAmtkUUVLVHsdLaCcMumImt3IQNJkn3QmwfoyKYwm0eEiDKHtJ0Logt5ddCXWrcjvyUAmCTGWt5mk216iIoDwyqwX2lhJhxggAjOuXzh59ngNZXcUx73z4fYmiGrdDtaAM91Y8p8X6Qyo1H37WPyowPdPdcL_"/>
+<span class="absolute -bottom-1 -right-1 bg-blue-500 text-white rounded-full p-0.5 border-2 border-surface-container-low">
+<span class="material-symbols-outlined text-[10px] block" style="font-variation-settings: 'FILL' 1;">check</span>
+</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Tunde Okoro</h4>
+<p class="text-xs text-on-surface-variant">ID: SM811 • Grade 10 Math</p>
+</div>
+</div>
+<div class="flex gap-2">
+<span class="px-3 py-1 bg-tertiary/10 text-tertiary text-[10px] font-bold uppercase tracking-widest rounded-full">Neutral</span>
+<span class="px-3 py-1 bg-primary/20 text-primary-fixed text-[10px] font-bold uppercase tracking-widest rounded-full">In Progress</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="md:col-span-3">
+<div class="inline-block px-2 py-0.5 bg-error/10 text-error text-[10px] font-bold uppercase tracking-widest rounded mb-3">UI Bug</div>
+<p class="text-on-surface/90 leading-relaxed mb-4">
+                                On the mobile app (iOS), the "Submit Assignment" button disappears if the phone is in landscape mode. I have to lock orientation to portrait just to submit.
+                            </p>
+</div>
+<div class="flex flex-col justify-end gap-3">
+<button class="w-full py-2.5 bg-primary text-on-primary-fixed text-sm font-bold rounded-lg hover:bg-primary-fixed-dim transition-colors">Contact Dev</button>
+</div>
+</div>
+</article>
+</section>
+</div>
+<!-- Right Sidebar: Filters -->
+<aside class="hidden lg:block lg:col-span-3 space-y-6">
+<div class="bg-surface-container p-6 rounded-xl border border-white/5 sticky top-24">
+<div class="flex items-center justify-between mb-8">
+<h3 class="font-headline text-lg font-bold text-on-surface">Filter Insights</h3>
+<button class="text-[10px] uppercase font-bold tracking-widest text-primary hover:text-white transition-colors">Clear All</button>
+</div>
+<div class="space-y-8">
+<!-- Sentiment Filter -->
+<div>
+<label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-4">Sentiment Analysis</label>
+<div class="grid grid-cols-2 gap-2">
+<button class="p-2 border border-outline-variant rounded-lg text-xs font-medium bg-error/5 text-error">Negative</button>
+<button class="p-2 border border-outline-variant rounded-lg text-xs font-medium hover:bg-white/5 transition-colors">Positive</button>
+<button class="p-2 border border-outline-variant rounded-lg text-xs font-medium hover:bg-white/5 transition-colors">Neutral</button>
+<button class="p-2 border border-primary text-primary rounded-lg text-xs font-bold bg-primary/5">All Tiers</button>
+</div>
+</div>
+<!-- Category Filter -->
+<div>
+<label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-4">Feedback Category</label>
+<div class="space-y-2">
+<div class="flex items-center gap-3">
+<input checked="" class="rounded bg-surface-container-low border-white/10 text-primary focus:ring-primary focus:ring-offset-background" type="checkbox"/>
+<span class="text-sm text-on-surface">Curriculum Errors</span>
+</div>
+<div class="flex items-center gap-3">
+<input class="rounded bg-surface-container-low border-white/10 text-primary focus:ring-primary focus:ring-offset-background" type="checkbox"/>
+<span class="text-sm text-on-surface">UI/UX Technical Bugs</span>
+</div>
+<div class="flex items-center gap-3">
+<input checked="" class="rounded bg-surface-container-low border-white/10 text-primary focus:ring-primary focus:ring-offset-background" type="checkbox"/>
+<span class="text-sm text-on-surface">Feature Suggestions</span>
+</div>
+</div>
+</div>
+<!-- Subject Filter -->
+<div>
+<label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-4">Subject Tags</label>
+<select class="w-full bg-surface-container-low border-white/10 rounded-lg text-sm py-2 px-3 text-on-surface focus:ring-primary">
+<option>All Subjects</option>
+<option>Mathematics</option>
+<option>Physics</option>
+<option>Literature</option>
+<option>Computer Science</option>
+</select>
+</div>
+<!-- Verified Toggle -->
+<div class="pt-6 border-t border-white/10 flex items-center justify-between">
+<div>
+<p class="text-sm font-bold text-on-surface">Only Verified</p>
+<p class="text-[10px] text-on-surface-variant">Prioritize active accounts</p>
+</div>
+<div class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</div>
+</div>
+<button class="w-full py-4 mt-4 bg-surface-container-highest text-on-surface font-bold text-sm rounded-xl hover:bg-white/10 transition-colors">
+                        Apply Filters
+                    </button>
+</div>
+</div>
+<!-- Promotion / Action Area -->
+<div class="bg-gradient-to-br from-[#1d1b3a] to-[#0c0e12] p-6 rounded-xl border border-primary/20 shadow-xl shadow-primary/5">
+<span class="material-symbols-outlined text-primary mb-2">auto_awesome</span>
+<h4 class="font-headline font-bold text-on-surface mb-2">AI Summary Gen</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed mb-4">Generate an executive report of all feedback received this week using NLP analysis.</p>
+<button class="w-full py-2 bg-primary/20 text-primary border border-primary/40 rounded-lg text-xs font-bold hover:bg-primary/30 transition-all">Start Processing</button>
+</div>
+</aside>
+</main>
+<!-- Global FAB (Suppressed on this deep-dive screen per instructions, but placeholder logic if needed) -->
+<!-- <button class="fixed bottom-8 right-8 w-14 h-14 bg-primary text-on-primary-fixed rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform">
+        <span class="material-symbols-outlined">add</span>
+    </button> -->
+</body></html>

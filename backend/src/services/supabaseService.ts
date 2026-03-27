@@ -32,6 +32,7 @@ export interface Question {
   id: string;
   exam_id: string;
   user_id: string;
+  question?: string;
   question_text: string;
   question_type: 'OBJECTIVE' | 'SHORT_ANSWER' | 'ESSAY' | 'TRUE_FALSE';
   options?: string[];
