@@ -8,9 +8,25 @@ import { codeBasedExamService } from '@/services/CodeBasedExamService';
 import { codeBasedEvaluationService } from '@/services/CodeBasedEvaluationService';
 import { ExamService, QuestionService } from '@/services/supabaseService';
 import { cacheService } from '@/infrastructure/cache';
+import { config } from '@/config';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import winston from 'winston';
 
 const router = Router();
+
+function createUserSupabaseClient(authToken: string): SupabaseClient {
+  return createClient(config.supabaseUrl, config.supabaseAnonKey, {
+    global: {
+      headers: {
+        Authorization: `Bearer ${authToken}`
+      }
+    },
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
+}
 
 /**
  * @route   POST /api/exam/generate
@@ -36,13 +52,31 @@ router.post('/generate',
   } = req.body;
 
   try {
-    winston.info(`Generating exam with topics: ${topics} for user`);
+    // Extract JWT from authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      res.status(401).json({ error: 'Unauthorized', message: 'Missing or invalid authorization header' });
+      return;
+    }
+    const authToken = authHeader.slice(7);
+
+    // Get user ID from JWT (already verified by authMiddleware)
+    const userId = (req as any).user?.id;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized', message: 'User not authenticated' });
+      return;
+    }
+
+    winston.info(`Generating exam with topics: ${topics} for user ${userId}`);
 
     // Generate questions using code-based logic
     const config = { type, difficulty, numQuestions };
     const generatedQuestions = await codeBasedExamService.generateExam(config, materials, topics);
 
-    // Create exam record in database
+    // Create user-scoped Supabase client with JWT for RLS
+    const userSupabase = createUserSupabaseClient(authToken);
+
+    // Create exam record with verified user_id from JWT
     const examData = {
       title: title || topics.split(',').map((t: string) => t.trim()).slice(0, 3).join(', ') + (topics.split(',').length > 3 ? '...' : ''),
       description: description || `Exam covering ${topics.split(',').map((t: string) => t.trim()).length} topics`,
@@ -50,27 +84,50 @@ router.post('/generate',
       difficulty,
       num_questions: numQuestions,
       time_limit: timeLimit,
-      user_id: (req as any).user?.id || 'temp-user-id',
+      user_id: userId,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
 
-    const exam = await ExamService.create(examData);
+    // Insert using user-scoped client to satisfy RLS
+    const { data: exam, error: examError } = await userSupabase
+      .from('exams')
+      .insert([examData])
+      .select()
+      .single();
+
+    if (examError) {
+      throw new Error(`Failed to create exam: ${examError.message}`);
+    }
 
     // Invalidate any cached exam lists for this user
     await cacheService.invalidateUserCache(exam.user_id);
 
-    // Create questions in database
-    const questionsData = generatedQuestions.map((question) => ({
+    // Create questions in database with schema-compliant column names
+    const questionsData = generatedQuestions.map((question, index) => ({
       exam_id: exam.id,
-      question: question.question,
+      question_text: question.question,
+      question_type: question.type || 'OBJECTIVE',
       options: question.options || null,
       correct_answer: question.correctAnswer,
-      topic: question.topic,
+      explanation: question.explanation || null,
+      difficulty: question.difficulty || 'medium',
+      order_index: index,
+      points: question.points || 10,
+      user_id: userId,
       created_at: new Date().toISOString()
     }));
 
-    const createdQuestions = await QuestionService.createBulk(questionsData as any);
+    let createdQuestions;
+    try {
+      createdQuestions = await QuestionService.createBulk(questionsData as any);
+    } catch (err: any) {
+      winston.error('Failed to create questions:', err);
+      // Clean up the exam since questions failed
+      await userSupabase.from('exams').delete().eq('id', exam.id);
+      res.status(500).json({ error: 'Failed to save questions', message: err.message });
+      return;
+    }
 
     winston.info(`Successfully generated exam ${exam.id} with ${createdQuestions.length} questions`);
 
@@ -86,11 +143,15 @@ router.post('/generate',
         timeLimit: exam.time_limit,
         createdAt: exam.created_at
       },
-      questions: createdQuestions.map((q) => ({
+      questions: createdQuestions.map((q: any) => ({
         id: q.id,
-        question: q.question,
+        question: q.question_text,
+        questionType: q.question_type,
         options: q.options,
-        topic: q.topic
+        difficulty: q.difficulty,
+        topic: q.topic || null,
+        orderIndex: q.order_index,
+        points: q.points
         // Don't return correct answers to frontend for security
       }))
     });

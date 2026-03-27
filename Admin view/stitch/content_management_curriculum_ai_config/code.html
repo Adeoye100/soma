@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Soma CMS | Command Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary-container": "#f8a010",
+                        "primary": "#a8a4ff",
+                        "tertiary-dim": "#e79400",
+                        "on-secondary-fixed": "#004a1d",
+                        "on-primary-container": "#16007d",
+                        "on-error": "#490013",
+                        "inverse-surface": "#f9f9ff",
+                        "primary-container": "#9995ff",
+                        "on-primary-fixed-variant": "#1d0098",
+                        "secondary-container": "#006e2f",
+                        "inverse-on-surface": "#53555a",
+                        "on-primary": "#1e009f",
+                        "surface": "#0c0e12",
+                        "surface-container": "#171a1f",
+                        "outline-variant": "#46484d",
+                        "error-dim": "#d73357",
+                        "on-tertiary-fixed": "#2a1700",
+                        "background": "#0c0e12",
+                        "surface-container-low": "#111318",
+                        "secondary-fixed": "#6bff8f",
+                        "on-error-container": "#ffb2b9",
+                        "on-tertiary-container": "#4a2c00",
+                        "outline": "#74757a",
+                        "tertiary-fixed": "#f8a010",
+                        "tertiary-fixed-dim": "#e79400",
+                        "inverse-primary": "#5044e3",
+                        "on-secondary-fixed-variant": "#006a2d",
+                        "surface-dim": "#0c0e12",
+                        "on-background": "#f6f6fc",
+                        "on-surface": "#f6f6fc",
+                        "secondary-fixed-dim": "#5bf083",
+                        "primary-fixed": "#9995ff",
+                        "on-tertiary-fixed-variant": "#563400",
+                        "surface-variant": "#23262c",
+                        "error-container": "#a70138",
+                        "error": "#ff6e84",
+                        "primary-fixed-dim": "#8a85ff",
+                        "on-surface-variant": "#aaabb0",
+                        "surface-container-highest": "#23262c",
+                        "surface-tint": "#a8a4ff",
+                        "surface-bright": "#292c33",
+                        "on-tertiary": "#573500",
+                        "tertiary": "#ffb148",
+                        "surface-container-lowest": "#000000",
+                        "on-primary-fixed": "#000000",
+                        "on-secondary": "#005f28",
+                        "on-secondary-container": "#e4ffe2",
+                        "secondary": "#6bff8f",
+                        "surface-container-high": "#1d2025",
+                        "primary-dim": "#675df9",
+                        "secondary-dim": "#5bf083"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-panel {
+            background: rgba(17, 19, 24, 0.7);
+            backdrop-filter: blur(8px);
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary selection:text-on-primary">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full flex flex-col h-screen w-64 border-r border-[#f6f6fc]/10 bg-[#111318] dark:bg-[#111318] shadow-2xl shadow-black/50 z-50">
+<div class="p-6">
+<h1 class="text-2xl font-bold text-[#a8a4ff] font-['Space_Grotesk'] tracking-tight">Soma</h1>
+<p class="text-xs text-on-surface-variant font-label tracking-widest mt-1 uppercase">Command Center</p>
+</div>
+<nav class="flex-1 px-4 space-y-2 mt-4 overflow-y-auto no-scrollbar">
+<!-- Navigation Items Mapping -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#f6f6fc]/60 hover:text-[#f6f6fc] hover:bg-[#f6f6fc]/5 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-['Space_Grotesk'] tracking-tight">Overview</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#f6f6fc]/60 hover:text-[#f6f6fc] hover:bg-[#f6f6fc]/5 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-['Space_Grotesk'] tracking-tight">Users</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#f6f6fc]/60 hover:text-[#f6f6fc] hover:bg-[#f6f6fc]/5 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">location_on</span>
+<span class="font-['Space_Grotesk'] tracking-tight">Location</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#f6f6fc]/60 hover:text-[#f6f6fc] hover:bg-[#f6f6fc]/5 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="font-['Space_Grotesk'] tracking-tight">Academic Performance</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#f6f6fc]/60 hover:text-[#f6f6fc] hover:bg-[#f6f6fc]/5 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-['Space_Grotesk'] tracking-tight">Exam Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#f6f6fc]/60 hover:text-[#f6f6fc] hover:bg-[#f6f6fc]/5 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">leaderboard</span>
+<span class="font-['Space_Grotesk'] tracking-tight">Leaderboards</span>
+</a>
+<!-- Active State: Content Management -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#a8a4ff] bg-[#a8a4ff]/10 font-bold border-r-2 border-[#a8a4ff] transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">library_books</span>
+<span class="font-['Space_Grotesk'] tracking-tight">Content Management</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#f6f6fc]/60 hover:text-[#f6f6fc] hover:bg-[#f6f6fc]/5 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">notifications</span>
+<span class="font-['Space_Grotesk'] tracking-tight">Notifications</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#f6f6fc]/60 hover:text-[#f6f6fc] hover:bg-[#f6f6fc]/5 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">dns</span>
+<span class="font-['Space_Grotesk'] tracking-tight">System Health</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#f6f6fc]/60 hover:text-[#f6f6fc] hover:bg-[#f6f6fc]/5 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-['Space_Grotesk'] tracking-tight">Settings</span>
+</a>
+</nav>
+<div class="p-4 mt-auto border-t border-[#f6f6fc]/5">
+<div class="flex items-center gap-3">
+<img alt="Admin Avatar" class="w-10 h-10 rounded-full object-cover" data-alt="close-up portrait of a professional black man in a tech environment, confident expression, soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFoRlljwMwUtMjvBqRShVd8zp0uveJoaaAy2UpmiudNIFriuH6L40k0vFd-G6gckURYSXQ5PC_GwX_3OmZAYOCjcdFhWWbKU6cNV2SRbiHGL7tnHsQdrfjS8GIF_xAb7pCYNdWZWm8i0PQt6ZQxIKiE5kQkt5_focBgEFVqmiZvaDpVUy1tnq9lfV26QMMZp1SO3SlUU7i8U5iKhGrNwcwS_1dLbzGIiWBXS7r4RUhm1OndOZyMq6jDKoNXmZ8VodCNeYMEFO-UHwy"/>
+<div class="overflow-hidden">
+<p class="text-sm font-bold truncate">Kwame Mensah</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Senior Curriculum Lead</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 h-16 bg-[#0c0e12]/80 backdrop-blur-md flex items-center justify-between px-8 ml-64 w-[calc(100%-16rem)] z-40">
+<div class="flex items-center gap-4 w-1/3">
+<div class="relative w-full group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-xl pl-10 pr-4 py-2 text-sm focus:ring-1 focus:ring-primary/40 transition-all" placeholder="Search curriculum assets..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 text-on-surface-variant">
+<button class="hover:text-[#a8a4ff] transition-all"><span class="material-symbols-outlined">sensors</span></button>
+<button class="hover:text-[#a8a4ff] transition-all relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full border-2 border-background"></span>
+</button>
+<button class="hover:text-[#a8a4ff] transition-all"><span class="material-symbols-outlined">account_circle</span></button>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-64 pt-24 px-8 pb-12 min-h-screen">
+<!-- Hero Section -->
+<section class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<h2 class="text-4xl font-headline font-bold text-on-surface mb-2">Curriculum Engine</h2>
+<p class="text-on-surface-variant max-w-xl">Centralize and scale educational content with AI-driven feedback loops and real-time mapping.</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 bg-surface-container-highest px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-surface-bright transition-all">
+<span class="material-symbols-outlined text-sm">auto_awesome</span>
+                    AI Feedback Settings
+                </button>
+<button class="flex items-center gap-2 bg-surface-container-highest px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-surface-bright transition-all">
+<span class="material-symbols-outlined text-sm">ios_share</span>
+                    Export Mapping
+                </button>
+<button class="flex items-center gap-2 bg-gradient-to-br from-primary to-primary-dim px-6 py-2.5 rounded-xl text-on-primary font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform">
+<span class="material-symbols-outlined">add</span>
+                    Create New Subject
+                </button>
+</div>
+</section>
+<!-- Metric Nodes (Asymmetrical Grid) -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+<div class="bg-surface-container-low p-6 rounded-xl relative overflow-hidden group hover:scale-[1.01] transition-all">
+<div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -mr-12 -mt-12 group-hover:scale-110 transition-transform"></div>
+<p class="text-xs font-label text-on-surface-variant tracking-widest uppercase mb-1">Total Subjects</p>
+<div class="flex items-end justify-between">
+<h3 class="text-4xl font-headline font-bold text-on-surface">12</h3>
+<div class="text-secondary text-xs flex items-center font-bold">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+                        +2 New
+                    </div>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl relative overflow-hidden group hover:scale-[1.01] transition-all">
+<p class="text-xs font-label text-on-surface-variant tracking-widest uppercase mb-1">Lessons Published</p>
+<div class="flex items-end justify-between">
+<h3 class="text-4xl font-headline font-bold text-on-surface">842</h3>
+<div class="text-secondary text-xs flex items-center font-bold">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+                        Live
+                    </div>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl relative overflow-hidden group hover:scale-[1.01] transition-all">
+<p class="text-xs font-label text-on-surface-variant tracking-widest uppercase mb-1">AI Modules</p>
+<div class="flex items-end justify-between">
+<h3 class="text-4xl font-headline font-bold text-on-surface">14</h3>
+<div class="text-primary text-xs flex items-center font-bold">
+<span class="material-symbols-outlined text-sm">bolt</span>
+                        Active
+                    </div>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl relative overflow-hidden group hover:scale-[1.01] transition-all border border-error/20">
+<p class="text-xs font-label text-on-surface-variant tracking-widest uppercase mb-1">Pending Reviews</p>
+<div class="flex items-end justify-between">
+<h3 class="text-4xl font-headline font-bold text-error">24</h3>
+<div class="text-error text-xs flex items-center font-bold">
+<span class="material-symbols-outlined text-sm">warning</span>
+                        Urgent
+                    </div>
+</div>
+</div>
+</section>
+<!-- Main Content Split -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Subject Library Library Grid/Table -->
+<div class="lg:col-span-8 space-y-6">
+<div class="bg-surface-container-low rounded-xl overflow-hidden">
+<div class="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-surface-container-high/30">
+<h4 class="font-headline font-bold text-lg">Subject Library</h4>
+<div class="flex gap-2">
+<button class="p-1.5 rounded-lg bg-surface-container-low hover:bg-surface-variant"><span class="material-symbols-outlined text-sm">filter_list</span></button>
+<button class="p-1.5 rounded-lg bg-surface-container-low hover:bg-surface-variant"><span class="material-symbols-outlined text-sm">more_vert</span></button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left text-sm">
+<thead>
+<tr class="text-on-surface-variant font-label text-[10px] uppercase tracking-widest">
+<th class="px-6 py-4">Subject Name</th>
+<th class="px-6 py-4 text-center">Levels</th>
+<th class="px-6 py-4 text-center">Lessons / Quizzes</th>
+<th class="px-6 py-4">Engagement</th>
+<th class="px-6 py-4">Status</th>
+<th class="px-6 py-4"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/5">
+<tr class="hover:bg-white/[0.02] transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">functions</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Mathematics</p>
+<p class="text-[10px] text-on-surface-variant">Modified 2h ago</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<span class="px-2 py-0.5 rounded bg-surface-container-highest text-[10px] font-bold">SSS 1-3</span>
+</td>
+<td class="px-6 py-5 text-center font-mono text-xs">
+                                        128 <span class="text-on-surface-variant">/</span> 42
+                                    </td>
+<td class="px-6 py-5">
+<!-- Sparkline Representation -->
+<div class="flex items-end gap-[2px] h-6 w-16">
+<div class="bg-secondary/40 w-1 h-[30%] rounded-full"></div>
+<div class="bg-secondary/40 w-1 h-[50%] rounded-full"></div>
+<div class="bg-secondary/40 w-1 h-[80%] rounded-full"></div>
+<div class="bg-secondary w-1 h-[100%] rounded-full"></div>
+<div class="bg-secondary/60 w-1 h-[70%] rounded-full"></div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-2 py-1 rounded-full text-[10px] font-bold bg-secondary/10 text-secondary">PUBLISHED</span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-primary hover:text-on-primary hover:bg-primary px-3 py-1 rounded-lg border border-primary/20 text-xs transition-all">Edit</button>
+</td>
+</tr>
+<tr class="hover:bg-white/[0.02] transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined">science</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Physics</p>
+<p class="text-[10px] text-on-surface-variant">Modified 1d ago</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<span class="px-2 py-0.5 rounded bg-surface-container-highest text-[10px] font-bold">SSS 3</span>
+</td>
+<td class="px-6 py-5 text-center font-mono text-xs">
+                                        94 <span class="text-on-surface-variant">/</span> 18
+                                    </td>
+<td class="px-6 py-5">
+<div class="flex items-end gap-[2px] h-6 w-16">
+<div class="bg-secondary/40 w-1 h-[60%] rounded-full"></div>
+<div class="bg-secondary/40 w-1 h-[40%] rounded-full"></div>
+<div class="bg-secondary/40 w-1 h-[90%] rounded-full"></div>
+<div class="bg-secondary w-1 h-[75%] rounded-full"></div>
+<div class="bg-secondary/60 w-1 h-[95%] rounded-full"></div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-2 py-1 rounded-full text-[10px] font-bold bg-tertiary/10 text-tertiary">DRAFT</span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-primary hover:text-on-primary hover:bg-primary px-3 py-1 rounded-lg border border-primary/20 text-xs transition-all">Edit</button>
+</td>
+</tr>
+<tr class="hover:bg-white/[0.02] transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary-container/10 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined">menu_book</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">English Lang.</p>
+<p class="text-[10px] text-on-surface-variant">Modified 3d ago</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<span class="px-2 py-0.5 rounded bg-surface-container-highest text-[10px] font-bold">JSS 1-3</span>
+</td>
+<td class="px-6 py-5 text-center font-mono text-xs">
+                                        210 <span class="text-on-surface-variant">/</span> 65
+                                    </td>
+<td class="px-6 py-5">
+<div class="flex items-end gap-[2px] h-6 w-16">
+<div class="bg-secondary/40 w-1 h-[20%] rounded-full"></div>
+<div class="bg-secondary/40 w-1 h-[30%] rounded-full"></div>
+<div class="bg-secondary/40 w-1 h-[40%] rounded-full"></div>
+<div class="bg-secondary w-1 h-[55%] rounded-full"></div>
+<div class="bg-secondary/60 w-1 h-[60%] rounded-full"></div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-2 py-1 rounded-full text-[10px] font-bold bg-secondary/10 text-secondary">PUBLISHED</span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-primary hover:text-on-primary hover:bg-primary px-3 py-1 rounded-lg border border-primary/20 text-xs transition-all">Edit</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Recent Updates Feed -->
+<div class="bg-surface-container-low rounded-xl p-6">
+<h4 class="font-headline font-bold text-lg mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">history</span>
+                        Curriculum Velocity
+                    </h4>
+<div class="space-y-4">
+<div class="flex gap-4 group">
+<div class="relative">
+<img alt="Amara Avatar" class="w-8 h-8 rounded-full object-cover" data-alt="close-up portrait of a young African woman with short hair, neutral background, sharp professional focus" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSNlBd-QEeCa3_adsNO6t7pXEwRIvdj-fsptC6s20TDBZHRgXfabj10lzGidPsvCVKmIhSUoE_zTLht3khLoga3OZyZNpf25B-eX4X6iM3ZeNlY3B9aJ-gUTMd_OanMI2mVg-wGCa3a_HHW14HpSIEfkGVAvlezJU100rjm_7XllnpnMxa4zh8vfJBBPSQsHwa04bkwXhanQhqIDIEnLUhdEEyd-tFvK5CKc6a85AVpPYYh3kh5kjf90saGy8mp8C2sQqCP-r5QXJD"/>
+<div class="absolute -bottom-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center border-2 border-surface-container-low">
+<span class="material-symbols-outlined text-[10px] text-on-primary font-bold">upload</span>
+</div>
+</div>
+<div class="flex-1">
+<p class="text-sm"><span class="font-bold text-on-surface">Amara</span> published <span class="text-primary italic font-medium">'Quantum Field Calculus IV'</span> in Physics</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-tighter mt-0.5">14 Minutes Ago • Senior Secondary 3</p>
+</div>
+</div>
+<div class="flex gap-4 group">
+<div class="relative">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm">robot_2</span>
+</div>
+<div class="absolute -bottom-1 -right-1 w-4 h-4 bg-secondary rounded-full flex items-center justify-center border-2 border-surface-container-low">
+<span class="material-symbols-outlined text-[10px] text-on-secondary font-bold">sync</span>
+</div>
+</div>
+<div class="flex-1">
+<p class="text-sm"><span class="font-bold text-on-surface">System</span> updated AI model for <span class="text-secondary font-medium">'Linguistic Analysis'</span></p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-tighter mt-0.5">2 Hours Ago • English Core v4.2</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Configuration Sidebar -->
+<aside class="lg:col-span-4 space-y-6">
+<!-- AI Assessment Configuration Panel -->
+<div class="bg-surface-container-low rounded-xl p-6 border border-primary/10">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary">psychology</span>
+<h4 class="font-headline font-bold text-lg">AI Configuration</h4>
+</div>
+<div class="space-y-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-sm font-bold">Auto-Feedback Generation</p>
+<p class="text-[10px] text-on-surface-variant">Real-time student intervention</p>
+</div>
+<button class="w-12 h-6 bg-primary rounded-full relative flex items-center px-1">
+<div class="w-4 h-4 bg-on-primary rounded-full absolute right-1"></div>
+</button>
+</div>
+<div>
+<div class="flex items-center justify-between mb-2">
+<p class="text-sm font-bold">Confidence Threshold</p>
+<span class="text-primary text-xs font-mono font-bold">0.85</span>
+</div>
+<input class="w-full h-1 bg-surface-container-highest appearance-none rounded-full accent-primary" type="range" value="85"/>
+<div class="flex justify-between mt-2 text-[10px] text-on-surface-variant font-label">
+<span>RELAXED (0.0)</span>
+<span>STRICT (1.0)</span>
+</div>
+</div>
+<div class="pt-6 border-t border-white/5">
+<p class="text-[10px] font-label text-on-surface-variant uppercase tracking-widest mb-4">Top Challenging Concepts</p>
+<div class="space-y-3">
+<div class="flex items-center gap-3 bg-surface-container-high/50 p-3 rounded-lg border border-white/5">
+<div class="text-error font-mono text-xs font-bold">78%</div>
+<div class="flex-1">
+<p class="text-xs font-bold">Vector Decomposition</p>
+<p class="text-[10px] text-on-surface-variant">Mathematics • SSS 2</p>
+</div>
+<span class="material-symbols-outlined text-error text-sm">trending_up</span>
+</div>
+<div class="flex items-center gap-3 bg-surface-container-high/50 p-3 rounded-lg border border-white/5">
+<div class="text-error font-mono text-xs font-bold">64%</div>
+<div class="flex-1">
+<p class="text-xs font-bold">Haber Process Catalyst</p>
+<p class="text-[10px] text-on-surface-variant">Chemistry • SSS 3</p>
+</div>
+<span class="material-symbols-outlined text-error text-sm">trending_up</span>
+</div>
+<div class="flex items-center gap-3 bg-surface-container-high/50 p-3 rounded-lg border border-white/5">
+<div class="text-tertiary font-mono text-xs font-bold">42%</div>
+<div class="flex-1">
+<p class="text-xs font-bold">Relative Pronouns</p>
+<p class="text-[10px] text-on-surface-variant">English • JSS 3</p>
+</div>
+<span class="material-symbols-outlined text-tertiary text-sm">horizontal_rule</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Actions / Quick Links -->
+<div class="bg-surface-container-low rounded-xl p-4 flex flex-col gap-2">
+<button class="flex items-center justify-between w-full p-3 rounded-lg hover:bg-white/5 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-xl">map</span>
+<span class="text-sm font-medium">Curriculum Standards Grid</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">chevron_right</span>
+</button>
+<button class="flex items-center justify-between w-full p-3 rounded-lg hover:bg-white/5 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-xl">school</span>
+<span class="text-sm font-medium">Examiner Feedback Portal</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">chevron_right</span>
+</button>
+</div>
+<!-- Aesthetic Branding Card -->
+<div class="relative h-40 rounded-xl overflow-hidden bg-primary-container">
+<img alt="Education Abstract" class="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-50" data-alt="abstract artistic visualization of data flowing between students, neon purple and green threads of light in a dark digital space" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuAnB4RI9n86psCGMtVqeYdCogDy6nAOwsHvn7UZlnTTtBMSldjtXayoeaONaWWrgPWk3tcqmbpytmsuR6mQoWxUOimhsMLMMjuZ9-eguSdL1fS2tDRYfoAnJzrTVjFRh-y4mAC0YkRPFBdFkKb-ufL8rTo2BX1-bcVdQdvaJmEpue6BMmW8uBbumUcBxmOh_O08UNyNI_a2ruh2O-bOmDoiuRchrm6tfpvDD2EcSPBFM8wJ5AlvRslhaQhKvAM3w27rIPS-mLY7yY"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-6 flex flex-col justify-end">
+<p class="text-on-primary font-headline font-bold text-xl leading-tight">Empowering Africa's Next Wave of Innovators.</p>
+<p class="text-on-primary/60 text-[10px] font-label tracking-widest uppercase mt-2">Soma Kinetic • Content Engine</p>
+</div>
+</div>
+</aside>
+</div>
+</main>
+</body></html>

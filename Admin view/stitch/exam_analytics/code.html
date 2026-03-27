@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Soma EdTech Admin - Exam Analytics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "outline": "#74757a",
+                        "tertiary-fixed-dim": "#e79400",
+                        "on-tertiary": "#573500",
+                        "on-surface": "#f6f6fc",
+                        "tertiary-container": "#f8a010",
+                        "secondary-fixed-dim": "#5bf083",
+                        "surface-dim": "#0c0e12",
+                        "inverse-primary": "#5044e3",
+                        "tertiary": "#ffb148",
+                        "inverse-surface": "#f9f9ff",
+                        "error-container": "#a70138",
+                        "surface-container-high": "#1d2025",
+                        "error": "#ff6e84",
+                        "on-primary-fixed": "#000000",
+                        "surface-container-lowest": "#000000",
+                        "secondary-fixed": "#6bff8f",
+                        "on-primary-fixed-variant": "#1d0098",
+                        "secondary-dim": "#5bf083",
+                        "inverse-on-surface": "#53555a",
+                        "surface-container": "#171a1f",
+                        "on-primary-container": "#16007d",
+                        "on-error": "#490013",
+                        "on-primary": "#1e009f",
+                        "primary": "#a8a4ff",
+                        "tertiary-dim": "#e79400",
+                        "surface-container-highest": "#23262c",
+                        "surface-bright": "#292c33",
+                        "primary-dim": "#675df9",
+                        "error-dim": "#d73357",
+                        "background": "#0c0e12",
+                        "primary-container": "#9995ff",
+                        "tertiary-fixed": "#f8a010",
+                        "surface-container-low": "#111318",
+                        "on-tertiary-container": "#4a2c00",
+                        "primary-fixed-dim": "#8a85ff",
+                        "secondary-container": "#006e2f",
+                        "on-tertiary-fixed": "#2a1700",
+                        "on-surface-variant": "#aaabb0",
+                        "surface-variant": "#23262c",
+                        "on-tertiary-fixed-variant": "#563400",
+                        "on-secondary-fixed-variant": "#006a2d",
+                        "on-secondary-fixed": "#004a1d",
+                        "secondary": "#6bff8f",
+                        "on-secondary-container": "#e4ffe2",
+                        "primary-fixed": "#9995ff",
+                        "on-secondary": "#005f28",
+                        "on-error-container": "#ffb2b9",
+                        "on-background": "#f6f6fc",
+                        "surface": "#0c0e12",
+                        "surface-tint": "#a8a4ff",
+                        "outline-variant": "#46484d"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #0c0e12;
+            color: #f6f6fc;
+            font-family: 'Inter', sans-serif;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Metric Node Sparkline Placeholder */
+        .sparkline-svg {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 0;
+        }
+    </style>
+</head>
+<body class="flex min-h-screen">
+<!-- SideNavBar (Shared Component) -->
+<aside class="w-[240px] h-screen sticky left-0 top-0 overflow-y-auto bg-[#111318] dark:bg-[#111318] flex flex-col border-r border-[#f6f6fc]/5 z-50">
+<div class="p-6 flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary-dim flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-fixed text-xl" style="font-variation-settings: 'FILL' 1;">school</span>
+</div>
+<div>
+<h1 class="text-2xl font-bold tracking-tighter text-[#f6f6fc] font-['Space_Grotesk']">Soma</h1>
+<p class="text-[10px] text-slate-400 font-medium uppercase tracking-[0.2em] leading-none">EdTech Admin</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1 px-3 font-['Space_Grotesk'] font-medium text-sm tracking-tight">
+<a class="flex items-center gap-3 text-slate-400 hover:text-[#f6f6fc] px-3 py-2 transition-colors hover:bg-[#111318] hover:scale-[1.01]" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Overview</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-[#f6f6fc] px-3 py-2 transition-colors hover:bg-[#111318] hover:scale-[1.01]" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span>Users &amp; Sessions</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-[#f6f6fc] px-3 py-2 transition-colors hover:bg-[#111318] hover:scale-[1.01]" href="#">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+<span>Location Intelligence</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-[#f6f6fc] px-3 py-2 transition-colors hover:bg-[#111318] hover:scale-[1.01]" href="#">
+<span class="material-symbols-outlined" data-icon="school">school</span>
+<span>Academic Performance</span>
+</a>
+<!-- Active Tab: Exam Analytics -->
+<a class="flex items-center gap-3 bg-[#a8a4ff]/10 text-[#a8a4ff] rounded-lg font-bold px-3 py-2 transition-all scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="analytics" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span>Exam Analytics</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-[#f6f6fc] px-3 py-2 transition-colors hover:bg-[#111318] hover:scale-[1.01]" href="#">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+<span>Leaderboards</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-[#f6f6fc] px-3 py-2 transition-colors hover:bg-[#111318] hover:scale-[1.01]" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span>Content Management</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-[#f6f6fc] px-3 py-2 transition-colors hover:bg-[#111318] hover:scale-[1.01]" href="#">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span>Notifications &amp; Alerts</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-[#f6f6fc] px-3 py-2 transition-colors hover:bg-[#111318] hover:scale-[1.01]" href="#">
+<span class="material-symbols-outlined" data-icon="monitor_heart">monitor_heart</span>
+<span>System Health</span>
+</a>
+<div class="pt-4 mt-4 border-t border-white/5">
+<a class="flex items-center gap-3 text-slate-400 hover:text-[#f6f6fc] px-3 py-2 transition-colors hover:bg-[#111318] hover:scale-[1.01]" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</div>
+</nav>
+<div class="p-4 mb-4 mx-3 bg-surface-container-high rounded-xl">
+<div class="flex items-center gap-3">
+<img alt="Soma Logo" class="w-8 h-8 rounded-full border border-primary/20" data-alt="professional portrait of a high-tech system administrator with subtle blue backlighting and sharp features" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9SZS9hJm4UfvELnRaXpuvulT1ve312a_tLo50VJzn7moE3d1MIeie-OJnOpTNYQE1_G15P-mSGPyOiv6-dpJphpfvOLZlorWwAYly2zPmVs-nEFD_1OxqryH3RA_yAY_ZfSocG2gn7AQbJDKsE3eBtPVbcAK_Kffl02FnCCWQXDlxxbzjDSKHqh9wv-2sE-xRb17bcWzYYCmTGFDASDfwrcXJfP89kuKCg7c89BdcZqkANoRxighhp71VlxLB0bLfZDxYMmF_k0Rd"/>
+<div class="overflow-hidden">
+<p class="text-xs font-bold truncate">Admin Profile</p>
+<p class="text-[10px] text-primary truncate">System Level 4</p>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 min-w-0 flex flex-col bg-surface relative">
+<!-- TopNavBar (Shared Component) -->
+<header class="flex justify-between items-center w-full px-8 sticky top-0 z-50 bg-[#0c0e12]/80 backdrop-blur-md h-16">
+<div class="flex items-center gap-8">
+<h2 class="font-['Space_Grotesk'] text-lg font-bold tracking-tight text-on-surface">Exam Analytics</h2>
+<div class="flex items-center gap-6 font-['Inter'] text-sm font-semibold uppercase tracking-wider">
+<a class="text-[#a8a4ff] border-b-2 border-[#a8a4ff] py-5" href="#">Live Status</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative group">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-500 text-sm" data-icon="search">search</span>
+<input class="bg-surface-container-low border border-outline-variant/20 rounded-lg pl-10 pr-4 py-1.5 text-xs font-label uppercase tracking-widest focus:ring-1 focus:ring-[#a8a4ff]/40 focus:border-[#a8a4ff]/40 outline-none w-64 transition-all" placeholder="QUERY METRICS..." type="text"/>
+</div>
+<div class="flex items-center gap-4 text-slate-400">
+<button class="hover:text-[#f6f6fc] transition-opacity">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+</button>
+<button class="hover:text-[#f6f6fc] transition-opacity relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute -top-1 -right-1 w-2 h-2 bg-error rounded-full ring-2 ring-background"></span>
+</button>
+<div class="h-6 w-px bg-white/10 mx-2"></div>
+<img alt="Admin Avatar" class="w-8 h-8 rounded-full ring-2 ring-primary/20 hover:ring-primary/50 cursor-pointer transition-all" data-alt="close up of a modern sleek avatar icon representing a system administrator with digital glitch aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARHrjrR14nWWkMeiI6FwGEPvadAS6T484ZJzaWtYwnH3zlMdCH0YduSTGCtfg0n2GRunqCpX95Tj6Z9nHJ0ocoGry3G7EAIWCpO7VPPhLAXkxLG1bgPqg7vLF_C0ebWAdX24bZEPm5cFzW_BwrRNDMIzI_Sjq1mwRqsfZPphXdceEsKSnD0Z2mJwIyoWPQHyUEhiUqvJnV5QdZUJMewO36sh0Y72r-Iz8dHVSI6QoQjIq60ujAVStu3FJiYFH5twjld1qJfJeUHjrP"/>
+</div>
+</div>
+</header>
+<div class="p-8 space-y-8 max-w-[1600px] mx-auto w-full">
+<!-- TOP: KPI Cards (Metric Nodes) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Total Attempts -->
+<div class="bg-surface-container-low rounded-xl p-6 border border-white/[0.03] group hover:scale-[1.01] transition-all">
+<div class="flex justify-between items-start mb-4">
+<p class="font-label text-xs uppercase tracking-[0.2em] text-on-surface-variant font-semibold">Total Attempts</p>
+<span class="text-secondary text-xs font-bold">+14.2%</span>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<h3 class="font-headline text-4xl font-bold tracking-tight">82,419</h3>
+<p class="text-[10px] text-slate-500 mt-1 uppercase">Across 4.2k active modules</p>
+</div>
+<svg class="w-16 h-8 text-secondary" viewbox="0 0 100 40">
+<path d="M0,35 Q20,30 40,35 T80,10 T100,5" fill="none" stroke="currentColor" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+<!-- Global Pass Rate -->
+<div class="bg-surface-container-low rounded-xl p-6 border border-white/[0.03] group hover:scale-[1.01] transition-all">
+<div class="flex justify-between items-start mb-4">
+<p class="font-label text-xs uppercase tracking-[0.2em] text-on-surface-variant font-semibold">Global Pass Rate</p>
+<span class="text-error text-xs font-bold">-2.1%</span>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<h3 class="font-headline text-4xl font-bold tracking-tight">74.8%</h3>
+<p class="text-[10px] text-slate-500 mt-1 uppercase">Target: 80% Performance</p>
+</div>
+<svg class="w-16 h-8 text-error" viewbox="0 0 100 40">
+<path d="M0,5 Q20,15 40,10 T80,25 T100,30" fill="none" stroke="currentColor" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+<!-- Avg Time to Finish -->
+<div class="bg-surface-container-low rounded-xl p-6 border border-white/[0.03] group hover:scale-[1.01] transition-all">
+<div class="flex justify-between items-start mb-4">
+<p class="font-label text-xs uppercase tracking-[0.2em] text-on-surface-variant font-semibold">Avg Time Finish</p>
+<span class="text-secondary text-xs font-bold">STABLE</span>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<h3 class="font-headline text-4xl font-bold tracking-tight">42<span class="text-xl font-medium">m</span></h3>
+<p class="text-[10px] text-slate-500 mt-1 uppercase">Efficiency Optimal</p>
+</div>
+<svg class="w-16 h-8 text-secondary" viewbox="0 0 100 40">
+<path d="M0,20 L20,22 L40,18 L60,20 L80,19 L100,20" fill="none" stroke="currentColor" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+<!-- Retake Rate -->
+<div class="bg-surface-container-low rounded-xl p-6 border border-white/[0.03] group hover:scale-[1.01] transition-all">
+<div class="flex justify-between items-start mb-4">
+<p class="font-label text-xs uppercase tracking-[0.2em] text-on-surface-variant font-semibold">Retake Rate</p>
+<span class="text-tertiary text-xs font-bold">+5.4%</span>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<h3 class="font-headline text-4xl font-bold tracking-tight">12.1%</h3>
+<p class="text-[10px] text-slate-500 mt-1 uppercase">Persistence Index: High</p>
+</div>
+<svg class="w-16 h-8 text-tertiary" viewbox="0 0 100 40">
+<path d="M0,38 L20,30 L40,28 L60,15 L80,10 L100,5" fill="none" stroke="currentColor" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</div>
+<!-- MIDDLE: Question Difficulty Heatmap -->
+<div class="bg-surface-container-low rounded-xl p-8 border border-white/[0.03]">
+<div class="flex justify-between items-center mb-8">
+<div>
+<h4 class="font-headline text-2xl font-bold tracking-tight">Question Difficulty Heatmap</h4>
+<p class="text-on-surface-variant text-sm mt-1">Difficulty density across 100 core assessment modules</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded bg-secondary-dim/20"></span>
+<span class="text-[10px] uppercase font-bold text-slate-400">Easy</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded bg-primary/40"></span>
+<span class="text-[10px] uppercase font-bold text-slate-400">Mid</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded bg-error-dim/80"></span>
+<span class="text-[10px] uppercase font-bold text-slate-400">Hard</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-10 gap-2 max-w-4xl mx-auto">
+<!-- Row 1-10 Dynamic Grid Rendering -->
+<!-- Pattern: Randomly varied difficulty colors based on system rules -->
+<div class="aspect-square bg-secondary-dim/30 rounded flex items-center justify-center text-[8px] font-bold text-secondary-fixed opacity-80 hover:scale-110 hover:opacity-100 transition-all cursor-crosshair">Q1</div>
+<div class="aspect-square bg-secondary-dim/30 rounded flex items-center justify-center text-[8px] font-bold text-secondary-fixed opacity-80 hover:scale-110 hover:opacity-100 transition-all cursor-crosshair">Q2</div>
+<div class="aspect-square bg-error-dim/40 rounded flex items-center justify-center text-[8px] font-bold text-error opacity-80 hover:scale-110 hover:opacity-100 transition-all cursor-crosshair">Q3</div>
+<div class="aspect-square bg-primary/20 rounded flex items-center justify-center text-[8px] font-bold text-primary opacity-80 hover:scale-110 hover:opacity-100 transition-all cursor-crosshair">Q4</div>
+<div class="aspect-square bg-secondary-dim/30 rounded flex items-center justify-center text-[8px] font-bold text-secondary-fixed opacity-80 hover:scale-110 hover:opacity-100 transition-all cursor-crosshair">Q5</div>
+<div class="aspect-square bg-error-dim/80 rounded flex items-center justify-center text-[8px] font-bold text-on-error opacity-80 hover:scale-110 hover:opacity-100 transition-all cursor-crosshair">Q6</div>
+<div class="aspect-square bg-secondary-dim/30 rounded flex items-center justify-center text-[8px] font-bold text-secondary-fixed opacity-80 hover:scale-110 hover:opacity-100 transition-all cursor-crosshair">Q7</div>
+<div class="aspect-square bg-primary/20 rounded flex items-center justify-center text-[8px] font-bold text-primary opacity-80 hover:scale-110 hover:opacity-100 transition-all cursor-crosshair">Q8</div>
+<div class="aspect-square bg-primary/40 rounded flex items-center justify-center text-[8px] font-bold text-on-primary opacity-80 hover:scale-110 hover:opacity-100 transition-all cursor-crosshair">Q9</div>
+<div class="aspect-square bg-secondary-dim/30 rounded flex items-center justify-center text-[8px] font-bold text-secondary-fixed opacity-80 hover:scale-110 hover:opacity-100 transition-all cursor-crosshair">Q10</div>
+<!-- Repeat for 100 squares with varied opacity/colors to simulate data -->
+<!-- row 2-10 omitted for brevity in response but implied by '10x10' grid request -->
+<script>
+                        // Visual trick to fill the grid without massive HTML bulk
+                        const grid = document.querySelector('.grid-cols-10');
+                        const colors = ['bg-secondary-dim/30', 'bg-primary/20', 'bg-primary/50', 'bg-error-dim/40', 'bg-error-dim/80'];
+                        for(let i=11; i<=100; i++) {
+                            const div = document.createElement('div');
+                            const colorClass = colors[Math.floor(Math.random() * colors.length)];
+                            div.className = `aspect-square ${colorClass} rounded flex items-center justify-center text-[8px] font-bold opacity-80 hover:scale-110 hover:opacity-100 transition-all cursor-crosshair`;
+                            div.innerText = `Q${i}`;
+                            grid.appendChild(div);
+                        }
+                    </script>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- ROW 2 LEFT: Time-to-answer distribution -->
+<div class="lg:col-span-7 bg-surface-container-low rounded-xl p-8 border border-white/[0.03]">
+<h4 class="font-headline text-xl font-bold tracking-tight mb-8">Time-to-Answer Distribution</h4>
+<div class="h-64 flex items-end justify-between relative px-10">
+<!-- Simulated Violin Plot -->
+<div class="flex-1 flex flex-col items-center group">
+<div class="w-12 bg-primary/20 rounded-full h-48 relative overflow-hidden flex flex-col items-center justify-center">
+<div class="w-6 bg-primary/60 rounded-full h-24 blur-sm opacity-50"></div>
+<div class="absolute w-full h-1 bg-primary z-10 top-1/2"></div>
+</div>
+<span class="text-[10px] uppercase mt-4 font-bold text-slate-500">Tier 1</span>
+</div>
+<div class="flex-1 flex flex-col items-center group">
+<div class="w-16 bg-secondary/10 rounded-full h-56 relative overflow-hidden flex flex-col items-center justify-center">
+<div class="w-8 bg-secondary/40 rounded-full h-32 blur-md opacity-40"></div>
+<div class="absolute w-full h-1 bg-secondary z-10 top-1/3"></div>
+</div>
+<span class="text-[10px] uppercase mt-4 font-bold text-slate-500">Tier 2</span>
+</div>
+<div class="flex-1 flex flex-col items-center group">
+<div class="w-10 bg-error/10 rounded-full h-32 relative overflow-hidden flex flex-col items-center justify-center">
+<div class="w-4 bg-error/40 rounded-full h-12 blur-sm opacity-50"></div>
+<div class="absolute w-full h-1 bg-error z-10 bottom-1/4"></div>
+</div>
+<span class="text-[10px] uppercase mt-4 font-bold text-slate-500">Tier 3</span>
+</div>
+<div class="flex-1 flex flex-col items-center group">
+<div class="w-14 bg-tertiary/10 rounded-full h-44 relative overflow-hidden flex flex-col items-center justify-center">
+<div class="w-7 bg-tertiary/50 rounded-full h-20 blur-md opacity-40"></div>
+<div class="absolute w-full h-1 bg-tertiary z-10 top-1/2"></div>
+</div>
+<span class="text-[10px] uppercase mt-4 font-bold text-slate-500">Tier 4</span>
+</div>
+<!-- Y-Axis labels -->
+<div class="absolute left-0 h-full flex flex-col justify-between text-[8px] font-mono text-slate-600">
+<span>120m</span><span>90m</span><span>60m</span><span>30m</span><span>0m</span>
+</div>
+</div>
+</div>
+<!-- ROW 2 RIGHT: Top 5 Most Skipped Questions -->
+<div class="lg:col-span-5 bg-surface-container-low rounded-xl p-8 border border-white/[0.03]">
+<div class="flex justify-between items-center mb-6">
+<h4 class="font-headline text-xl font-bold tracking-tight">Top Skipped</h4>
+<span class="material-symbols-outlined text-slate-500 text-lg" data-icon="flag">flag</span>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-3 rounded-lg bg-surface-container hover:bg-surface-container-highest transition-colors">
+<div class="flex items-center gap-4">
+<span class="text-xs font-mono text-error font-bold">#42</span>
+<div>
+<p class="text-sm font-semibold">Quantum Field Calculus IV</p>
+<p class="text-[10px] uppercase text-slate-500">Module: Advanced Physics</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold">14.2k</p>
+<p class="text-[10px] text-error uppercase font-semibold">88% Skip</p>
+</div>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg bg-surface-container hover:bg-surface-container-highest transition-colors">
+<div class="flex items-center gap-4">
+<span class="text-xs font-mono text-error font-bold">#18</span>
+<div>
+<p class="text-sm font-semibold">Organic Chemistry Synthesis</p>
+<p class="text-[10px] uppercase text-slate-500">Module: STEM Alpha</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold">9.8k</p>
+<p class="text-[10px] text-error uppercase font-semibold">62% Skip</p>
+</div>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg bg-surface-container hover:bg-surface-container-highest transition-colors">
+<div class="flex items-center gap-4">
+<span class="text-xs font-mono text-error font-bold">#91</span>
+<div>
+<p class="text-sm font-semibold">Macro-Economic Variance</p>
+<p class="text-[10px] uppercase text-slate-500">Module: Finance Hub</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold">7.1k</p>
+<p class="text-[10px] text-error uppercase font-semibold">51% Skip</p>
+</div>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg bg-surface-container hover:bg-surface-container-highest transition-colors opacity-80">
+<div class="flex items-center gap-4">
+<span class="text-xs font-mono text-error font-bold">#07</span>
+<div>
+<p class="text-sm font-semibold">Linguistics: Morphological</p>
+<p class="text-[10px] uppercase text-slate-500">Module: Humanities</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold">5.4k</p>
+<p class="text-[10px] text-error uppercase font-semibold">44% Skip</p>
+</div>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg bg-surface-container hover:bg-surface-container-highest transition-colors opacity-60">
+<div class="flex items-center gap-4">
+<span class="text-xs font-mono text-error font-bold">#25</span>
+<div>
+<p class="text-sm font-semibold">Neural Network Weighting</p>
+<p class="text-[10px] uppercase text-slate-500">Module: CS Tech</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold">4.2k</p>
+<p class="text-[10px] text-error uppercase font-semibold">39% Skip</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- BOTTOM: Retake Performance Comparison -->
+<div class="bg-surface-container-low rounded-xl p-8 border border-white/[0.03]">
+<div class="flex justify-between items-end mb-10">
+<div>
+<h4 class="font-headline text-2xl font-bold tracking-tight">Retake Performance Delta</h4>
+<p class="text-on-surface-variant text-sm mt-1">Correlation between initial failure and subsequent attempt success rates</p>
+</div>
+<div class="flex gap-8">
+<div class="text-right">
+<p class="text-[10px] uppercase text-slate-500 font-bold mb-1">Attempt 1 Avg</p>
+<p class="text-xl font-bold text-primary">54.2%</p>
+</div>
+<div class="text-right border-l border-white/10 pl-8">
+<p class="text-[10px] uppercase text-slate-500 font-bold mb-1">Attempt 2 Avg</p>
+<p class="text-xl font-bold text-secondary">81.7%</p>
+</div>
+</div>
+</div>
+<div class="relative h-64 w-full">
+<!-- Grid Lines -->
+<div class="absolute inset-0 flex flex-col justify-between">
+<div class="w-full h-px bg-white/[0.05]"></div>
+<div class="w-full h-px bg-white/[0.05]"></div>
+<div class="w-full h-px bg-white/[0.05]"></div>
+<div class="w-full h-px bg-white/[0.05]"></div>
+<div class="w-full h-px bg-white/[0.05]"></div>
+</div>
+<!-- Line Charts (SVG) -->
+<svg class="absolute inset-0 w-full h-full" preserveaspectratio="none">
+<!-- Attempt 1: Deep Purple -->
+<path class="opacity-80" d="M0,200 L100,180 L200,195 L300,160 L400,170 L500,140 L600,155 L700,130 L800,145 L900,120 L1000,130" fill="none" stroke="#a8a4ff" stroke-linecap="round" stroke-width="3"></path>
+<!-- Attempt 2: Emerald Green -->
+<path d="M0,150 L100,130 L200,110 L300,90 L400,70 L500,60 L600,45 L700,40 L800,35 L900,30 L1000,25" fill="none" stroke="#6bff8f" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+<!-- Legend Overlays -->
+<div class="absolute bottom-4 left-4 flex gap-6">
+<div class="flex items-center gap-2">
+<div class="w-3 h-1 bg-primary rounded"></div>
+<span class="text-[10px] uppercase font-bold text-slate-500">First Attempt</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-1 bg-secondary rounded"></div>
+<span class="text-[10px] uppercase font-bold text-slate-500">Retake Attempt</span>
+</div>
+</div>
+</div>
+<!-- X-Axis Labels -->
+<div class="flex justify-between mt-4 text-[10px] font-mono text-slate-600 uppercase tracking-widest px-2">
+<span>Week 01</span>
+<span>Week 04</span>
+<span>Week 08</span>
+<span>Week 12</span>
+<span>Week 16</span>
+<span>Week 20</span>
+<span>Week 24</span>
+</div>
+</div>
+</div>
+<!-- Footer / Global Metrics Status -->
+<footer class="mt-auto p-4 px-8 bg-[#111318]/50 backdrop-blur-sm border-t border-white/5 flex justify-between items-center text-[10px] font-mono text-slate-500">
+<div class="flex gap-6">
+<span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> CORE ENGINE ACTIVE</span>
+<span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> LATENCY: 24MS</span>
+<span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span> PROCESSING LIVE STREAM</span>
+</div>
+<div class="uppercase tracking-widest">
+                © 2024 SOMA ED-TECH INFRASTRUCTURE
+            </div>
+</footer>
+</main>
+</body></html>

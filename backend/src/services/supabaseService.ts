@@ -31,10 +31,16 @@ export interface Exam {
 export interface Question {
   id: string;
   exam_id: string;
-  question: string;
+  user_id: string;
+  question_text: string;
+  question_type: 'OBJECTIVE' | 'SHORT_ANSWER' | 'ESSAY' | 'TRUE_FALSE';
   options?: string[];
   correct_answer: string;
-  topic: string;
+  explanation?: string;
+  difficulty?: 'easy' | 'medium' | 'hard';
+  topic?: string;
+  order_index?: number;
+  points?: number;
   created_at: string;
 }
 

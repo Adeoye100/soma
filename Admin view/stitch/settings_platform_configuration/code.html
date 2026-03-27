@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Soma EdTech Admin - Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-fixed-variant": "#1d0098",
+                        "primary-fixed": "#9995ff",
+                        "on-secondary-container": "#e4ffe2",
+                        "on-primary-fixed": "#000000",
+                        "on-surface": "#f6f6fc",
+                        "on-tertiary": "#573500",
+                        "on-tertiary-container": "#4a2c00",
+                        "on-secondary-fixed": "#004a1d",
+                        "surface-tint": "#a8a4ff",
+                        "on-error": "#490013",
+                        "inverse-surface": "#f9f9ff",
+                        "tertiary": "#ffb148",
+                        "surface-variant": "#23262c",
+                        "surface-dim": "#0c0e12",
+                        "tertiary-fixed-dim": "#e79400",
+                        "tertiary-dim": "#e79400",
+                        "inverse-on-surface": "#53555a",
+                        "surface-container": "#171a1f",
+                        "on-tertiary-fixed-variant": "#563400",
+                        "primary-container": "#9995ff",
+                        "error": "#ff6e84",
+                        "inverse-primary": "#5044e3",
+                        "tertiary-container": "#f8a010",
+                        "background": "#0c0e12",
+                        "surface-container-highest": "#23262c",
+                        "primary": "#a8a4ff",
+                        "on-primary-container": "#16007d",
+                        "on-background": "#f6f6fc",
+                        "primary-fixed-dim": "#8a85ff",
+                        "on-surface-variant": "#aaabb0",
+                        "on-primary": "#1e009f",
+                        "primary-dim": "#675df9",
+                        "outline": "#74757a",
+                        "outline-variant": "#46484d",
+                        "error-container": "#a70138",
+                        "error-dim": "#d73357",
+                        "surface": "#0c0e12",
+                        "tertiary-fixed": "#f8a010",
+                        "secondary-fixed": "#6bff8f",
+                        "on-tertiary-fixed": "#2a1700",
+                        "secondary-container": "#006e2f",
+                        "on-secondary": "#005f28",
+                        "secondary-fixed-dim": "#5bf083",
+                        "secondary-dim": "#5bf083",
+                        "surface-bright": "#292c33",
+                        "secondary": "#6bff8f",
+                        "surface-container-high": "#1d2025",
+                        "on-secondary-fixed-variant": "#006a2d",
+                        "surface-container-low": "#111318",
+                        "on-error-container": "#ffb2b9",
+                        "surface-container-lowest": "#000000"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Space Grotesk', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0c0e12; }
+        ::-webkit-scrollbar-thumb { background: #23262c; border-radius: 10px; }
+        .glass-panel { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    </style>
+</head>
+<body class="bg-background text-on-surface selection:bg-primary selection:text-on-primary-container">
+<!-- SideNavBar (Authority: JSON) -->
+<aside class="h-screen w-64 fixed left-0 top-0 z-[60] bg-[#111318] flex flex-col py-8 px-4 gap-2">
+<div class="mb-10 px-2">
+<div class="text-lg font-black text-[#a8a4ff] tracking-tighter uppercase">Soma Admin</div>
+<div class="font-['Space_Grotesk'] uppercase tracking-widest text-[10px] text-[#f6f6fc]/50">Command Center</div>
+</div>
+<nav class="flex-1 flex flex-col gap-2">
+<a class="group flex items-center gap-3 px-4 py-3 text-[#f6f6fc]/50 hover:text-[#f6f6fc] hover:bg-[#111318] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-['Space_Grotesk'] uppercase tracking-widest text-[10px]">Dashboard</span>
+</a>
+<a class="group flex items-center gap-3 px-4 py-3 text-[#f6f6fc]/50 hover:text-[#f6f6fc] hover:bg-[#111318] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-['Space_Grotesk'] uppercase tracking-widest text-[10px]">Students</span>
+</a>
+<a class="group flex items-center gap-3 px-4 py-3 text-[#f6f6fc]/50 hover:text-[#f6f6fc] hover:bg-[#111318] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="font-['Space_Grotesk'] uppercase tracking-widest text-[10px]">Courses</span>
+</a>
+<a class="group flex items-center gap-3 px-4 py-3 text-[#f6f6fc]/50 hover:text-[#f6f6fc] hover:bg-[#111318] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span>
+<span class="font-['Space_Grotesk'] uppercase tracking-widest text-[10px]">Notifications</span>
+</a>
+<a class="group flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-[#a8a4ff] to-[#675df9] text-white rounded-xl shadow-lg shadow-[#675df9]/20 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-['Space_Grotesk'] uppercase tracking-widest text-[10px] font-semibold">Settings</span>
+</a>
+<a class="group flex items-center gap-3 px-4 py-3 text-[#f6f6fc]/50 hover:text-[#f6f6fc] hover:bg-[#111318] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+<span class="font-['Space_Grotesk'] uppercase tracking-widest text-[10px]">Analytics</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-outline-variant/10 pt-4 flex flex-col gap-2">
+<button class="bg-primary-container text-on-primary-container py-3 rounded-xl font-headline font-bold text-xs uppercase tracking-widest active:scale-95 duration-200">
+                Broadcast Alert
+            </button>
+<a class="group flex items-center gap-3 px-4 py-2 text-[#f6f6fc]/50 hover:text-[#f6f6fc]" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="contact_support">contact_support</span>
+<span class="font-['Space_Grotesk'] uppercase tracking-widest text-[10px]">Support</span>
+</a>
+<a class="group flex items-center gap-3 px-4 py-2 text-error-dim hover:text-error" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="logout">logout</span>
+<span class="font-['Space_Grotesk'] uppercase tracking-widest text-[10px]">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 min-h-screen">
+<!-- TopNavBar (Authority: JSON) -->
+<header class="bg-[#0c0e12]/70 backdrop-blur-md text-[#f6f6fc]/60 font-['Space_Grotesk'] text-sm tracking-tight flex justify-between items-center px-8 h-16 w-full sticky top-0 z-50 shadow-[0px_24px_24px_0px_rgba(246,246,252,0.06)]">
+<div class="flex items-center gap-6">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary" data-icon="search">search</span>
+<input class="bg-surface-container-low border-none focus:ring-1 focus:ring-primary/40 rounded-lg pl-10 pr-4 py-1.5 text-xs w-64 text-on-surface" placeholder="Command Search..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-[#111318] hover:text-[#f6f6fc] rounded-full transition-colors active:opacity-80">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 hover:bg-[#111318] hover:text-[#f6f6fc] rounded-full transition-colors active:opacity-80">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant/30">
+<img alt="Admin User Avatar" class="w-full h-full object-cover" data-alt="professional portrait of a high-ranking male corporate executive with sharp features and a confident expression in a tech office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3qqDOq2Sd4ti-Lbg7M_IiELNT2VxBnlv8YS9CdrAyVjBshuwFILdm7AREHjBvHBtCw8AuN639dX7BJs4hu34auN5KBgmnqze-ju4qN5ha4HiYOeV8SVhbA_6FB9tv1w9CBgY2NUVzAFhBaOBzPDPg9heOMAjBZIHaBLO0LKJaN_9Ev1jS-T-aa-OXBkegEaT4VuCSbtuU5BKDSVrT_GbQQIJWNWNTF7KE4CZKZ7kdHD3ogeDUAmQd3e1xBjNWwb0VIL_wqzzDExBY"/>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<div class="p-8 max-w-7xl mx-auto space-y-12">
+<!-- Header Section -->
+<section class="mb-12">
+<h1 class="text-4xl font-headline font-bold text-on-surface tracking-tighter">System Configuration</h1>
+<p class="text-on-surface-variant mt-2 font-body max-w-2xl">Manage administrative access, platform-wide defaults, and secure integration endpoints from the Soma Command Center.</p>
+</section>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Admin Profile: Layer 1 Surface -->
+<div class="col-span-12 lg:col-span-4 bg-surface-container-low rounded-xl p-6 border border-outline-variant/10 shadow-sm">
+<div class="flex items-center gap-4 mb-8">
+<div class="w-20 h-20 rounded-2xl bg-surface-container-highest overflow-hidden border-2 border-primary/20 relative group">
+<img alt="Admin" class="w-full h-full object-cover" data-alt="professional portrait of a high-ranking male corporate executive with sharp features and a confident expression in a tech office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqv9x6D3ZBhesw2MvPmo-fXtNFQAUE9krTXipLTS3F9e3cBW2UHpbkwEPhON0X6fcVKd1m6TGF22zNUQ6hij8IWzz2184yk8m4t9PnxOEiz74G1D8ViCFIhobKdJjJU59kVx1ppcBmTpCKiGhupFotbUtJtkoJXvMquGUSBdd9LcDY7W6kRtATywr8wrR9_dELeMy6jABnFYASYM5sJR9JbVUA2Z2iU5w7eaVgXbPdl4B_IkUzpzMXN1dOJgo9rVY_LG0xnPzsWP21"/>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+<span class="material-symbols-outlined text-white" data-icon="photo_camera">photo_camera</span>
+</div>
+</div>
+<div>
+<h3 class="font-headline font-bold text-lg text-on-surface">Kofi Asante</h3>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary uppercase tracking-wider">Super Admin</span>
+</div>
+</div>
+<div class="space-y-4">
+<div class="group">
+<label class="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Full Name</label>
+<input class="w-full bg-surface-container border-none focus:ring-1 focus:ring-primary/40 rounded-lg py-2.5 text-sm" type="text" value="Kofi Asante"/>
+</div>
+<div class="group">
+<label class="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Email Address</label>
+<input class="w-full bg-surface-container border-none focus:ring-1 focus:ring-primary/40 rounded-lg py-2.5 text-sm" type="email" value="k.asante@soma-ed.tech"/>
+</div>
+<button class="w-full mt-4 bg-surface-container-highest text-on-surface py-2.5 rounded-lg text-xs font-semibold hover:bg-surface-variant transition-colors">
+                            Update Profile
+                        </button>
+</div>
+</div>
+<!-- Platform Configuration -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container-low rounded-xl p-6 border border-outline-variant/10 shadow-sm">
+<div class="flex items-center justify-between mb-8">
+<h2 class="font-headline font-bold text-xl text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="tune">tune</span>
+                            Platform Configuration
+                        </h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-6">
+<div>
+<label class="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3">Regional Settings</label>
+<select class="w-full bg-surface-container border-none focus:ring-1 focus:ring-primary/40 rounded-lg py-2.5 text-sm appearance-none">
+<option>GMT (Accra/London)</option>
+<option selected="">WAT (Lagos/Luanda)</option>
+<option>EAT (Nairobi/Addis Ababa)</option>
+</select>
+</div>
+<div>
+<label class="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3">System Language</label>
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-2 rounded-lg bg-primary text-on-primary text-xs font-bold">English</button>
+<button class="px-4 py-2 rounded-lg bg-surface-container hover:bg-surface-container-highest text-on-surface-variant hover:text-on-surface text-xs font-bold transition-all">French</button>
+<button class="px-4 py-2 rounded-lg bg-surface-container hover:bg-surface-container-highest text-on-surface-variant hover:text-on-surface text-xs font-bold transition-all">Swahili</button>
+</div>
+</div>
+</div>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between items-center mb-4">
+<label class="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Pass Threshold</label>
+<span class="text-secondary font-headline font-bold">50%</span>
+</div>
+<input class="w-full h-1.5 bg-surface-container rounded-lg appearance-none cursor-pointer accent-secondary" max="100" min="0" type="range" value="50"/>
+<p class="text-[10px] text-on-surface-variant mt-2">Minimum score required for course completion across all modules.</p>
+</div>
+<div class="p-4 rounded-xl bg-secondary/5 border border-secondary/10">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-lg" data-icon="info">info</span>
+<p class="text-xs text-on-surface-variant leading-relaxed">Adjusting the threshold will retroactively affect student progress status in active cohorts.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Security & Access: High Density -->
+<div class="col-span-12 lg:col-span-7 bg-surface-container-low rounded-xl p-6 border border-outline-variant/10 shadow-sm">
+<h2 class="font-headline font-bold text-xl text-on-surface mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="security">security</span>
+                        Security &amp; Access
+                    </h2>
+<div class="space-y-6">
+<div class="flex items-center justify-between p-4 bg-surface-container rounded-xl">
+<div class="flex items-center gap-4">
+<div class="p-2 bg-secondary/10 rounded-lg text-secondary">
+<span class="material-symbols-outlined" data-icon="vibration">vibration</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-on-surface">Two-Factor Authentication</h4>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest">PROTECTION: ON</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<button class="flex items-center justify-center gap-2 bg-surface-container-highest py-3 rounded-xl text-xs font-bold hover:bg-surface-variant transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="lock_reset">lock_reset</span>
+                                Reset Password
+                            </button>
+<button class="flex items-center justify-center gap-2 bg-surface-container-highest py-3 rounded-xl text-xs font-bold hover:bg-surface-variant transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="devices">devices</span>
+                                Manage Devices
+                            </button>
+</div>
+<div>
+<h4 class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-4">Active Login Sessions</h4>
+<div class="space-y-2">
+<div class="flex items-center justify-between p-3 bg-surface-container/50 rounded-lg border border-outline-variant/5">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="laptop_mac">laptop_mac</span>
+<div>
+<p class="text-xs font-bold">MacBook Pro - Chrome</p>
+<p class="text-[10px] text-on-surface-variant">192.168.1.45 • Accra, GH (Current)</p>
+</div>
+</div>
+<span class="text-[10px] font-bold text-secondary uppercase">Active</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface-container/50 rounded-lg border border-outline-variant/5">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="smartphone">smartphone</span>
+<div>
+<p class="text-xs font-bold">iPhone 15 Pro</p>
+<p class="text-[10px] text-on-surface-variant">102.44.21.10 • Lagos, NG</p>
+</div>
+</div>
+<button class="text-[10px] font-bold text-error-dim uppercase hover:underline">Revoke</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- API & Integrations: The Tech View -->
+<div class="col-span-12 lg:col-span-5 bg-surface-container-low rounded-xl p-6 border border-outline-variant/10 shadow-sm">
+<h2 class="font-headline font-bold text-xl text-on-surface mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="api">api</span>
+                        API &amp; Integrations
+                    </h2>
+<div class="space-y-6">
+<div>
+<label class="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-4">Production API Key</label>
+<div class="flex gap-2">
+<div class="flex-1 bg-surface-container-highest px-4 py-2.5 rounded-lg font-mono text-xs overflow-hidden whitespace-nowrap opacity-60">
+                                    sk_prod_•••••••••••••••••••••••••••••
+                                </div>
+<button class="bg-primary-container text-on-primary-container px-4 rounded-lg text-[10px] font-bold uppercase tracking-wider">Reveal</button>
+</div>
+</div>
+<div>
+<label class="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-4">Webhook Endpoints</label>
+<div class="space-y-3">
+<div class="flex items-center justify-between p-3 bg-surface-container rounded-lg group">
+<div class="flex items-center gap-3">
+<div class="h-8 w-8 rounded-lg bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-sm" data-icon="database">database</span>
+</div>
+<span class="text-xs font-bold">Supabase DB</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+<span class="text-[10px] text-on-surface-variant">Healthy</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface-container rounded-lg group">
+<div class="flex items-center gap-3">
+<div class="h-8 w-8 rounded-lg bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-sm" data-icon="sms">sms</span>
+</div>
+<span class="text-xs font-bold">Twilio SMS</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+<span class="text-[10px] text-on-surface-variant">Healthy</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface-container rounded-lg group">
+<div class="flex items-center gap-3">
+<div class="h-8 w-8 rounded-lg bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-sm" data-icon="mail">mail</span>
+</div>
+<span class="text-xs font-bold">SendGrid Mail</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-error"></div>
+<span class="text-[10px] text-on-surface-variant">Timeout</span>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full border border-dashed border-outline-variant/30 text-on-surface-variant py-3 rounded-xl text-xs font-semibold hover:border-primary/40 hover:text-on-surface transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                            Configure New Webhook
+                        </button>
+</div>
+</div>
+<!-- Audit Log: Full Width Table -->
+<div class="col-span-12 bg-surface-container-low rounded-xl border border-outline-variant/10 shadow-sm overflow-hidden">
+<div class="p-6 border-b border-outline-variant/5 flex items-center justify-between">
+<h2 class="font-headline font-bold text-xl text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="history">history</span>
+                            Audit Log
+                        </h2>
+<button class="text-xs font-bold text-primary flex items-center gap-1 hover:underline">
+                            Export Logs <span class="material-symbols-outlined text-xs" data-icon="download">download</span>
+</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container">
+<tr>
+<th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Admin User</th>
+<th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Action Performed</th>
+<th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Resource</th>
+<th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest text-right">Timestamp</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/5">
+<tr class="hover:bg-surface-container-high/40 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">KA</div>
+<span class="text-xs font-semibold">Kofi Asante</span>
+</div>
+</td>
+<td class="px-6 py-4 text-xs">Changed JAMB threshold from 45% to 50%</td>
+<td class="px-6 py-4">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-highest text-[10px] text-on-surface-variant font-mono uppercase">SYST_CONF</span>
+</td>
+<td class="px-6 py-4 text-xs text-on-surface-variant text-right">Oct 24, 2023 • 14:22</td>
+</tr>
+<tr class="hover:bg-surface-container-high/40 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-secondary/20 flex items-center justify-center text-[10px] font-bold text-secondary">AO</div>
+<span class="text-xs font-semibold">Amara Okafor</span>
+</div>
+</td>
+<td class="px-6 py-4 text-xs">Updated AI feedback model weighting</td>
+<td class="px-6 py-4">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-highest text-[10px] text-on-surface-variant font-mono uppercase">AI_MODEL_V2</span>
+</td>
+<td class="px-6 py-4 text-xs text-on-surface-variant text-right">Oct 24, 2023 • 11:05</td>
+</tr>
+<tr class="hover:bg-surface-container-high/40 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-tertiary/20 flex items-center justify-center text-[10px] font-bold text-tertiary">MN</div>
+<span class="text-xs font-semibold">Musa Ndlovu</span>
+</div>
+</td>
+<td class="px-6 py-4 text-xs">Generated new production API key</td>
+<td class="px-6 py-4">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-highest text-[10px] text-on-surface-variant font-mono uppercase">AUTH_ROOT</span>
+</td>
+<td class="px-6 py-4 text-xs text-on-surface-variant text-right">Oct 23, 2023 • 16:48</td>
+</tr>
+<tr class="hover:bg-surface-container-high/40 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">KA</div>
+<span class="text-xs font-semibold">Kofi Asante</span>
+</div>
+</td>
+<td class="px-6 py-4 text-xs">Revoked access for admin user: J. Doe</td>
+<td class="px-6 py-4">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-highest text-[10px] text-on-surface-variant font-mono uppercase">USER_MGT</span>
+</td>
+<td class="px-6 py-4 text-xs text-on-surface-variant text-right">Oct 23, 2023 • 09:12</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Stats / Meta -->
+<footer class="p-8 mt-12 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
+<div class="flex items-center gap-4">
+<p>© 2023 Soma EdTech</p>
+<div class="w-1 h-1 rounded-full bg-outline-variant"></div>
+<p>Node ID: HQ-ACC-01</p>
+<div class="w-1 h-1 rounded-full bg-outline-variant"></div>
+<p>Uptime: 99.998%</p>
+</div>
+<div class="flex gap-6 mt-4 md:mt-0">
+<a class="hover:text-primary transition-colors" href="#">System Health</a>
+<a class="hover:text-primary transition-colors" href="#">Privacy Protocol</a>
+<a class="hover:text-primary transition-colors" href="#">Legal Framework</a>
+</div>
+</footer>
+</main>
+<!-- Floating Action for Quick Actions - Suppressed on Settings per instructions, but available if needed for "Save Global" -->
+<!-- Suppression Logic: Suppressed on Settings screens -->
+</body></html>

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Soma EdTech Admin - Academic Performance</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "outline": "#74757a",
+                        "tertiary-fixed-dim": "#e79400",
+                        "on-tertiary": "#573500",
+                        "on-surface": "#f6f6fc",
+                        "tertiary-container": "#f8a010",
+                        "secondary-fixed-dim": "#5bf083",
+                        "surface-dim": "#0c0e12",
+                        "inverse-primary": "#5044e3",
+                        "tertiary": "#ffb148",
+                        "inverse-surface": "#f9f9ff",
+                        "error-container": "#a70138",
+                        "surface-container-high": "#1d2025",
+                        "error": "#ff6e84",
+                        "on-primary-fixed": "#000000",
+                        "surface-container-lowest": "#000000",
+                        "secondary-fixed": "#6bff8f",
+                        "on-primary-fixed-variant": "#1d0098",
+                        "secondary-dim": "#5bf083",
+                        "inverse-on-surface": "#53555a",
+                        "surface-container": "#171a1f",
+                        "on-primary-container": "#16007d",
+                        "on-error": "#490013",
+                        "on-primary": "#1e009f",
+                        "primary": "#a8a4ff",
+                        "tertiary-dim": "#e79400",
+                        "surface-container-highest": "#23262c",
+                        "surface-bright": "#292c33",
+                        "primary-dim": "#675df9",
+                        "error-dim": "#d73357",
+                        "background": "#0c0e12",
+                        "primary-container": "#9995ff",
+                        "tertiary-fixed": "#f8a010",
+                        "surface-container-low": "#111318",
+                        "on-tertiary-container": "#4a2c00",
+                        "primary-fixed-dim": "#8a85ff",
+                        "secondary-container": "#006e2f",
+                        "on-tertiary-fixed": "#2a1700",
+                        "on-surface-variant": "#aaabb0",
+                        "surface-variant": "#23262c",
+                        "on-tertiary-fixed-variant": "#563400",
+                        "on-secondary-fixed-variant": "#006a2d",
+                        "on-secondary-fixed": "#004a1d",
+                        "secondary": "#6bff8f",
+                        "on-secondary-container": "#e4ffe2",
+                        "primary-fixed": "#9995ff",
+                        "on-secondary": "#005f28",
+                        "on-error-container": "#ffb2b9",
+                        "on-background": "#f6f6fc",
+                        "surface": "#0c0e12",
+                        "surface-tint": "#a8a4ff",
+                        "outline-variant": "#46484d"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #0c0e12;
+            color: #f6f6fc;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-card {
+            background: rgba(17, 19, 24, 0.8);
+            backdrop-filter: blur(8px);
+        }
+        .metric-node-gradient {
+            background: linear-gradient(135deg, #a8a4ff 0%, #675df9 100%);
+        }
+    </style>
+</head>
+<body class="flex min-h-screen">
+<!-- SideNavBar -->
+<aside class="w-[240px] h-screen sticky left-0 top-0 overflow-y-auto flex flex-col bg-[#111318] border-r border-[#f6f6fc]/5 font-['Space_Grotesk'] font-medium text-sm tracking-tight px-3 space-y-1">
+<div class="py-8 px-4 flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl metric-node-gradient flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary" style="font-variation-settings: 'FILL' 1;">school</span>
+</div>
+<div>
+<h1 class="text-2xl font-bold tracking-tighter text-[#f6f6fc]">Soma</h1>
+<p class="text-[10px] uppercase tracking-[0.2em] text-slate-500">EdTech Admin</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 text-slate-400 hover:text-[#f6f6fc] px-3 py-2 transition-colors hover:bg-[#111318] hover:scale-[1.01] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Overview</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-[#f6f6fc] px-3 py-2 transition-colors hover:bg-[#111318] hover:scale-[1.01] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span>Users &amp; Sessions</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-[#f6f6fc] px-3 py-2 transition-colors hover:bg-[#111318] hover:scale-[1.01] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+<span>Location Intelligence</span>
+</a>
+<!-- Active Tab: Academic Performance -->
+<a class="flex items-center gap-3 bg-[#a8a4ff]/10 text-[#a8a4ff] rounded-lg font-bold px-3 py-2 hover:scale-[1.01] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="school" style="font-variation-settings: 'FILL' 1;">school</span>
+<span>Academic Performance</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-[#f6f6fc] px-3 py-2 transition-colors hover:bg-[#111318] hover:scale-[1.01] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>Exam Analytics</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-[#f6f6fc] px-3 py-2 transition-colors hover:bg-[#111318] hover:scale-[1.01] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+<span>Leaderboards</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-[#f6f6fc] px-3 py-2 transition-colors hover:bg-[#111318] hover:scale-[1.01] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span>Content Management</span>
+</a>
+</nav>
+<div class="pt-4 pb-8 border-t border-[#f6f6fc]/5 mt-4 space-y-1">
+<a class="flex items-center gap-3 text-slate-400 hover:text-[#f6f6fc] px-3 py-2 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span>Notifications &amp; Alerts</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-[#f6f6fc] px-3 py-2 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="monitor_heart">monitor_heart</span>
+<span>System Health</span>
+</a>
+<a class="flex items-center gap-3 text-slate-400 hover:text-[#f6f6fc] px-3 py-2 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</div>
+</aside>
+<main class="flex-1 flex flex-col min-w-0">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full px-8 sticky top-0 z-50 h-16 bg-[#0c0e12]/80 backdrop-blur-md">
+<div class="flex items-center gap-8">
+<h2 class="font-headline text-xl font-bold tracking-tight text-on-surface">Academic Performance</h2>
+<nav class="hidden md:flex gap-6 items-center">
+<a class="text-[#a8a4ff] border-b-2 border-[#a8a4ff] font-['Inter'] text-sm font-semibold uppercase tracking-wider py-5" href="#">Live Status</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative hidden lg:block">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-500 text-sm" data-icon="search">search</span>
+<input class="bg-surface-container-low border-none rounded-full pl-10 pr-4 py-1.5 text-xs font-label tracking-widest focus:ring-1 focus:ring-[#a8a4ff]/40 w-64" placeholder="GLOBAL SEARCH..." type="text"/>
+</div>
+<div class="flex items-center gap-4 text-slate-400">
+<span class="material-symbols-outlined cursor-pointer hover:text-on-surface" data-icon="calendar_today">calendar_today</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-on-surface" data-icon="notifications">notifications</span>
+</div>
+<div class="flex items-center gap-3 pl-4 border-l border-white/5">
+<div class="text-right">
+<p class="text-xs font-bold text-on-surface">Admin Profile</p>
+<p class="text-[10px] text-slate-500">Superuser</p>
+</div>
+<img alt="Admin Avatar" class="w-8 h-8 rounded-full bg-surface-container-high" data-alt="professional headshot of an administrator in a dark studio setting with subtle blue backlighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGj9WdvEo05YhKxst-O6UZTWmR63aahu6kPtMbhwF1dFxJlpOY_dDqQEf-aFtT6o1qTB_8H0NINWaybNw0wA95zF7nb-TmNb3QpbQlkCRlHu78sEVEAqkEpQKo1KUXgPzfultQzNc7pf6fi-uOS6Js4Tu0AMiJvdXTfoReDzKKMVGn58mMxYEXhq60zDVxKc3J6C6y84HeoQsjeddLzhtqzaNhSafMgNho3kgSc_d2B7U4Pt_PP0RSj28iKYI-vcMd-8E8FGMHmdYC"/>
+</div>
+</div>
+</header>
+<!-- Content Canvas -->
+<div class="p-8 space-y-8 max-w-[1600px] mx-auto w-full">
+<!-- Metric Nodes Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="bg-surface-container-low p-6 rounded-xl relative overflow-hidden group">
+<div class="relative z-10">
+<p class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-1">Global Avg Score</p>
+<h3 class="font-headline text-4xl font-bold text-on-surface">74.2%</h3>
+<div class="mt-4 flex items-center gap-2 text-secondary text-xs font-bold">
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+                            +3.1% FROM LAST MONTH
+                        </div>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-9xl" data-icon="school">school</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl relative overflow-hidden group">
+<div class="relative z-10">
+<p class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-1">Active Students</p>
+<h3 class="font-headline text-4xl font-bold text-on-surface">12,482</h3>
+<div class="mt-4 flex items-center gap-2 text-secondary text-xs font-bold">
+<span class="material-symbols-outlined text-sm" data-icon="group">group</span>
+                            LIVE SESSIONS: 842
+                        </div>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl relative overflow-hidden group">
+<div class="relative z-10">
+<p class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-1">Distinction Rate</p>
+<h3 class="font-headline text-4xl font-bold text-on-surface">18.4%</h3>
+<div class="mt-4 flex items-center gap-2 text-error text-xs font-bold">
+<span class="material-symbols-outlined text-sm" data-icon="trending_down">trending_down</span>
+                            -0.5% SYSTEM DRIFT
+                        </div>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl metric-node-gradient group">
+<div class="relative z-10">
+<p class="text-[10px] font-label uppercase tracking-widest text-on-primary mb-1">Performance Index</p>
+<h3 class="font-headline text-4xl font-bold text-on-primary">EXCELLENT</h3>
+<div class="mt-4 flex items-center gap-2 text-on-primary/80 text-xs font-bold">
+<span class="material-symbols-outlined text-sm" data-icon="verified">verified</span>
+                            TOP 5% REGIONAL RANK
+                        </div>
+</div>
+</div>
+</div>
+<!-- Row 1: Pass Rate by Subject -->
+<section class="bg-surface-container-low rounded-xl p-8">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h4 class="font-headline text-xl font-bold mb-1">Pass Rate by Subject</h4>
+<p class="text-sm text-on-surface-variant">Comparative analysis: This Month vs Last Month</p>
+</div>
+<div class="flex gap-4">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-sm bg-primary"></div>
+<span class="text-[10px] font-label uppercase tracking-tighter">This Month</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-sm bg-surface-container-highest"></div>
+<span class="text-[10px] font-label uppercase tracking-tighter">Last Month</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-5 gap-12 items-end h-64 px-4">
+<!-- Math -->
+<div class="flex flex-col items-center gap-4 h-full">
+<div class="flex-1 w-full flex items-end justify-center gap-2">
+<div class="w-full bg-surface-container-highest rounded-t-lg h-[82%]"></div>
+<div class="w-full bg-primary rounded-t-lg h-[88%] shadow-[0_0_20px_rgba(168,164,255,0.2)]"></div>
+</div>
+<span class="text-xs font-bold font-label tracking-widest">MATH</span>
+</div>
+<!-- English -->
+<div class="flex flex-col items-center gap-4 h-full">
+<div class="flex-1 w-full flex items-end justify-center gap-2">
+<div class="w-full bg-surface-container-highest rounded-t-lg h-[92%]"></div>
+<div class="w-full bg-primary rounded-t-lg h-[90%]"></div>
+</div>
+<span class="text-xs font-bold font-label tracking-widest">ENGLISH</span>
+</div>
+<!-- Biology -->
+<div class="flex flex-col items-center gap-4 h-full">
+<div class="flex-1 w-full flex items-end justify-center gap-2">
+<div class="w-full bg-surface-container-highest rounded-t-lg h-[65%]"></div>
+<div class="w-full bg-primary rounded-t-lg h-[74%]"></div>
+</div>
+<span class="text-xs font-bold font-label tracking-widest">BIOLOGY</span>
+</div>
+<!-- Physics -->
+<div class="flex flex-col items-center gap-4 h-full">
+<div class="flex-1 w-full flex items-end justify-center gap-2">
+<div class="w-full bg-surface-container-highest rounded-t-lg h-[70%]"></div>
+<div class="w-full bg-primary rounded-t-lg h-[81%]"></div>
+</div>
+<span class="text-xs font-bold font-label tracking-widest">PHYSICS</span>
+</div>
+<!-- Economics -->
+<div class="flex flex-col items-center gap-4 h-full">
+<div class="flex-1 w-full flex items-end justify-center gap-2">
+<div class="w-full bg-surface-container-highest rounded-t-lg h-[88%]"></div>
+<div class="w-full bg-primary rounded-t-lg h-[94%]"></div>
+</div>
+<span class="text-xs font-bold font-label tracking-widest">ECONOMICS</span>
+</div>
+</div>
+</section>
+<!-- Row 2: Histogram and Line Chart -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Histogram -->
+<div class="bg-surface-container-low rounded-xl p-8">
+<h4 class="font-headline text-xl font-bold mb-6">Score Distribution</h4>
+<div class="flex items-end gap-1 h-48 w-full group">
+<!-- Ranges 0-100 -->
+<div class="flex-1 bg-error-dim/40 rounded-t-sm h-[10%] hover:h-[12%] transition-all"></div>
+<div class="flex-1 bg-error-dim/60 rounded-t-sm h-[15%]"></div>
+<div class="flex-1 bg-error-dim/80 rounded-t-sm h-[25%]"></div>
+<div class="flex-1 bg-tertiary-dim/50 rounded-t-sm h-[40%]"></div>
+<div class="flex-1 bg-tertiary-dim/70 rounded-t-sm h-[60%]"></div>
+<div class="flex-1 bg-secondary-dim/40 rounded-t-sm h-[85%]"></div>
+<div class="flex-1 bg-secondary-dim/60 rounded-t-sm h-[100%]"></div>
+<div class="flex-1 bg-secondary-dim/80 rounded-t-sm h-[75%]"></div>
+<div class="flex-1 bg-secondary-dim/100 rounded-t-sm h-[50%]"></div>
+<div class="flex-1 bg-secondary-dim/80 rounded-t-sm h-[30%]"></div>
+</div>
+<div class="flex justify-between mt-4 text-[10px] font-label text-on-surface-variant uppercase tracking-widest">
+<span>0 Scores</span>
+<span>Median (74)</span>
+<span>100 Perfect</span>
+</div>
+</div>
+<!-- Line Chart -->
+<div class="bg-surface-container-low rounded-xl p-8">
+<div class="flex justify-between items-center mb-6">
+<h4 class="font-headline text-xl font-bold">Performance Over Time</h4>
+<div class="flex bg-surface-container-high p-1 rounded-lg">
+<button class="px-3 py-1 text-[10px] font-bold rounded-md bg-[#a8a4ff]/10 text-[#a8a4ff]">7D</button>
+<button class="px-3 py-1 text-[10px] font-bold rounded-md text-slate-500 hover:text-on-surface">30D</button>
+<button class="px-3 py-1 text-[10px] font-bold rounded-md text-slate-500 hover:text-on-surface">90D</button>
+</div>
+</div>
+<div class="relative h-48 w-full">
+<svg class="w-full h-full" viewbox="0 0 400 100">
+<defs>
+<lineargradient id="line-grad" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#a8a4ff;stop-opacity:0.3"></stop>
+<stop offset="100%" style="stop-color:#a8a4ff;stop-opacity:0"></stop>
+</lineargradient>
+</defs>
+<path d="M0,80 Q50,40 100,60 T200,30 T300,50 T400,20" fill="none" stroke="#a8a4ff" stroke-width="3"></path>
+<path d="M0,80 Q50,40 100,60 T200,30 T300,50 T400,20 L400,100 L0,100 Z" fill="url(#line-grad)"></path>
+</svg>
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none border-l border-b border-white/5">
+<div class="w-full border-t border-white/5 h-0"></div>
+<div class="w-full border-t border-white/5 h-0"></div>
+<div class="w-full border-t border-white/5 h-0"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Row 3: Exam Completion Funnel -->
+<section class="bg-surface-container-low rounded-xl p-8">
+<h4 class="font-headline text-xl font-bold mb-8">Exam Completion Funnel</h4>
+<div class="flex flex-col md:flex-row gap-4 items-stretch">
+<!-- Enrolled -->
+<div class="flex-1 flex flex-col gap-2">
+<div class="bg-surface-container-high p-4 rounded-lg flex justify-between items-center border-l-4 border-[#a8a4ff]">
+<div>
+<p class="text-[10px] font-label uppercase text-on-surface-variant">Enrolled</p>
+<p class="text-xl font-bold">42,000</p>
+</div>
+<div class="text-right">
+<p class="text-[10px] font-bold text-secondary">100%</p>
+</div>
+</div>
+<div class="h-8 flex items-center justify-center opacity-40">
+<span class="material-symbols-outlined text-sm" data-icon="keyboard_double_arrow_down">keyboard_double_arrow_down</span>
+</div>
+</div>
+<!-- Started -->
+<div class="flex-1 flex flex-col gap-2">
+<div class="bg-surface-container-high p-4 rounded-lg flex justify-between items-center border-l-4 border-[#a8a4ff]/80">
+<div>
+<p class="text-[10px] font-label uppercase text-on-surface-variant">Started</p>
+<p class="text-xl font-bold">38,640</p>
+</div>
+<div class="text-right">
+<p class="text-[10px] font-bold text-secondary">92%</p>
+<p class="text-[8px] text-error font-bold">-8.0% DROP</p>
+</div>
+</div>
+<div class="h-8 flex items-center justify-center opacity-40">
+<span class="material-symbols-outlined text-sm" data-icon="keyboard_double_arrow_down">keyboard_double_arrow_down</span>
+</div>
+</div>
+<!-- Completed -->
+<div class="flex-1 flex flex-col gap-2">
+<div class="bg-surface-container-high p-4 rounded-lg flex justify-between items-center border-l-4 border-[#a8a4ff]/60">
+<div>
+<p class="text-[10px] font-label uppercase text-on-surface-variant">Completed</p>
+<p class="text-xl font-bold">34,100</p>
+</div>
+<div class="text-right">
+<p class="text-[10px] font-bold text-secondary">81%</p>
+<p class="text-[8px] text-error font-bold">-11.0% DROP</p>
+</div>
+</div>
+<div class="h-8 flex items-center justify-center opacity-40">
+<span class="material-symbols-outlined text-sm" data-icon="keyboard_double_arrow_down">keyboard_double_arrow_down</span>
+</div>
+</div>
+<!-- Passed -->
+<div class="flex-1 flex flex-col gap-2">
+<div class="bg-surface-container-high p-4 rounded-lg flex justify-between items-center border-l-4 border-secondary">
+<div>
+<p class="text-[10px] font-label uppercase text-on-surface-variant">Passed</p>
+<p class="text-xl font-bold">25,240</p>
+</div>
+<div class="text-right">
+<p class="text-[10px] font-bold text-secondary">60%</p>
+<p class="text-[8px] text-error font-bold">-21.0% FAIL</p>
+</div>
+</div>
+<div class="h-8 flex items-center justify-center opacity-40">
+<span class="material-symbols-outlined text-sm" data-icon="keyboard_double_arrow_down">keyboard_double_arrow_down</span>
+</div>
+</div>
+<!-- Distinction -->
+<div class="flex-1 flex flex-col gap-2">
+<div class="metric-node-gradient p-4 rounded-lg flex justify-between items-center shadow-lg shadow-primary/20">
+<div>
+<p class="text-[10px] font-label uppercase text-on-primary/70">Distinction</p>
+<p class="text-xl font-bold text-on-primary">7,728</p>
+</div>
+<div class="text-right">
+<p class="text-[10px] font-bold text-on-primary">18.4%</p>
+</div>
+</div>
+<div class="h-8"></div>
+</div>
+</div>
+</section>
+</div>
+</main>
+</body></html>

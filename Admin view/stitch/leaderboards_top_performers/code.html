@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Soma Kinetic | Leaderboard Command Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-secondary": "#005f28",
+                        "on-background": "#f6f6fc",
+                        "secondary-fixed-dim": "#5bf083",
+                        "on-tertiary-container": "#4a2c00",
+                        "on-primary": "#1e009f",
+                        "on-secondary-fixed": "#004a1d",
+                        "surface-tint": "#a8a4ff",
+                        "surface": "#0c0e12",
+                        "tertiary": "#ffb148",
+                        "surface-variant": "#23262c",
+                        "on-tertiary-fixed-variant": "#563400",
+                        "on-tertiary": "#573500",
+                        "secondary-fixed": "#6bff8f",
+                        "surface-bright": "#292c33",
+                        "surface-container": "#171a1f",
+                        "outline": "#74757a",
+                        "on-primary-fixed-variant": "#1d0098",
+                        "on-tertiary-fixed": "#2a1700",
+                        "primary-dim": "#675df9",
+                        "surface-container-high": "#1d2025",
+                        "on-secondary-fixed-variant": "#006a2d",
+                        "on-surface": "#f6f6fc",
+                        "surface-dim": "#0c0e12",
+                        "surface-container-low": "#111318",
+                        "secondary-dim": "#5bf083",
+                        "secondary": "#6bff8f",
+                        "on-error-container": "#ffb2b9",
+                        "on-primary-container": "#16007d",
+                        "inverse-surface": "#f9f9ff",
+                        "error-container": "#a70138",
+                        "surface-container-lowest": "#000000",
+                        "primary-fixed-dim": "#8a85ff",
+                        "inverse-on-surface": "#53555a",
+                        "on-error": "#490013",
+                        "primary-fixed": "#9995ff",
+                        "error-dim": "#d73357",
+                        "error": "#ff6e84",
+                        "primary": "#a8a4ff",
+                        "on-secondary-container": "#e4ffe2",
+                        "tertiary-dim": "#e79400",
+                        "tertiary-fixed": "#f8a010",
+                        "surface-container-highest": "#23262c",
+                        "secondary-container": "#006e2f",
+                        "on-primary-fixed": "#000000",
+                        "inverse-primary": "#5044e3",
+                        "tertiary-fixed-dim": "#e79400",
+                        "on-surface-variant": "#aaabb0",
+                        "primary-container": "#9995ff",
+                        "background": "#0c0e12",
+                        "outline-variant": "#46484d",
+                        "tertiary-container": "#f8a010"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .podium-gradient {
+            background: linear-gradient(135deg, rgba(168, 164, 255, 0.15) 0%, rgba(103, 93, 249, 0.05) 100%);
+        }
+        .gold-glow {
+            box-shadow: 0 0 40px rgba(248, 160, 16, 0.15);
+        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary/30 antialiased overflow-x-hidden">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full flex flex-col py-6 bg-[#111318]/80 backdrop-blur-lg docked left-0 h-screen w-64 rounded-r-2xl tonal-transition spacing-y-4 flat no-shadows border-r border-[#f6f6fc]/10 z-50">
+<div class="px-6 mb-10">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container text-xl" style="font-variation-settings: 'FILL' 1;">deployed_code</span>
+</div>
+<div>
+<h1 class="font-headline text-lg font-bold text-[#a8a4ff] leading-none">Soma Kinetic</h1>
+<p class="font-inter text-[10px] font-semibold uppercase tracking-widest text-[#f6f6fc]/40 mt-1">Command Center</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1 px-2">
+<a class="flex items-center gap-3 text-[#f6f6fc]/50 hover:text-[#f6f6fc] mx-2 px-4 py-3 hover:bg-[#111318] hover:scale-[1.01] transition-all duration-200 ease-in-out font-inter text-xs font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-xl">dashboard</span>
+<span>Overview</span>
+</a>
+<a class="flex items-center gap-3 text-[#f6f6fc]/50 hover:text-[#f6f6fc] mx-2 px-4 py-3 hover:bg-[#111318] hover:scale-[1.01] transition-all duration-200 ease-in-out font-inter text-xs font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-xl">analytics</span>
+<span>Analytics</span>
+</a>
+<a class="flex items-center gap-3 text-[#f6f6fc]/50 hover:text-[#f6f6fc] mx-2 px-4 py-3 hover:bg-[#111318] hover:scale-[1.01] transition-all duration-200 ease-in-out font-inter text-xs font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-xl">group</span>
+<span>Students</span>
+</a>
+<a class="flex items-center gap-3 text-[#f6f6fc]/50 hover:text-[#f6f6fc] mx-2 px-4 py-3 hover:bg-[#111318] hover:scale-[1.01] transition-all duration-200 ease-in-out font-inter text-xs font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-xl">domain</span>
+<span>Institutions</span>
+</a>
+<a class="bg-[#a8a4ff]/10 text-[#a8a4ff] rounded-lg mx-2 px-4 py-3 flex items-center gap-3 font-inter text-xs font-semibold uppercase tracking-widest duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">leaderboard</span>
+<span>Leaderboard</span>
+</a>
+<a class="flex items-center gap-3 text-[#f6f6fc]/50 hover:text-[#f6f6fc] mx-2 px-4 py-3 hover:bg-[#111318] hover:scale-[1.01] transition-all duration-200 ease-in-out font-inter text-xs font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-xl">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="px-4 mt-auto space-y-2">
+<button class="w-full bg-primary/10 text-primary border border-primary/20 py-3 rounded-xl font-headline font-bold text-sm tracking-tight hover:bg-primary/20 transition-all">
+                New Report
+            </button>
+<div class="pt-4 border-t border-outline-variant/20">
+<a class="flex items-center gap-3 text-[#f6f6fc]/50 hover:text-[#f6f6fc] mx-2 px-4 py-3 font-inter text-xs font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-xl">help</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-3 text-[#f6f6fc]/50 hover:text-[#f6f6fc] mx-2 px-4 py-3 font-inter text-xs font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-xl text-error">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 min-h-screen pb-20">
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 left-64 z-40 h-16 bg-[#0c0e12]/70 backdrop-blur-md flex justify-between items-center px-8 shadow-[0_24px_24px_rgba(0,0,0,0.06)]">
+<div class="flex items-center gap-6">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">search</span>
+<input class="bg-surface-container-low border-none rounded-full pl-10 pr-4 py-1.5 text-sm w-64 focus:ring-1 focus:ring-primary/40 placeholder:text-on-surface-variant/50 transition-all" placeholder="Global search..." type="text"/>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-[#f6f6fc]/60 font-space-grotesk text-sm font-medium tracking-tight hover:text-[#f6f6fc] transition-colors" href="#">Dashboard</a>
+<a class="text-[#f6f6fc]/60 font-space-grotesk text-sm font-medium tracking-tight hover:text-[#f6f6fc] transition-colors" href="#">Curriculum</a>
+<a class="text-[#f6f6fc]/60 font-space-grotesk text-sm font-medium tracking-tight hover:text-[#f6f6fc] transition-colors" href="#">Assessments</a>
+<a class="text-[#a8a4ff] border-b-2 border-[#a8a4ff] pb-1 font-space-grotesk text-sm font-medium tracking-tight" href="#">Leaderboard</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img alt="User Profile Avatar" data-alt="close up headshot of a professional black woman with short natural hair smiling confidently against a neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMZMGC5wNrRp-Ri4gkZNQUaKiNM6uKexJwUSKzqcSUSxAm6EWN4RR_0-XOUFzISQSAZA_UYo07xVHnx4erQtQJo6iE7yvPEWxoz3URNjCexYoXwTmin-c5h7ovbKo4yfwLzHCIf8eiYpcWuIRWV_m6iHsD8qTCxkgksDi7oPragAQu8UEXas4ezAoiDaYhqClDGFdz5wy1gxMLH2JB51UQfXPpGjivpE87UD8YdegMV-oo1Kw7NW55jOZJsPHTdq5l172x6NOsb9CI"/>
+</div>
+</div>
+</header>
+<div class="pt-24 px-10">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+<div>
+<span class="font-label text-[10px] uppercase tracking-[0.2em] text-primary font-bold">Academic Ranking</span>
+<h2 class="font-headline text-5xl font-bold tracking-tighter mt-2">Elite Performers</h2>
+<p class="text-on-surface-variant mt-2 max-w-md">The top 1% of students driving innovation across the Pan-African curriculum network.</p>
+</div>
+<div class="flex gap-4">
+<div class="flex -space-x-3 overflow-hidden">
+<img alt="Student 1" class="inline-block h-10 w-10 rounded-full ring-2 ring-surface" data-alt="Nigerian student smiling confidently wearing a light colored linen shirt in a bright office environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvk04cfgToc_7RRJW-nBZ-w7gUUDnF2WwYbUasy2zMFm7nKYDSHyWLF2res4piSovG_f1kmGB0W3LbxcImqUkjrDJtpsHNxpwEtbMgoUeS89-gYSV0NZYwSp3Oav4h-9rqJArZ0JJYBrlvNc9V92vDQjSXGvlpvixDAVKzq6OvaWc-y_c01H5QfJngLyaMssUIFF_tASQNPxxssgikBZsEIb-I1v8NBNpnqcmKeNe2WJdbnLjbMwcs82eN6aTbU5qoTo0wxSXlwo3Z"/>
+<img alt="Student 2" class="inline-block h-10 w-10 rounded-full ring-2 ring-surface" data-alt="South African male student in a modern library setting with soft natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpICDWUkp4NiwJgzwcLxAjreb7jbCYNJRxWYlXuCD5NDGR1ElebXymZNgRkj09oUdTTUfveQHN2J7hUjQ4VCkmDcJ-AkH6eqGPZrPuQXhaQSM0Aem1epI-KNOjm8lg3wP9Rj12ZTPKTy1Jup3t_9RXfdzX85cMF7He3Ohongt93YdRyIR3c5JKEDLSgO9I9eG5dj-SYu4A6gvkiaFZZUhW-hYcoE_3lyrNLyvUx1x-RMtxKGzMLTBRBeM4RR5xFUb7pwz6Op47v-Ge"/>
+<img alt="Student 3" class="inline-block h-10 w-10 rounded-full ring-2 ring-surface" data-alt="Kenyan student portrait with vibrant traditional patterns in background and warm lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQoLaYH9aTJeE3icFIoexHmnBxNdEbBj63QlPb1jLS7E9TrCVwFFQkG6YIVKlrPGJStIhWQ4d3HzPQkmozitbG_BPLfy4wZIHh1VZFxgnw0Ip-8NmHbxfIie1NBnscDMUuZGkOOX0HwhvspEUFbFVLIHMrH93NEp1wGX6IvCnS3kZ84VGAm_qPSEZbLA_J8u_3GFds7VifVShiAfByMAPLdsO_i672wJT5brA8BZuguHp6QpbdXvWvYA2prODlpjsNQQmqs-PHjDTd"/>
+<div class="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-highest text-xs font-bold ring-2 ring-surface">+12k</div>
+</div>
+</div>
+</div>
+<!-- TOP SECTION — Animated Podium -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end mb-16 max-w-6xl mx-auto">
+<!-- 2nd Place -->
+<div class="order-2 md:order-1 h-[340px] flex flex-col items-center justify-end">
+<div class="relative mb-6">
+<div class="w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-slate-400 to-slate-200">
+<img alt="Chidi Obi" class="w-full h-full rounded-full object-cover ring-4 ring-surface" data-alt="A portrait of a young African man with a neat beard and stylish glasses, looking thoughtfully towards the camera" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKs32ShhsynJ_aRgpvgYQ3VT0PFWXYKuincrpvDoU3fWpwmk53xuYAHXxVNoemwFB6WUHrvS1GkPloExQGoaJf5nSGIUgsJSqt_vAr8pQ-2Avg38SOsWStxAC99DGfjlwpCP0Libv7pJnCIn-oRTlGbdfFKH6C0zCHd8l4nWDDAYg_jchbKt5vcykqszpAXT6gA7ZSu3z_vEwctS8E6gm5uW1D5aiw72oxin4cD0Zl2GZrCDiKxgbY9KXfC2CNtLpKF4hh_MZgskz8"/>
+</div>
+<div class="absolute -bottom-2 -right-2 bg-slate-400 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold border-4 border-surface">2</div>
+</div>
+<div class="podium-gradient w-full h-48 rounded-t-3xl p-6 text-center border-x border-t border-outline-variant/10">
+<h3 class="font-headline text-xl font-bold">Chidi Obi</h3>
+<div class="flex items-center justify-center gap-1.5 mt-1 opacity-70">
+<span class="text-xs">🇳🇬 Nigeria</span>
+</div>
+<div class="mt-4 flex flex-col gap-1">
+<span class="font-headline text-2xl font-bold text-on-surface">992</span>
+<span class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Total Score</span>
+</div>
+<div class="flex justify-center gap-2 mt-4">
+<span class="w-6 h-6 rounded-md bg-tertiary/20 flex items-center justify-center"><span class="material-symbols-outlined text-sm text-tertiary" style="font-variation-settings: 'FILL' 1;">workspace_premium</span></span>
+<span class="w-6 h-6 rounded-md bg-secondary/20 flex items-center justify-center"><span class="material-symbols-outlined text-sm text-secondary" style="font-variation-settings: 'FILL' 1;">star</span></span>
+</div>
+</div>
+</div>
+<!-- 1st Place -->
+<div class="order-1 md:order-2 h-[420px] flex flex-col items-center justify-end relative">
+<!-- Confetti Effect Conceptualizer -->
+<div class="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl opacity-30">
+<div class="absolute top-0 left-1/4 w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+<div class="absolute top-10 right-1/3 w-1.5 h-1.5 bg-secondary rounded-full animate-pulse"></div>
+<div class="absolute top-20 left-1/2 w-2 h-2 bg-tertiary rounded-full animate-bounce"></div>
+</div>
+<div class="relative mb-8 scale-110">
+<div class="w-32 h-32 rounded-full p-1.5 bg-gradient-to-tr from-tertiary to-yellow-200 gold-glow">
+<img alt="Amara Diallo" class="w-full h-full rounded-full object-cover ring-4 ring-surface" data-alt="Portrait of a young woman with intricate braided hairstyle and radiant skin, wearing a vibrant mustard-colored dress" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6Gitk9LnyB-Bb3V-If8-7qv1zUT2ZEJ7o4MW9UvCWsSomfZxKaXnNbRUOBgK2-w9T3FG8H_UB-xg9p2gZ_1P9E6JRfAs2P0l4ba7Or1mpaEVnUuQhdZMxbBGGlupQZY_-zyqLPTmnSxrDANtjRnHa7irjukSDkeiwGgFccze94mxUecQXn2VpHwemsKg4_OgN6E6rSnOV5wNhW8pZuO6eO6718uxqCV4kgylHT_-zB5agP7uS6vthCiYLw2IS-WR18qLG5WV_lW3X"/>
+</div>
+<div class="absolute -bottom-2 -right-2 bg-tertiary text-on-tertiary-container w-10 h-10 rounded-full flex items-center justify-center font-bold border-4 border-surface text-lg">1</div>
+<div class="absolute -top-6 left-1/2 -translate-x-1/2">
+<span class="material-symbols-outlined text-4xl text-tertiary" style="font-variation-settings: 'FILL' 1;">cognition</span>
+</div>
+</div>
+<div class="bg-surface-container-high w-full h-64 rounded-t-3xl p-8 text-center border-x border-t border-primary/20 shadow-[0_-20px_50px_rgba(168,164,255,0.1)] relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent"></div>
+<h3 class="font-headline text-2xl font-bold relative z-10">Amara Diallo</h3>
+<div class="flex items-center justify-center gap-1.5 mt-1 opacity-70 relative z-10">
+<span class="text-xs">🇸🇳 Senegal</span>
+</div>
+<div class="mt-6 flex flex-col gap-1 relative z-10">
+<span class="font-headline text-4xl font-extrabold text-primary">1,048</span>
+<span class="font-label text-xs uppercase tracking-[0.2em] text-on-surface-variant font-bold">Total Score</span>
+</div>
+<div class="flex justify-center gap-3 mt-6 relative z-10">
+<div class="px-3 py-1 bg-primary/10 rounded-full flex items-center gap-1 border border-primary/20">
+<span class="material-symbols-outlined text-sm text-primary" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+<span class="text-[10px] font-bold text-primary">ELITE OPS</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 3rd Place -->
+<div class="order-3 md:order-3 h-[300px] flex flex-col items-center justify-end">
+<div class="relative mb-6">
+<div class="w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-amber-700 to-amber-500">
+<img alt="Kofi Mensah" class="w-full h-full rounded-full object-cover ring-4 ring-surface" data-alt="Confident young Kenyan man with close-cropped hair wearing a professional navy blue shirt" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPNIbMzKwB0uEQ_3JhWutEUEEaVMcbFQhIb3bKzQkq6_kSJhiKYUJkzd-SLdVlSxBVBdiIE_8daU1OwYwEsAOr75EANH426rTpqE8Ttw92P5fAS2y1lJYojlrMJZm_nhmiw6En5_QKO_Gkjx-tZD93fhuaLtCvMmMn5G8S5pPZ0mX0zf9gHrqFkReIzZ65oWZt7BTBtaf7jSlFsW8-Sq8n187w8rBn3QLs0DomFAkp99I17nHnuSXxfqJbnglWaSGR4ySWtyLmsNtL"/>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-amber-600 text-white w-7 h-7 rounded-full flex items-center justify-center font-bold border-4 border-surface text-sm">3</div>
+</div>
+<div class="podium-gradient w-full h-40 rounded-t-3xl p-5 text-center border-x border-t border-outline-variant/10">
+<h3 class="font-headline text-lg font-bold">Kofi Mensah</h3>
+<div class="flex items-center justify-center gap-1.5 mt-1 opacity-70">
+<span class="text-xs">🇬🇭 Ghana</span>
+</div>
+<div class="mt-3 flex flex-col gap-1">
+<span class="font-headline text-xl font-bold text-on-surface">975</span>
+<span class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Total Score</span>
+</div>
+</div>
+</div>
+</div>
+<!-- TABLE CONTROLS -->
+<div class="bg-surface-container-low rounded-xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-3 flex-1 min-w-[300px]">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-high border-outline-variant/20 rounded-lg pl-11 pr-4 py-2.5 text-sm focus:ring-primary/40 focus:border-primary transition-all" placeholder="Filter by name, ID or region..." type="text"/>
+</div>
+<button class="bg-surface-container-highest px-4 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-surface-bright transition-colors">
+<span class="material-symbols-outlined text-lg">filter_list</span>
+                        Filters
+                    </button>
+</div>
+<div class="flex items-center gap-2">
+<select class="bg-surface-container-high border-outline-variant/20 rounded-lg px-4 py-2.5 text-xs font-semibold uppercase tracking-wider focus:ring-primary/40">
+<option>All Subjects</option>
+<option>Quantum Physics</option>
+<option>Neural Ethics</option>
+</select>
+<select class="bg-surface-container-high border-outline-variant/20 rounded-lg px-4 py-2.5 text-xs font-semibold uppercase tracking-wider focus:ring-primary/40">
+<option>Last 30 Days</option>
+<option>Semester 1</option>
+<option>Academic Year</option>
+</select>
+<button class="bg-primary text-on-primary-fixed px-6 py-2.5 rounded-lg font-headline font-bold text-sm tracking-tight hover:opacity-90 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">csv</span>
+                        Export to CSV
+                    </button>
+</div>
+</div>
+<!-- RANKED TABLE -->
+<div class="bg-surface-container-low rounded-xl overflow-hidden shadow-2xl">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high/50 border-b border-outline-variant/10">
+<th class="px-6 py-4 font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold">Rank</th>
+<th class="px-6 py-4 font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold">Student Identity</th>
+<th class="px-6 py-4 font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold text-center">Country</th>
+<th class="px-6 py-4 font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold text-right">Score</th>
+<th class="px-6 py-4 font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold text-right">Pass Rate</th>
+<th class="px-6 py-4 font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold text-center">Streak</th>
+<th class="px-6 py-4 font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold">Badges</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-high transition-colors group cursor-pointer">
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+<span class="font-headline font-bold text-lg">01</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<img alt="Amara Diallo" class="w-10 h-10 rounded-full ring-2 ring-primary/20" data-alt="Portrait of a young woman with intricate braided hairstyle and radiant skin, wearing a vibrant mustard-colored dress" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsQIKBaKMcdEVO6SYEjrQA1Uny3HGUhP2YbY0gtNWGlTmREqetnJeiodpgi0ynLt01YBJxUpsp5Q2hPvZyRVsgR0zTWA5TeZI-nerQ-HhTCun7xCbOnksiUGeLSFDXv9KYfoDzAZrFgOcIKk6HhPwbpb20EcSeLEpgXzU40Jw7JnoN2ne4if4wvedqMDWAVN2j25DQV5NcbIOpvhWMWEZe2vCEcbF_DfSYulCZxUaBvDudWVFKAMTPVXMQx5mBKjBAiCAnatsb8Jic"/>
+<div>
+<div class="font-headline font-bold text-on-surface">Amara Diallo</div>
+<div class="text-[10px] text-on-surface-variant uppercase font-semibold">SK-2024-88492</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<span class="text-sm">🇸🇳 Senegal</span>
+</td>
+<td class="px-6 py-5 text-right font-headline font-bold text-primary">1,048</td>
+<td class="px-6 py-5 text-right">
+<div class="flex flex-col items-end gap-1">
+<span class="text-xs font-bold text-secondary">99.4%</span>
+<div class="w-20 h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[99.4%]"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<div class="inline-flex items-center gap-1 px-2 py-1 bg-error-container/10 text-error rounded-md">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="text-xs font-bold tracking-tighter">42 Days</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex gap-1">
+<span class="material-symbols-outlined text-tertiary text-lg" title="Top Performer">verified</span>
+<span class="material-symbols-outlined text-primary text-lg" title="Innovation Award">psychology</span>
+<span class="material-symbols-outlined text-secondary text-lg" title="Consistent Learner">auto_awesome</span>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-high transition-colors group cursor-pointer">
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400" style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+<span class="font-headline font-bold text-lg">02</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<img alt="Chidi Obi" class="w-10 h-10 rounded-full" data-alt="A portrait of a young African man with a neat beard and stylish glasses, looking thoughtfully towards the camera" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOGhJqx7lEZf7tV4fuVd2oDBC_Ea1JS8YFY1EqLqfvwt5Ea6CzkWcpabTKGWD7twXpTpS9HVUDEyG5azuHeN7eEFHI7En3zE8TChw83-zqhPoXpSOdf-mYoSwJn9IjfueW27dRQ7Bv-tDUoFvTbTJbgNEAn93VkMLewm2d5IMw9vTrxU3oKed-sEIugTOLcdujH6sVYEUBdUekW976y9NO4fsiOM2BoSN-iUDivZaP8EMnFLVnNpQ5BwHgAdTepEcgnTuc0s-2h5Kl"/>
+<div>
+<div class="font-headline font-bold text-on-surface">Chidi Obi</div>
+<div class="text-[10px] text-on-surface-variant uppercase font-semibold">SK-2024-11029</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<span class="text-sm">🇳🇬 Nigeria</span>
+</td>
+<td class="px-6 py-5 text-right font-headline font-bold">992</td>
+<td class="px-6 py-5 text-right">
+<div class="flex flex-col items-end gap-1">
+<span class="text-xs font-bold text-secondary">98.1%</span>
+<div class="w-20 h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[98.1%]"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<div class="inline-flex items-center gap-1 px-2 py-1 bg-error-container/10 text-error rounded-md">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="text-xs font-bold tracking-tighter">38 Days</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex gap-1">
+<span class="material-symbols-outlined text-primary text-lg">rocket_launch</span>
+<span class="material-symbols-outlined text-tertiary text-lg">rewarded_ads</span>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-high transition-colors group cursor-pointer">
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-amber-700" style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+<span class="font-headline font-bold text-lg">03</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<img alt="Kofi Mensah" class="w-10 h-10 rounded-full" data-alt="Confident young Kenyan man with close-cropped hair wearing a professional navy blue shirt" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHL70ynLfJAovr1ScZWM1zmQjCDUmvLZWcF3NLxCcNfh0GquaB9RFwIYBaS4vIKYYNxQLltsDPMJs_5w2fVD4_ezAti0KuDsfeiuSu2dZALwnZp_rJ0mzTsOtGyYN7bJI5WUs4kbxXiwCBGllfzW1gQxsHGg1irZswdVWlnXOJ5tGwSdvsk7fvxZ_R28lYaNmN_nk5JLhXsf9nknl-7xK8hHYAZZuYsIu0BuH0xz61OhicCjf1Gmzb7cf-gzqlcWbQi8iGhH9kGF8t"/>
+<div>
+<div class="font-headline font-bold text-on-surface">Kofi Mensah</div>
+<div class="text-[10px] text-on-surface-variant uppercase font-semibold">SK-2024-33291</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<span class="text-sm">🇬🇭 Ghana</span>
+</td>
+<td class="px-6 py-5 text-right font-headline font-bold">975</td>
+<td class="px-6 py-5 text-right">
+<div class="flex flex-col items-end gap-1">
+<span class="text-xs font-bold text-secondary">94.5%</span>
+<div class="w-20 h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[94.5%]"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<div class="inline-flex items-center gap-1 px-2 py-1 bg-error-container/10 text-error rounded-md">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="text-xs font-bold tracking-tighter">12 Days</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex gap-1">
+<span class="material-symbols-outlined text-primary text-lg">science</span>
+</div>
+</td>
+</tr>
+<!-- More Rows (Asymmetric Density) -->
+<tr class="hover:bg-surface-container-high transition-colors group cursor-pointer">
+<td class="px-6 py-5 text-center font-headline font-bold opacity-40">04</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<img alt="Zandi Mbeki" class="w-10 h-10 rounded-full" data-alt="close up headshot of a professional black woman with short natural hair smiling confidently against a neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAr3veRWHSv3lQhREnY6Tpc8F343Bi_CzLY1FZ0mcI86_H9GSCr3asfb_g04tn3mt99QkJhrZM82G9vvDROIsZ8p3l5PkKcYjje9W8XHestRgpxc9PdBvdjWcSXi6qbfALAcqeAGCKsPfGVby7jYXzV9P7fG1UiCr_KH8gHaYcqKX6hr9CQns1I_dcv2TiSa3FIovbMzxhBsbr6W6naZ-QTgufggKuH5gq8LoAjSaCFMwHiHJ4udf7_inbXzAeAu32mdxfYYDP4JXG_"/>
+<div>
+<div class="font-headline font-bold text-on-surface">Zandi Mbeki</div>
+<div class="text-[10px] text-on-surface-variant uppercase font-semibold">SK-2024-11882</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<span class="text-sm">🇿🇦 South Africa</span>
+</td>
+<td class="px-6 py-5 text-right font-headline font-bold">962</td>
+<td class="px-6 py-5 text-right">
+<div class="flex flex-col items-end gap-1">
+<span class="text-xs font-bold text-secondary">92.0%</span>
+<div class="w-20 h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[92%]"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<div class="inline-flex items-center gap-1 px-2 py-1 bg-surface-container-highest text-on-surface-variant rounded-md">
+<span class="material-symbols-outlined text-xs">history</span>
+<span class="text-xs font-bold tracking-tighter">0 Days</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex gap-1">
+<span class="material-symbols-outlined text-primary text-lg">edit_note</span>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors group cursor-pointer">
+<td class="px-6 py-5 text-center font-headline font-bold opacity-40">05</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<img alt="Jabari Mwangi" class="w-10 h-10 rounded-full" data-alt="Nigerian student smiling confidently wearing a light colored linen shirt in a bright office environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLFtIyT6jKZDYsf0pGjzakpeezQbjeRNT2ttj_j5sRXyYyN7z2OCWPn8s2fEAM5ZQQZ85gg6LYHvEdUg-_aqYSJ700qh1l12UzGdGuGT1mgFLOD7nJmwrM84nug5e2ttYZIZ4X0KVynk5guzC0JmjRWb_ZyiO4wTlLm2PhVb4nLaIebadct9K_tr_91eakONU5FzRywbtWR1GOsNLFZRrNvOHa2y-SJJ8TFVyay0hwUL1DMO8ygnH2tyl04uzQQQzLQkZP7xRUctKk"/>
+<div>
+<div class="font-headline font-bold text-on-surface">Jabari Mwangi</div>
+<div class="text-[10px] text-on-surface-variant uppercase font-semibold">SK-2024-99120</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<span class="text-sm">🇰🇪 Kenya</span>
+</td>
+<td class="px-6 py-5 text-right font-headline font-bold">944</td>
+<td class="px-6 py-5 text-right">
+<div class="flex flex-col items-end gap-1">
+<span class="text-xs font-bold text-secondary">88.2%</span>
+<div class="w-20 h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[88.2%]"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<div class="inline-flex items-center gap-1 px-2 py-1 bg-error-container/10 text-error rounded-md">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="text-xs font-bold tracking-tighter">15 Days</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex gap-1">
+<span class="material-symbols-outlined text-secondary text-lg">bolt</span>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="p-6 bg-surface-container-high/30 flex justify-between items-center">
+<span class="text-xs text-on-surface-variant font-medium">Showing 1-10 of 12,402 Elite Performers</span>
+<div class="flex gap-1">
+<button class="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container-highest border border-outline-variant/20 hover:bg-surface-bright transition-colors">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-on-primary-fixed text-xs font-bold">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-highest text-xs font-bold">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-highest text-xs font-bold">3</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container-highest border border-outline-variant/20 hover:bg-surface-bright transition-colors">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- DETAIL DRAWER (Performance Analytics Snippet) -->
+<div class="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="lg:col-span-2 bg-surface-container-low rounded-xl p-6 border border-outline-variant/10">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h4 class="font-headline text-lg font-bold">Performance Matrix</h4>
+<p class="text-xs text-on-surface-variant font-medium mt-1">Global average vs. Top 1% baseline</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Top Tier</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Network Avg</span>
+</div>
+</div>
+</div>
+<!-- Radial / Radar conceptualization using CSS -->
+<div class="h-64 flex items-center justify-center relative">
+<div class="absolute inset-0 flex items-center justify-center opacity-10">
+<div class="w-48 h-48 border border-on-surface rounded-full"></div>
+<div class="absolute w-32 h-32 border border-on-surface rounded-full"></div>
+<div class="absolute w-16 h-16 border border-on-surface rounded-full"></div>
+</div>
+<div class="relative w-48 h-48 flex items-center justify-center">
+<!-- SVG Radar Chart Simulation -->
+<svg class="w-full h-full transform rotate-45" viewbox="0 0 100 100">
+<polygon fill="rgba(168, 164, 255, 0.2)" points="50,10 90,50 50,90 10,50" stroke="#a8a4ff" stroke-width="2"></polygon>
+<polygon fill="rgba(116, 117, 122, 0.1)" points="50,30 70,50 50,70 30,50" stroke="#74757a" stroke-width="1"></polygon>
+</svg>
+<!-- Subject Labels -->
+<span class="absolute top-0 -translate-y-6 font-label text-[9px] uppercase tracking-tighter text-on-surface-variant">Mathematics</span>
+<span class="absolute right-0 translate-x-12 font-label text-[9px] uppercase tracking-tighter text-on-surface-variant">Ethics</span>
+<span class="absolute bottom-0 translate-y-6 font-label text-[9px] uppercase tracking-tighter text-on-surface-variant">Coding</span>
+<span class="absolute left-0 -translate-x-12 font-label text-[9px] uppercase tracking-tighter text-on-surface-variant">Physics</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-xl p-6 border border-outline-variant/10">
+<h4 class="font-headline text-lg font-bold mb-6">Regional Distribution</h4>
+<div class="space-y-6">
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-bold">
+<span>West Africa</span>
+<span class="text-primary">38%</span>
+</div>
+<div class="h-2 bg-surface-container-highest rounded-full">
+<div class="h-full bg-primary rounded-full" style="width: 38%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-bold">
+<span>East Africa</span>
+<span class="text-secondary">24%</span>
+</div>
+<div class="h-2 bg-surface-container-highest rounded-full">
+<div class="h-full bg-secondary rounded-full" style="width: 24%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-bold">
+<span>Southern Africa</span>
+<span class="text-tertiary">19%</span>
+</div>
+<div class="h-2 bg-surface-container-highest rounded-full">
+<div class="h-full bg-tertiary rounded-full" style="width: 19%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-bold">
+<span>North Africa</span>
+<span class="text-error">12%</span>
+</div>
+<div class="h-2 bg-surface-container-highest rounded-full">
+<div class="h-full bg-error rounded-full" style="width: 12%"></div>
+</div>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-outline-variant/10">
+<button class="w-full text-center text-[10px] font-bold uppercase tracking-widest text-primary hover:underline">View Detailed Demographics</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-br from-primary to-primary-dim text-on-primary-container rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50 group">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">add</span>
+<div class="absolute right-full mr-4 bg-surface-container-high px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            New Academic Challenge
+        </div>
+</button>
+</body></html>

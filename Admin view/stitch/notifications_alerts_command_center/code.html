@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Soma EdTech Admin | Notifications &amp; Alerts</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Space Grotesk', sans-serif; }
+        .glass-panel {
+            background: rgba(17, 19, 24, 0.7);
+            backdrop-filter: blur(8px);
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #0c0e12; }
+        ::-webkit-scrollbar-thumb { background: #23262c; border-radius: 10px; }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-fixed-variant": "#1d0098",
+              "primary-fixed": "#9995ff",
+              "on-secondary-container": "#e4ffe2",
+              "on-primary-fixed": "#000000",
+              "on-surface": "#f6f6fc",
+              "on-tertiary": "#573500",
+              "on-tertiary-container": "#4a2c00",
+              "on-secondary-fixed": "#004a1d",
+              "surface-tint": "#a8a4ff",
+              "on-error": "#490013",
+              "inverse-surface": "#f9f9ff",
+              "tertiary": "#ffb148",
+              "surface-variant": "#23262c",
+              "surface-dim": "#0c0e12",
+              "tertiary-fixed-dim": "#e79400",
+              "tertiary-dim": "#e79400",
+              "inverse-on-surface": "#53555a",
+              "surface-container": "#171a1f",
+              "on-tertiary-fixed-variant": "#563400",
+              "primary-container": "#9995ff",
+              "error": "#ff6e84",
+              "inverse-primary": "#5044e3",
+              "tertiary-container": "#f8a010",
+              "background": "#0c0e12",
+              "surface-container-highest": "#23262c",
+              "primary": "#a8a4ff",
+              "on-primary-container": "#16007d",
+              "on-background": "#f6f6fc",
+              "primary-fixed-dim": "#8a85ff",
+              "on-surface-variant": "#aaabb0",
+              "on-primary": "#1e009f",
+              "primary-dim": "#675df9",
+              "outline": "#74757a",
+              "outline-variant": "#46484d",
+              "error-container": "#a70138",
+              "error-dim": "#d73357",
+              "surface": "#0c0e12",
+              "tertiary-fixed": "#f8a010",
+              "secondary-fixed": "#6bff8f",
+              "on-tertiary-fixed": "#2a1700",
+              "secondary-container": "#006e2f",
+              "on-secondary": "#005f28",
+              "secondary-fixed-dim": "#5bf083",
+              "secondary-dim": "#5bf083",
+              "surface-bright": "#292c33",
+              "secondary": "#6bff8f",
+              "surface-container-high": "#1d2025",
+              "on-secondary-fixed-variant": "#006a2d",
+              "surface-container-low": "#111318",
+              "on-error-container": "#ffb2b9",
+              "surface-container-lowest": "#000000"
+            },
+            fontFamily: {
+              "headline": ["Space Grotesk"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background text-on-surface selection:bg-primary/30">
+<!-- Sidebar Navigation -->
+<aside class="h-screen w-64 fixed left-0 top-0 z-[60] bg-[#111318] flex flex-col py-8 px-4 gap-2">
+<div class="mb-8 px-4">
+<h1 class="text-lg font-black text-[#a8a4ff] font-headline uppercase tracking-tighter">Soma Admin</h1>
+<p class="font-['Space_Grotesk'] uppercase tracking-widest text-[10px] text-on-surface/40">Command Center</p>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-3 text-[#f6f6fc]/50 hover:text-[#f6f6fc] hover:bg-[#111318] transition-all group" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-['Space_Grotesk'] uppercase tracking-widest text-[10px]">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#f6f6fc]/50 hover:text-[#f6f6fc] hover:bg-[#111318] transition-all group" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-['Space_Grotesk'] uppercase tracking-widest text-[10px]">Students</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#f6f6fc]/50 hover:text-[#f6f6fc] hover:bg-[#111318] transition-all group" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="font-['Space_Grotesk'] uppercase tracking-widest text-[10px]">Courses</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-[#a8a4ff] to-[#675df9] text-white rounded-xl shadow-lg shadow-[#675df9]/20 group" href="#">
+<span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span>
+<span class="font-['Space_Grotesk'] uppercase tracking-widest text-[10px] font-semibold">Notifications</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#f6f6fc]/50 hover:text-[#f6f6fc] hover:bg-[#111318] transition-all group" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-['Space_Grotesk'] uppercase tracking-widest text-[10px]">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#f6f6fc]/50 hover:text-[#f6f6fc] hover:bg-[#111318] transition-all group" href="#">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+<span class="font-['Space_Grotesk'] uppercase tracking-widest text-[10px]">Analytics</span>
+</a>
+</nav>
+<div class="mt-auto pt-8 flex flex-col gap-2">
+<button class="bg-primary/10 border border-primary/20 text-primary py-3 rounded-xl font-headline text-[10px] uppercase tracking-widest font-bold hover:bg-primary/20 transition-all">
+                Broadcast Alert
+            </button>
+<div class="flex flex-col gap-1 mt-4">
+<a class="flex items-center gap-3 px-4 py-2 text-[#f6f6fc]/50 hover:text-[#f6f6fc] transition-colors" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="contact_support">contact_support</span>
+<span class="font-['Space_Grotesk'] uppercase tracking-widest text-[10px]">Support</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-error-dim hover:text-error transition-colors" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="logout">logout</span>
+<span class="font-['Space_Grotesk'] uppercase tracking-widest text-[10px]">Logout</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen">
+<!-- Top Nav Bar -->
+<header class="bg-[#0c0e12]/70 backdrop-blur-md sticky top-0 z-50 flex justify-between items-center px-8 h-16 w-full shadow-[0px_24px_24px_0px_rgba(246,246,252,0.06)]">
+<div class="flex items-center gap-4">
+<div class="bg-surface-container-low px-4 py-1.5 rounded-lg border border-outline-variant/10 flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="search">search</span>
+<input class="bg-transparent border-none text-xs focus:ring-0 text-on-surface w-64 placeholder:text-on-surface-variant/50" placeholder="Search logs, alerts, or users..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-on-surface/60 hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface/60 hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-primary/30">
+<img class="h-full w-full object-cover" data-alt="Close-up portrait of a professional African woman admin in a high-tech environment with soft blue lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZBUxpBIYrcHyXXUuGKfmoBD78MG8-6ZURxbZyZA0WpdaxnjsecexwncwUI5jUOidEbNT55SiaL-EN8L7pP7h-ZlqNrkHtuNFXeOBvHgkavZXZKBr895CKAFh4EmDSf-8f9CLgfQFWHQSiv7joNDlhpp49-7ZC8PKBUrIpvLZ3QtZvQIAEfBZTWWo22aHFzsdPxHTMYajXr00UCV85QzNwcJaV1SNJR8jYRolIPjo0GW5natboStNH2iRV4dSxWjVJJTsseh5kp76y"/>
+</div>
+</div>
+</header>
+<div class="p-8">
+<!-- Header Section -->
+<div class="mb-10">
+<h2 class="text-4xl font-bold tracking-tight mb-2">Notifications &amp; Alerts</h2>
+<p class="text-on-surface-variant max-w-2xl">Real-time surveillance of Soma EdTech infrastructure and student communication channels across Lagos, Nairobi, and Accra nodes.</p>
+</div>
+<!-- Top Stats Section (Metric Nodes) -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+<div class="bg-surface-container-low border border-outline-variant/10 p-6 rounded-xl hover:bg-surface-container-high transition-all group">
+<p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Active Alerts</p>
+<div class="flex items-baseline gap-2">
+<span class="text-4xl font-headline font-bold text-error">12</span>
+<span class="text-[10px] text-error-dim flex items-center gap-1 font-bold">
+<span class="material-symbols-outlined text-xs" data-icon="trending_up">trending_up</span> 4%
+                        </span>
+</div>
+<div class="mt-4 h-1 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-error w-3/4"></div>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant/10 p-6 rounded-xl hover:bg-surface-container-high transition-all relative overflow-hidden">
+<div class="relative z-10">
+<p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">System Health</p>
+<div class="flex items-baseline gap-2">
+<span class="text-4xl font-headline font-bold text-secondary">99.8%</span>
+</div>
+<p class="text-[10px] mt-2 text-on-surface-variant italic">Nairobi Edge: 12ms lat</p>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-8xl text-secondary" data-icon="analytics">analytics</span>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant/10 p-6 rounded-xl hover:bg-surface-container-high transition-all">
+<p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Scheduled Broadcasts</p>
+<div class="flex items-baseline gap-2">
+<span class="text-4xl font-headline font-bold text-tertiary">08</span>
+</div>
+<p class="text-[10px] mt-2 text-on-surface-variant">Next: JAMB Mock Results (14:00)</p>
+</div>
+<div class="bg-surface-container-low border border-outline-variant/10 p-6 rounded-xl hover:bg-surface-container-high transition-all">
+<p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Resolved Alerts</p>
+<div class="flex items-baseline gap-2">
+<span class="text-4xl font-headline font-bold text-primary">142</span>
+</div>
+<p class="text-[10px] mt-2 text-primary-dim">Last 24 hours</p>
+</div>
+</div>
+<div class="flex flex-col lg:flex-row gap-8">
+<!-- Main Alert Feed (70%) -->
+<section class="lg:w-[70%] bg-surface-container-low border border-outline-variant/10 rounded-xl overflow-hidden flex flex-col">
+<div class="px-6 py-4 border-b border-outline-variant/10 flex justify-between items-center">
+<h3 class="text-sm font-bold tracking-widest uppercase flex items-center gap-2">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-error"></span>
+</span>
+                            System Alert Feed
+                        </h3>
+<div class="flex gap-2">
+<span class="text-[10px] px-2 py-0.5 rounded bg-surface-container-highest text-on-surface-variant border border-outline-variant/20">Lagos-AWS-1</span>
+<span class="text-[10px] px-2 py-0.5 rounded bg-surface-container-highest text-on-surface-variant border border-outline-variant/20">DB-Primary</span>
+</div>
+</div>
+<div class="divide-y divide-outline-variant/5 max-h-[800px] overflow-y-auto">
+<!-- Alert Item 1 -->
+<div class="px-6 py-4 hover:bg-surface-container-high transition-colors flex gap-4 items-start group">
+<div class="mt-1">
+<span class="material-symbols-outlined text-error" data-icon="error">error</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between mb-1">
+<div class="flex items-center gap-3">
+<span class="text-[10px] font-bold uppercase tracking-tighter py-0.5 px-2 bg-error/10 text-error rounded">CRITICAL</span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase">DATABASE CLUSTER</span>
+</div>
+<span class="text-[10px] text-on-surface-variant/50 font-mono">12:44:02 UTC</span>
+</div>
+<p class="text-sm font-medium mb-1">Unusual Latency Spike: Lagos Region (Node-04)</p>
+<p class="text-xs text-on-surface-variant">Response times exceeded 1200ms for student quiz submissions. Failover initiated to Accra-Edge-02.</p>
+</div>
+<button class="opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- Alert Item 2 -->
+<div class="px-6 py-4 hover:bg-surface-container-high transition-colors flex gap-4 items-start group">
+<div class="mt-1">
+<span class="material-symbols-outlined text-tertiary" data-icon="warning">warning</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between mb-1">
+<div class="flex items-center gap-3">
+<span class="text-[10px] font-bold uppercase tracking-tighter py-0.5 px-2 bg-tertiary/10 text-tertiary rounded">WARNING</span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase">USER REGISTRATION</span>
+</div>
+<span class="text-[10px] text-on-surface-variant/50 font-mono">12:38:15 UTC</span>
+</div>
+<p class="text-sm font-medium mb-1">Sms Gateway Delays: Kenya (Safaricom)</p>
+<p class="text-xs text-on-surface-variant">OTP delivery taking longer than 60s for 15% of new signups. Switching to backup Twilio route.</p>
+</div>
+<button class="opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- Alert Item 3 -->
+<div class="px-6 py-4 hover:bg-surface-container-high transition-colors flex gap-4 items-start group">
+<div class="mt-1">
+<span class="material-symbols-outlined text-primary" data-icon="info">info</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between mb-1">
+<div class="flex items-center gap-3">
+<span class="text-[10px] font-bold uppercase tracking-tighter py-0.5 px-2 bg-primary/10 text-primary rounded">INFO</span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase">PAYMENT GATEWAY</span>
+</div>
+<span class="text-[10px] text-on-surface-variant/50 font-mono">12:15:30 UTC</span>
+</div>
+<p class="text-sm font-medium mb-1">Paystack Settlement Successful</p>
+<p class="text-xs text-on-surface-variant">Batch settlement for Lagos premium subscriptions (₦2.4M) processed successfully.</p>
+</div>
+<button class="opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- Alert Item 4 -->
+<div class="px-6 py-4 hover:bg-surface-container-high transition-colors flex gap-4 items-start group">
+<div class="mt-1">
+<span class="material-symbols-outlined text-error" data-icon="error">error</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between mb-1">
+<div class="flex items-center gap-3">
+<span class="text-[10px] font-bold uppercase tracking-tighter py-0.5 px-2 bg-error/10 text-error rounded">CRITICAL</span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase">AUTH SERVICE</span>
+</div>
+<span class="text-[10px] text-on-surface-variant/50 font-mono">11:59:44 UTC</span>
+</div>
+<p class="text-sm font-medium mb-1">Brute Force Attempt Detected</p>
+<p class="text-xs text-on-surface-variant">IP range 192.168.1.1XX blocked after 500+ failed login attempts on Admin panel.</p>
+</div>
+<button class="opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- Alert Item 5 -->
+<div class="px-6 py-4 hover:bg-surface-container-high transition-colors flex gap-4 items-start group">
+<div class="mt-1">
+<span class="material-symbols-outlined text-secondary" data-icon="check_circle">check_circle</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between mb-1">
+<div class="flex items-center gap-3">
+<span class="text-[10px] font-bold uppercase tracking-tighter py-0.5 px-2 bg-secondary/10 text-secondary rounded">RESOLVED</span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase">CDN CACHE</span>
+</div>
+<span class="text-[10px] text-on-surface-variant/50 font-mono">11:30:12 UTC</span>
+</div>
+<p class="text-sm font-medium mb-1">Static Asset Purge Complete</p>
+<p class="text-xs text-on-surface-variant">JAMB preparation video modules updated across all African edge nodes.</p>
+</div>
+<button class="opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Sidebar Toolset (30%) -->
+<aside class="lg:w-[30%] flex flex-col gap-8">
+<!-- Broadcast Tool -->
+<div class="bg-surface-container-low border border-outline-variant/10 rounded-xl p-6">
+<h3 class="text-xs font-bold tracking-widest uppercase mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="campaign">campaign</span>
+                            Broadcast Tool
+                        </h3>
+<div class="flex flex-col gap-4">
+<div class="flex flex-col gap-1.5">
+<label class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Segment</label>
+<select class="bg-surface-container-highest border border-outline-variant/20 rounded-lg text-xs py-2 px-3 text-on-surface focus:ring-primary focus:border-primary">
+<option>All Students</option>
+<option>West Africa (Lagos/Accra)</option>
+<option>East Africa (Nairobi)</option>
+<option>Top Scorers (JAMB Prep)</option>
+</select>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Title</label>
+<input class="bg-surface-container-highest border border-outline-variant/20 rounded-lg text-xs py-2 px-3 focus:ring-primary focus:border-primary" placeholder="e.g. JAMB Exam Update" type="text"/>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Body</label>
+<textarea class="bg-surface-container-highest border border-outline-variant/20 rounded-lg text-xs py-2 px-3 focus:ring-primary focus:border-primary" placeholder="Enter message..." rows="3"></textarea>
+</div>
+<button class="w-full bg-gradient-to-r from-primary to-primary-dim text-on-primary-fixed font-bold py-3 rounded-xl text-xs uppercase tracking-widest mt-2 hover:opacity-90 transition-opacity">
+                                Send Now
+                            </button>
+</div>
+</div>
+<!-- Alert Rules -->
+<div class="bg-surface-container-low border border-outline-variant/10 rounded-xl p-6">
+<h3 class="text-xs font-bold tracking-widest uppercase mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="rule">rule</span>
+                            Alert Rules
+                        </h3>
+<div class="flex flex-col gap-5">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-xs font-medium">Pass Rate Alert</span>
+<span class="text-[10px] text-on-surface-variant">Notify when &lt; 60%</span>
+</div>
+<div class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-8 h-4 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface-variant after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary/50 peer-checked:after:bg-primary"></div>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-xs font-medium">Latency Threshold</span>
+<span class="text-[10px] text-on-surface-variant">Notify if &gt; 500ms</span>
+</div>
+<div class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-8 h-4 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface-variant after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary/50 peer-checked:after:bg-primary"></div>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-xs font-medium">Payment Dropoff</span>
+<span class="text-[10px] text-on-surface-variant">Alert on 5+ failures/min</span>
+</div>
+<div class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-8 h-4 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface-variant after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary/50 peer-checked:after:bg-primary"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Scheduled Announcements -->
+<div class="bg-surface-container-low border border-outline-variant/10 rounded-xl p-6">
+<h3 class="text-xs font-bold tracking-widest uppercase mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="schedule">schedule</span>
+                            Scheduled
+                        </h3>
+<div class="flex flex-col gap-4">
+<div class="p-3 bg-surface-container-highest rounded-lg border-l-2 border-primary">
+<p class="text-[10px] font-bold text-on-surface-variant uppercase mb-1">Today 14:00</p>
+<p class="text-xs font-medium truncate">JAMB Mock Results Release Notification</p>
+<div class="mt-2 flex items-center justify-between">
+<span class="text-[9px] text-on-surface-variant">To: Premium Users</span>
+<span class="material-symbols-outlined text-xs text-on-surface-variant" data-icon="edit">edit</span>
+</div>
+</div>
+<div class="p-3 bg-surface-container-highest rounded-lg border-l-2 border-tertiary">
+<p class="text-[10px] font-bold text-on-surface-variant uppercase mb-1">Tomorrow 09:00</p>
+<p class="text-xs font-medium truncate">Math Marathon Live Stream Reminder</p>
+<div class="mt-2 flex items-center justify-between">
+<span class="text-[9px] text-on-surface-variant">To: All Registered</span>
+<span class="material-symbols-outlined text-xs text-on-surface-variant" data-icon="edit">edit</span>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</main>
+<!-- Floating Action Button (Only on Dashboard context) -->
+<button class="fixed bottom-8 right-8 h-14 w-14 rounded-full bg-gradient-to-br from-primary to-primary-dim shadow-xl shadow-primary/20 flex items-center justify-center text-on-primary-fixed z-50 hover:scale-105 transition-transform">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</body></html>
