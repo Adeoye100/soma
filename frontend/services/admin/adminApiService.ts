@@ -1,4 +1,4 @@
-import { supabase } from '@/services/supabase';
+import { supabase } from '../supabase';
 
 const API_BASE = '/api';
 

@@ -1,4 +1,4 @@
-import { supabase } from '@/services/supabase';
+import { supabase } from '../supabase';
 import { Session, User } from '@supabase/supabase-js';
 
 // Admin whitelist - can be extended with database queries later

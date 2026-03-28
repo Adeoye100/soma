@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { AdminAuthService } from '../../services/admin/adminAuthService';
-import Loader from '../../components/Loader';
+import { useAuth } from '../../../context/AuthContext';
+import { AdminAuthService } from '../../../services/admin/adminAuthService';
+import Loader from '../../../components/Loader';
 
 const AdminProtectedRoute: React.FC = () => {
   const { user, session, loading: authLoading } = useAuth();
