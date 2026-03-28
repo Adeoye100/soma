@@ -12,6 +12,17 @@ import AuthCallback from './pages/auth/callback';
 import { AuthProvider } from './context/AuthContext';
 import { useSessionHeartbeat } from './src/hooks/useSessionHeartbeat';
 
+// Admin routes and components
+import AdminProtectedRoute from './src/views/admin/AdminProtectedRoute';
+import AdminDashboard from './src/views/admin/pages/AdminDashboard';
+import SystemHealth from './src/views/admin/pages/SystemHealth';
+import Monitoring from './src/views/admin/pages/Monitoring';
+import Automation from './src/views/admin/pages/Automation';
+import Queues from './src/views/admin/pages/Queues';
+import Configuration from './src/views/admin/pages/Configuration';
+import Alerts from './src/views/admin/pages/Alerts';
+import SystemInfo from './src/views/admin/pages/SystemInfo';
+
 // Check if we're in development mode
 const isDev = import.meta.env.DEV;
 // Removed SignUpScreen import - now handled by LoginScreen component
@@ -143,6 +154,18 @@ const App: React.FC = () => {
                 }
               />
               <Route path="/app" element={<Navigate to="/dashboard" replace />} />
+            </Route>
+
+            {/* Admin Routes */}
+            <Route element={<AdminProtectedRoute />}>
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/system-health" element={<SystemHealth />} />
+              <Route path="/admin/monitoring" element={<Monitoring />} />
+              <Route path="/admin/automation" element={<Automation />} />
+              <Route path="/admin/queues" element={<Queues />} />
+              <Route path="/admin/configuration" element={<Configuration />} />
+              <Route path="/admin/alerts" element={<Alerts />} />
+              <Route path="/admin/system-info" element={<SystemInfo />} />
             </Route>
           </Routes>
         </BrowserRouter>
