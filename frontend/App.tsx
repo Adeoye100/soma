@@ -6,11 +6,22 @@ import { supabase } from './services/supabase';
 import Loader from './components/Loader';
 import { Session, User } from '@supabase/supabase-js';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminProtectedRoute from './components/AdminProtectedRoute';
 import LandingPage from './components/LandingPage';
 import ResetPasswordForm from './components/ResetPasswordForm';
 import AuthCallback from './pages/auth/callback';
 import { AuthProvider } from './context/AuthContext';
 import { useSessionHeartbeat } from './src/hooks/useSessionHeartbeat';
+
+// Admin pages
+import AdminDashboard from './pages/admin/AdminDashboard';
+import SystemHealth from './pages/admin/SystemHealth';
+import Monitoring from './pages/admin/Monitoring';
+import Automation from './pages/admin/Automation';
+import Queues from './pages/admin/Queues';
+import Configuration from './pages/admin/Configuration';
+import Alerts from './pages/admin/Alerts';
+import SystemInfo from './pages/admin/SystemInfo';
 
 // Check if we're in development mode
 const isDev = import.meta.env.DEV;
@@ -143,6 +154,18 @@ const App: React.FC = () => {
                 }
               />
               <Route path="/app" element={<Navigate to="/dashboard" replace />} />
+            </Route>
+
+            {/* Admin Routes */}
+            <Route element={<AdminProtectedRoute />}>
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/system-health" element={<SystemHealth />} />
+              <Route path="/admin/monitoring" element={<Monitoring />} />
+              <Route path="/admin/automation" element={<Automation />} />
+              <Route path="/admin/queues" element={<Queues />} />
+              <Route path="/admin/configuration" element={<Configuration />} />
+              <Route path="/admin/alerts" element={<Alerts />} />
+              <Route path="/admin/system-info" element={<SystemInfo />} />
             </Route>
           </Routes>
         </BrowserRouter>
