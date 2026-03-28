@@ -6,22 +6,22 @@ import { supabase } from './services/supabase';
 import Loader from './components/Loader';
 import { Session, User } from '@supabase/supabase-js';
 import ProtectedRoute from './components/ProtectedRoute';
-import AdminProtectedRoute from './components/AdminProtectedRoute';
 import LandingPage from './components/LandingPage';
 import ResetPasswordForm from './components/ResetPasswordForm';
 import AuthCallback from './pages/auth/callback';
 import { AuthProvider } from './context/AuthContext';
 import { useSessionHeartbeat } from './src/hooks/useSessionHeartbeat';
 
-// Admin pages
-import AdminDashboard from './pages/admin/AdminDashboard';
-import SystemHealth from './pages/admin/SystemHealth';
-import Monitoring from './pages/admin/Monitoring';
-import Automation from './pages/admin/Automation';
-import Queues from './pages/admin/Queues';
-import Configuration from './pages/admin/Configuration';
-import Alerts from './pages/admin/Alerts';
-import SystemInfo from './pages/admin/SystemInfo';
+// Admin routes and components
+import AdminProtectedRoute from './src/views/admin/AdminProtectedRoute';
+import AdminDashboard from './src/views/admin/pages/AdminDashboard';
+import SystemHealth from './src/views/admin/pages/SystemHealth';
+import Monitoring from './src/views/admin/pages/Monitoring';
+import Automation from './src/views/admin/pages/Automation';
+import Queues from './src/views/admin/pages/Queues';
+import Configuration from './src/views/admin/pages/Configuration';
+import Alerts from './src/views/admin/pages/Alerts';
+import SystemInfo from './src/views/admin/pages/SystemInfo';
 
 // Check if we're in development mode
 const isDev = import.meta.env.DEV;
