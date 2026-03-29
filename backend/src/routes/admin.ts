@@ -1,371 +1,315 @@
-import { Router } from 'express';
-import { AuthService } from '../services/authService';
-import { AutomationAdminService } from '../services/automation/AutomationAdminService';
-import { EnterpriseMonitoringSystem } from '../automation/monitoring/EnterpriseMonitoringSystem';
-import { TaskQueueManager } from '../automation/queues/TaskQueueManager';
-import { ConfigurationManager } from '../config/ConfigurationManager';
+import { Router, Request, Response } from 'express';
+import { query, param, body } from 'express-validator';
+import { asyncHandler } from '@/middleware/errorHandler';
+import { authMiddleware, AuthenticatedRequest } from '@/middleware/auth';
+import { checkValidationResult } from '@/middleware/requestValidator';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { cacheService } from '@/infrastructure/cache';
+import { DatabaseError } from '@/middleware/errorHandler';
+import { config } from '@/config';
+import winston from 'winston';
 
 const router = Router();
 
-// Middleware to check admin access
-const requireAdmin = async (req: any, res: any, next: any) => {
-  try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
-      return res.status(401).json({ error: 'No authorization header' });
-    }
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'admin@soma.app').split(',').map(e => e.trim().toLowerCase());
 
-    const token = authHeader.split(' ')[1];
-    const user = await AuthService.verifyToken(token);
-    
-    if (!user || user.role !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required' });
-    }
-
-    req.user = user;
-    next();
-  } catch (error) {
-    return res.status(401).json({ error: 'Invalid token' });
-  }
+const createSupabaseAdmin = (): SupabaseClient => {
+  return createClient(config.supabaseUrl, config.supabaseServiceKey || config.supabaseAnonKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+    global: { headers: { 'X-Client-Info': 'soma-admin' } }
+  });
 };
 
-// Health and monitoring endpoints
-router.get('/health', requireAdmin, async (req, res) => {
-  try {
-    const monitoringService = req.app.locals.monitoringService as EnterpriseMonitoringSystem;
-    const health = monitoringService.getSystemHealth();
-    res.json(health);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get system health' });
+const requireAdminEmail = (req: AuthenticatedRequest, res: Response, next: Function) => {
+  const userEmail = req.user?.email?.toLowerCase();
+  if (!userEmail || !ADMIN_EMAILS.includes(userEmail)) {
+    res.status(403).json({ error: 'Forbidden', message: 'Admin access required' });
+    return;
   }
-});
+  next();
+};
 
-router.get('/monitoring/status', requireAdmin, async (req, res) => {
-  try {
-    const monitoringService = req.app.locals.monitoringService as EnterpriseMonitoringSystem;
-    const status = monitoringService.getStatus();
-    res.json(status);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get monitoring status' });
-  }
-});
+// All admin routes require JWT + admin email check
+router.use(authMiddleware);
+router.use(requireAdminEmail);
 
-router.get('/monitoring/metrics', requireAdmin, async (req, res) => {
+/**
+ * @route   GET /api/admin/stats
+ * @desc    Platform-wide KPIs
+ */
+router.get('/stats', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const supabase = createSupabaseAdmin();
+
   try {
-    const monitoringService = req.app.locals.monitoringService as EnterpriseMonitoringSystem;
-    const { name, startTime, endTime, limit } = req.query;
-    
-    const metrics = monitoringService.queryMetrics({
-      name: name as string,
-      startTime: startTime ? new Date(startTime as string) : undefined,
-      endTime: endTime ? new Date(endTime as string) : undefined,
-      limit: limit ? parseInt(limit as string) : undefined
+    const [{ count: totalUsers }, { count: totalExams }, { count: totalResults }, { count: totalDocs }] = await Promise.all([
+      supabase.from('users').select('*', { count: 'exact', head: true }),
+      supabase.from('exams').select('*', { count: 'exact', head: true }),
+      supabase.from('exam_results').select('*', { count: 'exact', head: true }),
+      supabase.from('documents').select('*', { count: 'exact', head: true })
+    ]);
+
+    const { data: avgScoreData } = await supabase
+      .from('exam_results')
+      .select('percentage')
+      .not('percentage', 'is', null);
+
+    const avgScore = avgScoreData && avgScoreData.length > 0
+      ? Math.round(avgScoreData.reduce((sum, r) => sum + (r.percentage || 0), 0) / avgScoreData.length)
+      : 0;
+
+    const { count: passCount } = await supabase
+      .from('exam_results')
+      .select('*', { count: 'exact', head: true })
+      .eq('passed', true);
+
+    const passRate = totalResults && totalResults > 0
+      ? Math.round(((passCount || 0) / totalResults) * 100)
+      : 0;
+
+    res.json({
+      message: 'Platform stats retrieved',
+      stats: {
+        totalUsers: totalUsers || 0,
+        totalExams: totalExams || 0,
+        totalSubmissions: totalResults || 0,
+        totalDocuments: totalDocs || 0,
+        averageScore: avgScore,
+        passRate
+      }
     });
-    
-    res.json(metrics);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to query metrics' });
+  } catch (error: any) {
+    winston.error('Admin stats error:', error);
+    res.status(500).json({ error: 'Failed to retrieve stats', message: error.message });
   }
-});
+}));
 
-router.get('/monitoring/traces', requireAdmin, async (req, res) => {
-  try {
-    const monitoringService = req.app.locals.monitoringService as EnterpriseMonitoringSystem;
-    const { name, status, startTime, endTime, limit } = req.query;
-    
-    const traces = monitoringService.queryTraces({
-      name: name as string,
-      status: status as any,
-      startTime: startTime ? new Date(startTime as string) : undefined,
-      endTime: endTime ? new Date(endTime as string) : undefined,
-      limit: limit ? parseInt(limit as string) : undefined
-    });
-    
-    res.json(traces);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to query traces' });
-  }
-});
+/**
+ * @route   GET /api/admin/users
+ * @desc    Paginated user list
+ */
+router.get('/users',
+  query('page').optional().isInt({ min: 1 }),
+  query('limit').optional().isInt({ min: 1, max: 100 }),
+  query('search').optional().isString(),
+  checkValidationResult,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const search = req.query.search as string || '';
+    const supabase = createSupabaseAdmin();
 
-router.get('/sla/metrics', requireAdmin, async (req, res) => {
-  try {
-    const monitoringService = req.app.locals.monitoringService as EnterpriseMonitoringSystem;
-    const slaMetrics = monitoringService.getSLAMetrics();
-    res.json(slaMetrics);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get SLA metrics' });
-  }
-});
+    try {
+      const offset = (page - 1) * limit;
+      let query = supabase.from('users').select('*', { count: 'exact' });
 
-// Automation management endpoints
-router.get('/automation/overview', requireAdmin, async (req, res) => {
-  try {
-    const automationService = req.app.locals.automationAdminService as AutomationAdminService;
-    const overview = await automationService.getAutomationOverview();
-    res.json(overview);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get automation overview' });
-  }
-});
+      if (search) {
+        query = query.or(`email.ilike.%${search}%,full_name.ilike.%${search}%`);
+      }
 
-router.get('/automation/workflows', requireAdmin, async (req, res) => {
-  try {
-    const automationService = req.app.locals.automationAdminService as AutomationAdminService;
-    const workflows = await automationService.getWorkflows();
-    res.json(workflows);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get workflows' });
-  }
-});
+      const { data, error, count } = await query
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
 
-router.get('/automation/workflows/:id', requireAdmin, async (req, res) => {
-  try {
-    const automationService = req.app.locals.automationAdminService as AutomationAdminService;
-    const workflow = await automationService.getWorkflow(req.params.id);
-    if (!workflow) {
-      return res.status(404).json({ error: 'Workflow not found' });
+      if (error) throw new DatabaseError(`Failed to fetch users: ${error.message}`);
+
+      res.json({
+        message: 'Users retrieved',
+        users: (data || []).map(u => ({
+          id: u.id, email: u.email, fullName: u.full_name,
+          username: u.username, role: u.role, createdAt: u.created_at
+        })),
+        pagination: { page, limit, total: count || 0, totalPages: Math.ceil((count || 0) / limit) }
+      });
+    } catch (error: any) {
+      winston.error('Admin users error:', error);
+      res.status(500).json({ error: 'Failed to retrieve users', message: error.message });
     }
-    res.json(workflow);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get workflow' });
-  }
-});
+  })
+);
 
-router.post('/automation/workflows/:id/execute', requireAdmin, async (req, res) => {
-  try {
-    const automationService = req.app.locals.automationAdminService as AutomationAdminService;
-    const executionId = await automationService.executeWorkflow(req.params.id, req.body);
-    res.json({ executionId });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to execute workflow' });
-  }
-});
+/**
+ * @route   GET /api/admin/users/:id
+ * @desc    Individual user detail
+ */
+router.get('/users/:id',
+  param('id').isUUID().withMessage('Valid user ID required'),
+  checkValidationResult,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { id } = req.params;
+    const supabase = createSupabaseAdmin();
 
-router.get('/automation/executions', requireAdmin, async (req, res) => {
-  try {
-    const automationService = req.app.locals.automationAdminService as AutomationAdminService;
-    const { status, workflowId, limit } = req.query;
-    const executions = await automationService.getExecutions({
-      status: status as string,
-      workflowId: workflowId as string,
-      limit: limit ? parseInt(limit as string) : undefined
-    });
-    res.json(executions);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get executions' });
-  }
-});
+    try {
+      const { data: user, error } = await supabase.from('users').select('*').eq('id', id).single();
+      if (error || !user) { res.status(404).json({ error: 'User not found' }); return; }
 
-router.get('/automation/executions/:id', requireAdmin, async (req, res) => {
-  try {
-    const automationService = req.app.locals.automationAdminService as AutomationAdminService;
-    const execution = await automationService.getExecution(req.params.id);
-    if (!execution) {
-      return res.status(404).json({ error: 'Execution not found' });
+      const { data: profile } = await supabase.from('user_profiles').select('*').eq('id', id).single();
+      const { count: examCount } = await supabase.from('exam_results').select('*', { count: 'exact', head: true }).eq('user_id', id);
+
+      res.json({
+        message: 'User detail retrieved',
+        user: {
+          id: user.id, email: user.email, fullName: user.full_name,
+          username: user.username, role: user.role, createdAt: user.created_at,
+          profile: profile || null,
+          stats: { totalSubmissions: examCount || 0 }
+        }
+      });
+    } catch (error: any) {
+      winston.error('Admin user detail error:', error);
+      res.status(500).json({ error: 'Failed to retrieve user', message: error.message });
     }
-    res.json(execution);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get execution' });
-  }
-});
+  })
+);
 
-router.post('/automation/executions/:id/cancel', requireAdmin, async (req, res) => {
-  try {
-    const automationService = req.app.locals.automationAdminService as AutomationAdminService;
-    await automationService.cancelExecution(req.params.id);
-    res.json({ message: 'Execution cancelled' });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to cancel execution' });
-  }
-});
+/**
+ * @route   POST /api/admin/users/:id/suspend
+ * @desc    Suspend a user
+ */
+router.post('/users/:id/suspend',
+  param('id').isUUID().withMessage('Valid user ID required'),
+  body('reason').optional().isString(),
+  checkValidationResult,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { id } = req.params;
+    const supabase = createSupabaseAdmin();
 
-// Queue management endpoints
-router.get('/queues/overview', requireAdmin, async (req, res) => {
-  try {
-    const queueManager = req.app.locals.taskQueueManager as TaskQueueManager;
-    const overview = await queueManager.getQueueOverview();
-    res.json(overview);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get queue overview' });
-  }
-});
+    try {
+      const { error } = await supabase.from('users').update({
+        role: 'suspended',
+        updated_at: new Date().toISOString()
+      }).eq('id', id);
 
-router.get('/queues/:queueName', requireAdmin, async (req, res) => {
-  try {
-    const queueManager = req.app.locals.taskQueueManager as TaskQueueManager;
-    const queueInfo = await queueManager.getQueueInfo(req.params.queueName);
-    if (!queueInfo) {
-      return res.status(404).json({ error: 'Queue not found' });
+      if (error) throw new DatabaseError(`Failed to suspend user: ${error.message}`);
+
+      winston.info(`User ${id} suspended by admin ${req.user?.email}`);
+      res.json({ message: 'User suspended successfully' });
+    } catch (error: any) {
+      winston.error('Admin suspend error:', error);
+      res.status(500).json({ error: 'Failed to suspend user', message: error.message });
     }
-    res.json(queueInfo);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get queue info' });
-  }
-});
+  })
+);
 
-router.post('/queues/:queueName/pause', requireAdmin, async (req, res) => {
-  try {
-    const queueManager = req.app.locals.taskQueueManager as TaskQueueManager;
-    await queueManager.pauseQueue(req.params.queueName);
-    res.json({ message: 'Queue paused' });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to pause queue' });
-  }
-});
+/**
+ * @route   GET /api/admin/exams
+ * @desc    All exams across platform
+ */
+router.get('/exams',
+  query('page').optional().isInt({ min: 1 }),
+  query('limit').optional().isInt({ min: 1, max: 100 }),
+  checkValidationResult,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const supabase = createSupabaseAdmin();
 
-router.post('/queues/:queueName/resume', requireAdmin, async (req, res) => {
-  try {
-    const queueManager = req.app.locals.taskQueueManager as TaskQueueManager;
-    await queueManager.resumeQueue(req.params.queueName);
-    res.json({ message: 'Queue resumed' });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to resume queue' });
-  }
-});
+    try {
+      const offset = (page - 1) * limit;
+      const { data, error, count } = await supabase
+        .from('exams')
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
 
-router.post('/queues/:queueName/clean', requireAdmin, async (req, res) => {
-  try {
-    const queueManager = req.app.locals.taskQueueManager as TaskQueueManager;
-    const { status, grace } = req.body;
-    const count = await queueManager.cleanQueue(req.params.queueName, status, grace);
-    res.json({ cleaned: count });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to clean queue' });
-  }
-});
+      if (error) throw new DatabaseError(`Failed to fetch exams: ${error.message}`);
 
-// Configuration management endpoints
-router.get('/config', requireAdmin, async (req, res) => {
-  try {
-    const configManager = req.app.locals.configManager as ConfigurationManager;
-    const config = await configManager.getAllConfigurations();
-    res.json(config);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get configuration' });
-  }
-});
-
-router.get('/config/environments', requireAdmin, async (req, res) => {
-  try {
-    const configManager = req.app.locals.configManager as ConfigurationManager;
-    const environments = await configManager.getEnvironments();
-    res.json(environments);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get environments' });
-  }
-});
-
-router.get('/config/:environment', requireAdmin, async (req, res) => {
-  try {
-    const configManager = req.app.locals.configManager as ConfigurationManager;
-    const config = await configManager.getEnvironmentConfiguration(req.params.environment);
-    if (!config) {
-      return res.status(404).json({ error: 'Environment not found' });
+      res.json({
+        message: 'Exams retrieved',
+        exams: (data || []).map(e => ({
+          id: e.id, title: e.title, type: e.type, difficulty: e.difficulty,
+          numQuestions: e.num_questions, userId: e.user_id, status: e.status,
+          createdAt: e.created_at
+        })),
+        pagination: { page, limit, total: count || 0, totalPages: Math.ceil((count || 0) / limit) }
+      });
+    } catch (error: any) {
+      winston.error('Admin exams error:', error);
+      res.status(500).json({ error: 'Failed to retrieve exams', message: error.message });
     }
-    res.json(config);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get environment configuration' });
-  }
-});
+  })
+);
 
-router.put('/config/:environment', requireAdmin, async (req, res) => {
-  try {
-    const configManager = req.app.locals.configManager as ConfigurationManager;
-    await configManager.updateEnvironmentConfiguration(req.params.environment, req.body);
-    res.json({ message: 'Configuration updated' });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to update configuration' });
-  }
-});
+/**
+ * @route   GET /api/admin/leaderboard
+ * @desc    Full unfiltered leaderboard
+ */
+router.get('/leaderboard',
+  query('limit').optional().isInt({ min: 1, max: 500 }),
+  checkValidationResult,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 100;
+    const supabase = createSupabaseAdmin();
 
-router.post('/config/reload', requireAdmin, async (req, res) => {
-  try {
-    const configManager = req.app.locals.configManager as ConfigurationManager;
-    await configManager.reloadConfigurations();
-    res.json({ message: 'Configurations reloaded' });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to reload configurations' });
-  }
-});
+    try {
+      const { data: profiles, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .order('average_score', { ascending: false })
+        .limit(limit);
 
-router.get('/config/history', requireAdmin, async (req, res) => {
-  try {
-    const configManager = req.app.locals.configManager as ConfigurationManager;
-    const { environment, limit } = req.query;
-    const history = await configManager.getConfigurationHistory({
-      environment: environment as string,
-      limit: limit ? parseInt(limit as string) : undefined
-    });
-    res.json(history);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get configuration history' });
-  }
-});
+      if (error) throw new DatabaseError(`Failed to fetch leaderboard: ${error.message}`);
 
-// Alert management endpoints
-router.get('/alerts', requireAdmin, async (req, res) => {
-  try {
-    const monitoringService = req.app.locals.monitoringService as EnterpriseMonitoringSystem;
-    const { status, severity, limit } = req.query;
-    
-    // This would need to be implemented in the monitoring service
-    // For now, return empty array
-    const alerts = [];
-    res.json(alerts);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get alerts' });
-  }
-});
+      res.json({
+        message: 'Full leaderboard retrieved',
+        leaderboard: (profiles || []).map((p, i) => ({
+          rank: i + 1,
+          userId: p.id,
+          username: p.display_name || p.username || 'Anonymous',
+          country: p.country,
+          totalExams: p.total_exams,
+          averageScore: p.average_score,
+          bestScore: p.best_score,
+          currentStreak: p.current_streak,
+          longestStreak: p.longest_streak
+        }))
+      });
+    } catch (error: any) {
+      winston.error('Admin leaderboard error:', error);
+      res.status(500).json({ error: 'Failed to retrieve leaderboard', message: error.message });
+    }
+  })
+);
 
-router.post('/alerts/:id/acknowledge', requireAdmin, async (req, res) => {
-  try {
-    // This would acknowledge an alert
-    res.json({ message: 'Alert acknowledged' });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to acknowledge alert' });
-  }
-});
+/**
+ * @route   GET /api/admin/activity
+ * @desc    Recent activity feed
+ */
+router.get('/activity',
+  query('limit').optional().isInt({ min: 1, max: 100 }),
+  checkValidationResult,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 50;
+    const supabase = createSupabaseAdmin();
 
-router.post('/alerts/:id/resolve', requireAdmin, async (req, res) => {
-  try {
-    // This would resolve an alert
-    res.json({ message: 'Alert resolved' });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to resolve alert' });
-  }
-});
+    try {
+      const [recentExams, recentResults] = await Promise.all([
+        supabase.from('exams').select('id, title, user_id, created_at').order('created_at', { ascending: false }).limit(limit),
+        supabase.from('exam_results').select('id, exam_id, user_id, percentage, passed, created_at').order('created_at', { ascending: false }).limit(limit)
+      ]);
 
-// System information endpoints
-router.get('/system/info', requireAdmin, async (req, res) => {
-  try {
-    const systemInfo = {
-      uptime: process.uptime(),
-      memory: process.memoryUsage(),
-      cpu: process.cpuUsage(),
-      version: process.version,
-      platform: process.platform,
-      arch: process.arch,
-      pid: process.pid
-    };
-    res.json(systemInfo);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get system info' });
-  }
-});
+      const activities = [
+        ...(recentExams.data || []).map(e => ({
+          type: 'exam_created',
+          id: e.id,
+          userId: e.user_id,
+          description: `New exam created: ${e.title}`,
+          timestamp: e.created_at
+        })),
+        ...(recentResults.data || []).map(r => ({
+          type: 'exam_submitted',
+          id: r.id,
+          userId: r.user_id,
+          description: `Exam ${r.passed ? 'passed' : 'failed'} with ${r.percentage}%`,
+          timestamp: r.created_at
+        }))
+      ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, limit);
 
-router.get('/system/dependencies', requireAdmin, async (req, res) => {
-  try {
-    // Return dependency status
-    const dependencies = {
-      redis: 'connected',
-      database: 'connected',
-      queue: 'active',
-      monitoring: 'active'
-    };
-    res.json(dependencies);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get dependency status' });
-  }
-});
+      res.json({ message: 'Activity feed retrieved', activities });
+    } catch (error: any) {
+      winston.error('Admin activity error:', error);
+      res.status(500).json({ error: 'Failed to retrieve activity', message: error.message });
+    }
+  })
+);
 
 export default router;

@@ -41,6 +41,11 @@ export class EnhancedRateLimiter {
    * Initialize Redis connection if available
    */
   private async initializeRedis(): Promise<void> {
+    if (!config.redisEnabled) {
+      this.logger.info('Redis disabled via REDIS_ENABLED=false, rate limiting using memory store');
+      return;
+    }
+
     if (!config.redisUrl) {
       this.logger.warn('Redis URL not configured, using memory store for rate limiting');
       return;
@@ -58,17 +63,13 @@ export class EnhancedRateLimiter {
       });
 
       this.redisClient.on('error', (err) => {
-        if (config.nodeEnv === 'development' && (err as any).code === 'ECONNREFUSED') {
-          // Suppress in dev
-        } else {
-          this.logger.error('Redis Client Error', err);
-        }
+        // Suppress all Redis errors — memory fallback handles it
       });
 
       await this.redisClient.connect();
       this.logger.info('Redis connected successfully for rate limiting');
     } catch (error) {
-      this.logger.warn('Redis connection failed, falling back to memory store:', error);
+      this.logger.warn('Redis connection failed, falling back to memory store');
     }
   }
 

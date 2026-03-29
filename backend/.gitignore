@@ -6,8 +6,8 @@ node_modules/
 
 # Build
 dist/
-dist-ssr/
 /build/
+tsconfig.tsbuildinfo
 
 # Logs
 logs/
@@ -36,12 +36,11 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
-# Vite specific
-.vite/
-
 # Testing
 coverage/
+full_tsc_output.txt
+compilation_output.txt
 
-# Misc
-temp/
-tmp/
+# Database
+/data/
+/uploads/

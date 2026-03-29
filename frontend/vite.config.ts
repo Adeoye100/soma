@@ -44,6 +44,13 @@ export default defineConfig(({ mode }) => {
             target: 'http://localhost:3000',
             changeOrigin: true,
             secure: false,
+            configure: (proxy) => {
+              proxy.on('proxyReq', (proxyReq, req) => {
+                if (req.headers.authorization) {
+                  proxyReq.setHeader('Authorization', req.headers.authorization);
+                }
+              });
+            },
           },
         },
       },

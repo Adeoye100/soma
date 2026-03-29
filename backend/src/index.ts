@@ -27,9 +27,16 @@ import resultRoutes from '@/routes/result';
 import healthRoutes from '@/routes/health';
 import automationRoutes from '@/routes/automation';
 import fileUploadRoutes from '@/routes/fileUpload';
+import documentRoutes from '@/routes/documents';
+import leaderboardRoutes from '@/routes/leaderboard';
+import userRoutes from '@/routes/user';
+import adminRoutes from '@/routes/admin';
 
 // Import automation framework
 import { initializeAutomationFramework, checkAutomationHealth } from '@/automation';
+
+// Import Supabase client for schema cache reload
+import { supabase } from '@/services/supabaseService';
 
 // Create Express application
 const app = express();
@@ -38,6 +45,9 @@ const app = express();
 if (config.nodeEnv === 'production') {
   app.set('trust proxy', 1);
 }
+
+// Track whether Redis unavailable warning was already logged
+let redisUnavailableLogged = false;
 
 // Create Redis client for rate limiting
 const redisClient: RedisClientType = createClient({
@@ -53,19 +63,26 @@ const redisClient: RedisClientType = createClient({
 });
 
 redisClient.on('error', (err) => {
-  if (config.nodeEnv === 'development' && (err as any).code === 'ECONNREFUSED') {
-    // Only log once or suppress in dev to avoid noise
-  } else {
-    console.error('Redis Client Error', err);
+  if (!redisUnavailableLogged) {
+    redisUnavailableLogged = true;
+    console.warn('⚠️  Redis unavailable, using in-memory store');
   }
 });
 
 // Initialize Redis connection
 const initializeRedis = async (): Promise<void> => {
+  if (!config.redisEnabled) {
+    console.log('ℹ️  Redis disabled via REDIS_ENABLED=false, using in-memory store');
+    return;
+  }
+
   try {
     await redisClient.connect();
     console.log('✅ Redis connected successfully');
   } catch (error) {
+    if (!redisUnavailableLogged) {
+      redisUnavailableLogged = true;
+    }
     console.warn('⚠️  Redis connection failed, falling back to memory store');
   }
 };
@@ -180,6 +197,10 @@ app.use('/api/material', authMiddleware, materialRoutes);
 app.use('/api/result', authMiddleware, resultRoutes);
 app.use('/api/automation', automationRoutes);
 app.use('/api/files', authMiddleware, fileUploadRoutes);
+app.use('/api/documents', authMiddleware, documentRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
+app.use('/api/user', authMiddleware, userRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Serve static files in production
 if (config.nodeEnv === 'production') {
@@ -254,6 +275,15 @@ const startServer = async (): Promise<void> => {
     // Initialize automation framework
     await initializeAutomationFramework();
     logger.info('🤖 Automation framework initialized');
+
+    // Force Supabase schema cache reload
+    try {
+      await supabase.rpc('pgrst_watch');
+      logger.info('🔄 Supabase schema cache reload triggered');
+    } catch (schemaErr: any) {
+      // Non-critical: schema cache reload is best-effort
+      logger.debug('Schema cache reload skipped (non-critical):', schemaErr.message);
+    }
     
     // Start the server
     const port = config.port;

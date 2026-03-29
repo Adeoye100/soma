@@ -35,6 +35,7 @@ interface Config {
   rateLimitWindowMs: number;
   rateLimitMaxRequests: number;
   redisUrl: string;
+  redisEnabled: boolean;
   queueMaxConcurrent: number;
   queueMaxQueueSize: number;
   
@@ -122,6 +123,7 @@ export const config: Config = {
   rateLimitWindowMs: getOptionalEnvVarAsNumber('RATE_LIMIT_WINDOW_MS', 900000),
   rateLimitMaxRequests: getOptionalEnvVarAsNumber('RATE_LIMIT_MAX_REQUESTS', 100),
   redisUrl: getOptionalEnvVar('REDIS_URL', 'redis://localhost:6379'),
+  redisEnabled: getOptionalEnvVarAsBoolean('REDIS_ENABLED', true),
   queueMaxConcurrent: getOptionalEnvVarAsNumber('QUEUE_MAX_CONCURRENT', 5),
   queueMaxQueueSize: getOptionalEnvVarAsNumber('QUEUE_MAX_QUEUE_SIZE', 100),
   

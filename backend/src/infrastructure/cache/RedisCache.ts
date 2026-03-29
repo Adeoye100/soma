@@ -12,8 +12,17 @@ export class RedisCache {
   private defaultTtl: number = 3600; // 1 hour default
   private isConnected: boolean = false;
   private memoryFallback = new Map<string, { value: string, expiry: number }>();
+  private redisErrorLogged: boolean = false;
 
   constructor() {
+    if (!config.redisEnabled) {
+      winston.info('Redis disabled via REDIS_ENABLED=false, cache using memory store');
+      // Create a dummy client that will never connect
+      this.client = new Redis({ lazyConnect: true, host: '127.0.0.1', port: 1, maxRetriesPerRequest: 0 });
+      setInterval(() => this.cleanupMemoryFallback(), 60000);
+      return;
+    }
+
     this.client = new Redis(config.redisUrl, {
       enableReadyCheck: false,
       maxRetriesPerRequest: 1, // Minimize retries on failure
@@ -41,10 +50,9 @@ export class RedisCache {
 
     this.client.on('error', (err) => {
       this.isConnected = false;
-      if (config.nodeEnv === 'development' && (err as any).code === 'ECONNREFUSED') {
-        winston.debug('Redis cache unavailable, using memory fallback');
-      } else {
-        winston.error('Redis cache error:', err);
+      if (!this.redisErrorLogged) {
+        this.redisErrorLogged = true;
+        winston.warn('Redis cache unavailable, using memory fallback');
       }
     });
 

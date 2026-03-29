@@ -24,6 +24,7 @@ export interface Exam {
   num_questions: number;
   time_limit?: number;
   user_id: string;
+  status?: string;
   created_at: string;
   updated_at: string;
 }
@@ -40,6 +41,7 @@ export interface Question {
   explanation?: string;
   difficulty?: 'easy' | 'medium' | 'hard';
   topic?: string;
+  subject?: string;
   order_index?: number;
   points?: number;
   created_at: string;
@@ -63,6 +65,8 @@ export interface ExamResult {
   score: number;
   total_questions: number;
   correct_answers: number;
+  percentage?: number;
+  passed?: boolean;
   time_taken?: number;
   answers: any[];
   feedback?: string;

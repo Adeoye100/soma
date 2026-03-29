@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { supabase } from '../../services/supabase';
+import { supabase } from '@/services/supabase';
 
 const HEARTBEAT_INTERVAL = 30 * 60 * 1000;
 

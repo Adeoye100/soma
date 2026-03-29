@@ -31,6 +31,10 @@ export const authMiddleware = async (
   next: NextFunction
 ): Promise<void> => {
   try {
+    // DEBUG: Remove after confirming fix
+    console.log('[Auth] headers received:', Object.keys(req.headers));
+    console.log('[Auth] authorization:', req.headers.authorization ? 'present' : 'MISSING');
+
     // Get token from header
     const authHeader = req.headers.authorization;
     
