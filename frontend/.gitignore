@@ -45,3 +45,11 @@ coverage/
 # Misc
 temp/
 tmp/
+*.tar.gz
+*.tar.xz
+*.zip
+*.dmg
+*.exe
+*.AppImage
+WebStorm*
+node_modules/
