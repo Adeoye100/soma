@@ -79,3 +79,7 @@ tsconfig.tsbuildinfo
 # Documentation / Large assets (Optional)
 # If you have large assets, uncomment the following:
 # assets/large/
+
+# npm lockfile — project uses pnpm exclusively
+package-lock.json
+npm-debug.log*

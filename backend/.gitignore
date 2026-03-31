@@ -44,3 +44,4 @@ compilation_output.txt
 # Database
 /data/
 /uploads/
+package-lock.json
