@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+<<<<<<< HEAD
 import { supabase } from '@/services/supabase';
+=======
+import { supabase } from '../../../services/supabase';
+>>>>>>> e102c8a33e923e35d0f947d6551aac6d394a06ba
 import AdminSidebar from './AdminSidebar';
 
 interface AdminLayoutProps {
