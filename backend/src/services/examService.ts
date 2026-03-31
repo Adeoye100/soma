@@ -3,7 +3,7 @@ import { Queue, Worker, Job } from 'bullmq';
 import { config } from '@/config';
 import { cacheService } from '@/infrastructure/cache';
 import { DatabaseError } from '@/middleware/errorHandler';
-import { sanitizeForTable, QUESTIONS_COLUMNS, EXAMS_COLUMNS } from '@/utils/dbUtils';
+import { sanitizeForTable, QUESTIONS_COLUMNS, EXAMS_COLUMNS, validateQuestionRow } from '@/utils/dbUtils';
 import winston from 'winston';
 
 export interface GenerateExamInput {
@@ -23,6 +23,7 @@ export interface GeneratedQuestion {
   difficulty: string;
   topic: string;
   subject: string;
+  order_index?: number;
 }
 
 export interface ExamSubmission {
@@ -126,16 +127,20 @@ export class ExamService {
       correct_answer: q.correct_answer,
       explanation: q.explanation,
       difficulty: q.difficulty || input.difficulty,
-      order_index: index,
+      order_index: Number.isFinite(Number(q.order_index))
+        ? Math.max(0, Number(q.order_index))
+        : index,
       points: 10,
+      topic: q.topic || input.topic,
+      subject: q.subject || input.subject,
       metadata: {
         topic: q.topic || input.topic,
         subject: q.subject || input.subject
       }
     }));
 
-    const safeQuestionsData = questionsData.map((q: Record<string, unknown>) =>
-      sanitizeForTable(q, QUESTIONS_COLUMNS)
+    const safeQuestionsData = questionsData.map((q: Record<string, unknown>, i: number) =>
+      sanitizeForTable(validateQuestionRow(q, i), QUESTIONS_COLUMNS)
     );
 
     const { data: questions, error: questionsError } = await supabase
@@ -144,7 +149,7 @@ export class ExamService {
       .select();
 
     if (questionsError) {
-      await supabase.from('exams').delete().eq('id', exam.id);
+      await supabase.from('exams').update({ status: 'failed' }).eq('id', exam.id);
       throw new DatabaseError(`Failed to save questions: ${questionsError.message}`, { error: questionsError });
     }
 

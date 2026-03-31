@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AdminApiService } from '@/services/admin/adminApiService';
 
 interface UseAdminDataOptions {
@@ -11,164 +11,132 @@ export function useSystemHealth(options?: UseAdminDataOptions) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      setLoading(true);
       const result = await AdminApiService.getSystemHealth();
-      if (result.error) {
-        setError(result.error);
-        options?.onError?.(result.error);
-      } else {
-        setData(result.data);
-        setError(null);
-      }
+      setData(result);
+      setError(null);
     } catch (err: any) {
       setError(err.message);
       options?.onError?.(err.message);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, options?.refetchInterval || 30000);
     return () => clearInterval(interval);
-  }, [options?.refetchInterval]);
+  }, [fetchData, options?.refetchInterval]);
 
   return { data, loading, error, refetch: fetchData };
 }
 
-export function useMonitoringStatus(options?: UseAdminDataOptions) {
+export function useMonitoring(options?: UseAdminDataOptions) {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      setLoading(true);
-      const result = await AdminApiService.getMonitoringStatus();
-      if (result.error) {
-        setError(result.error);
-        options?.onError?.(result.error);
-      } else {
-        setData(result.data);
-        setError(null);
-      }
+      const result = await AdminApiService.getMonitoring();
+      setData(result);
+      setError(null);
     } catch (err: any) {
       setError(err.message);
       options?.onError?.(err.message);
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, options?.refetchInterval || 30000);
-    return () => clearInterval(interval);
-  }, [options?.refetchInterval]);
-
-  return { data, loading, error, refetch: fetchData };
-}
-
-export function useWorkflows(options?: UseAdminDataOptions) {
-  const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const result = await AdminApiService.getWorkflows();
-      if (result.error) {
-        setError(result.error);
-        options?.onError?.(result.error);
-      } else {
-        setData(result.data || []);
-        setError(null);
-      }
-    } catch (err: any) {
-      setError(err.message);
-      options?.onError?.(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, []);
 
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, options?.refetchInterval || 60000);
     return () => clearInterval(interval);
-  }, [options?.refetchInterval]);
+  }, [fetchData, options?.refetchInterval]);
+
+  return { data, loading, error, refetch: fetchData };
+}
+
+export function useAutomation(options?: UseAdminDataOptions) {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    try {
+      const result = await AdminApiService.getAutomation();
+      setData(result);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message);
+      options?.onError?.(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchData, options?.refetchInterval || 60000);
+    return () => clearInterval(interval);
+  }, [fetchData, options?.refetchInterval]);
 
   return { data, loading, error, refetch: fetchData };
 }
 
 export function useQueues(options?: UseAdminDataOptions) {
-  const [data, setData] = useState<any[]>([]);
-  const [overview, setOverview] = useState<any>(null);
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      setLoading(true);
-      const result = await AdminApiService.getQueueOverview();
-      if (result.error) {
-        setError(result.error);
-        options?.onError?.(result.error);
-      } else {
-        setData(result.data?.queues || []);
-        setOverview(result.data);
-        setError(null);
-      }
+      const result = await AdminApiService.getQueues();
+      setData(result);
+      setError(null);
     } catch (err: any) {
       setError(err.message);
       options?.onError?.(err.message);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, options?.refetchInterval || 30000);
+    const interval = setInterval(fetchData, options?.refetchInterval || 15000);
     return () => clearInterval(interval);
-  }, [options?.refetchInterval]);
+  }, [fetchData, options?.refetchInterval]);
 
-  return { data, overview, loading, error, refetch: fetchData };
+  return { data, loading, error, refetch: fetchData };
 }
 
 export function useAlerts(options?: UseAdminDataOptions) {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      setLoading(true);
-      const result = await AdminApiService.getAlerts({ limit: 50 });
-      if (result.error) {
-        setError(result.error);
-        options?.onError?.(result.error);
-      } else {
-        setData(result.data || []);
-        setError(null);
-      }
+      const result = await AdminApiService.getAlerts();
+      setData(result);
+      setError(null);
     } catch (err: any) {
       setError(err.message);
       options?.onError?.(err.message);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, options?.refetchInterval || 30000);
+    const interval = setInterval(fetchData, options?.refetchInterval || 60000);
     return () => clearInterval(interval);
-  }, [options?.refetchInterval]);
+  }, [fetchData, options?.refetchInterval]);
 
   return { data, loading, error, refetch: fetchData };
 }
@@ -178,30 +146,76 @@ export function useSystemInfo(options?: UseAdminDataOptions) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      setLoading(true);
       const result = await AdminApiService.getSystemInfo();
-      if (result.error) {
-        setError(result.error);
-        options?.onError?.(result.error);
-      } else {
-        setData(result.data);
-        setError(null);
-      }
+      setData(result);
+      setError(null);
     } catch (err: any) {
       setError(err.message);
       options?.onError?.(err.message);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, options?.refetchInterval || 60000);
     return () => clearInterval(interval);
-  }, [options?.refetchInterval]);
+  }, [fetchData, options?.refetchInterval]);
+
+  return { data, loading, error, refetch: fetchData };
+}
+
+export function useDashboard(options?: UseAdminDataOptions) {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    try {
+      const result = await AdminApiService.getDashboard();
+      setData(result);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message);
+      options?.onError?.(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchData, options?.refetchInterval || 30000);
+    return () => clearInterval(interval);
+  }, [fetchData, options?.refetchInterval]);
+
+  return { data, loading, error, refetch: fetchData };
+}
+
+export function useConfiguration(options?: UseAdminDataOptions) {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    try {
+      const result = await AdminApiService.getConfiguration();
+      setData(result);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message);
+      options?.onError?.(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   return { data, loading, error, refetch: fetchData };
 }

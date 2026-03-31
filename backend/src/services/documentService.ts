@@ -1,10 +1,8 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { config } from '@/config';
 import { DatabaseError } from '@/middleware/errorHandler';
+import { ILovePDFService } from '@/services/ilovepdf';
 import winston from 'winston';
-
-const pdfParse = require('pdf-parse');
-const mammoth = require('mammoth');
 
 export interface DocumentUploadResult {
   documentId: string;
@@ -28,7 +26,6 @@ export class DocumentService {
     userId: string
   ): Promise<DocumentUploadResult> {
     const supabase = createSupabaseAdmin();
-    const fileExt = filename.split('.').pop()?.toLowerCase() || 'bin';
     const storagePath = `${userId}/${Date.now()}-${filename}`;
 
     const { error: uploadError } = await supabase.storage
@@ -50,7 +47,7 @@ export class DocumentService {
 
     let preview = '';
     try {
-      preview = await this.extractTextPreview(fileBuffer, fileExt);
+      preview = await this.extractTextPreview(fileBuffer, filename, fileType);
     } catch (err) {
       winston.warn(`Could not extract text preview for ${filename}: ${(err as Error).message}`);
       preview = 'Preview not available for this file type.';
@@ -105,8 +102,7 @@ export class DocumentService {
     }
 
     const buffer = Buffer.from(await fileData.arrayBuffer());
-    const ext = doc.filename.split('.').pop()?.toLowerCase() || '';
-    return this.extractText(buffer, ext);
+    return this.extractText(buffer, doc.filename, doc.file_type);
   }
 
   static async getDocumentsByUser(userId: string, page: number = 1, limit: number = 10) {
@@ -127,37 +123,34 @@ export class DocumentService {
     return { data: data || [], total: count || 0 };
   }
 
-  private static async extractTextPreview(buffer: Buffer, ext: string): Promise<string> {
-    const text = await this.extractText(buffer, ext);
-    return text.substring(0, 500);
+  /**
+   * Extract text from any supported file type using iLovePDF.
+   * This is the single entry point for ALL file conversions.
+   */
+  static async extractText(buffer: Buffer, filename: string, mimeType: string): Promise<string> {
+    try {
+      return await ILovePDFService.extractTextFromBuffer(buffer, filename, mimeType);
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        throw new Error(
+          'File conversion service auth failed. Check ILOVEPDF_PUBLIC_KEY in .env'
+        );
+      }
+      if (err.response?.status === 422) {
+        throw new Error('File format not supported for conversion');
+      }
+      if (err.code === 'ECONNREFUSED') {
+        throw new Error(
+          'File conversion service unreachable. Check internet connection.'
+        );
+      }
+      throw new Error(`File processing failed: ${err.message}`);
+    }
   }
 
-  private static async extractText(buffer: Buffer, ext: string): Promise<string> {
-    switch (ext) {
-      case 'pdf': {
-        const data = await pdfParse(buffer);
-        return data.text || '';
-      }
-      case 'docx': {
-        const result = await mammoth.extractRawText({ buffer });
-        return result.value || '';
-      }
-      case 'txt':
-        return buffer.toString('utf-8');
-      case 'png':
-      case 'jpg':
-      case 'jpeg': {
-        try {
-          const Tesseract = require('tesseract.js');
-          const { data: { text } } = await Tesseract.recognize(buffer, 'eng');
-          return text || '';
-        } catch {
-          return '[Image — OCR not available]';
-        }
-      }
-      default:
-        return '';
-    }
+  private static async extractTextPreview(buffer: Buffer, filename: string, mimeType: string): Promise<string> {
+    const text = await this.extractText(buffer, filename, mimeType);
+    return text.substring(0, 500);
   }
 }
 

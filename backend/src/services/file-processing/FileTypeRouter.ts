@@ -2,6 +2,7 @@ import * as path from 'path';
 import { PdfParser, ParsedContent as PdfParsedContent } from './parsers/PdfParser';
 import { DocxParser, ParsedContent as DocxParsedContent } from './parsers/DocxParser';
 import { PptxParser, ParsedContent as PptxParsedContent } from './parsers/PptxParser';
+import { XlsxParser, ParsedContent as XlsxParsedContent } from './parsers/XlsxParser';
 import { TextParser, ParsedContent as TextParsedContent } from './parsers/TextParser';
 import { ImageParser, ParsedContent as ImageParsedContent } from './parsers/ImageParser';
 import { TextSanitizer, SanitizedResult } from './TextSanitizer';
@@ -35,16 +36,17 @@ interface UnifiedParsedContent {
   };
 }
 
-type SupportedFileType = "text" | "pdf" | "docx" | "pptx" | "image";
+type SupportedFileType = "text" | "pdf" | "docx" | "pptx" | "xlsx" | "image";
 
 function isSupportedFileType(value: string): value is SupportedFileType {
-  return ["text", "pdf", "docx", "pptx", "image"].includes(value);
+  return ["text", "pdf", "docx", "pptx", "xlsx", "image"].includes(value);
 }
 
 export class FileTypeRouter {
   private pdfParser: PdfParser;
   private docxParser: DocxParser;
   private pptxParser: PptxParser;
+  private xlsxParser: XlsxParser;
   private textParser: TextParser;
   private imageParser: ImageParser;
   private sanitizer: TextSanitizer;
@@ -54,7 +56,10 @@ export class FileTypeRouter {
     ['.pdf', 'pdf'],
     ['.docx', 'docx'],
     ['.pptx', 'pptx'],
+    ['.xlsx', 'xlsx'],
+    ['.xls', 'xlsx'],
     ['.txt', 'text'],
+    ['.csv', 'text'],
     ['.png', 'image'],
     ['.jpg', 'image'],
     ['.jpeg', 'image']
@@ -64,6 +69,7 @@ export class FileTypeRouter {
     this.pdfParser = new PdfParser();
     this.docxParser = new DocxParser();
     this.pptxParser = new PptxParser();
+    this.xlsxParser = new XlsxParser();
     this.textParser = new TextParser();
     this.imageParser = new ImageParser();
     this.sanitizer = new TextSanitizer();
@@ -85,7 +91,7 @@ export class FileTypeRouter {
     if (!isSupportedFileType(detectedType)) {
       throw new Error(
         `FileTypeRouter: unsupported file type detected — "${detectedType}". ` +
-        `Accepted types: text, pdf, docx, pptx, image`
+        `Accepted types: text, pdf, docx, pptx, xlsx, image`
       );
     }
 
@@ -117,6 +123,11 @@ export class FileTypeRouter {
         case 'pptx': {
           const result: PptxParsedContent = await this.pptxParser.parse(filePath);
           return this.normalizeResult(result, filePath, 'pptx');
+        }
+
+        case 'xlsx': {
+          const result: XlsxParsedContent = await this.xlsxParser.parse(filePath);
+          return this.normalizeResult(result, filePath, 'xlsx');
         }
 
         case 'text': {
@@ -154,7 +165,7 @@ export class FileTypeRouter {
     if (!isSupportedFileType(detectedType)) {
       throw new Error(
         `FileTypeRouter: unsupported file type detected — "${detectedType}". ` +
-        `Accepted types: text, pdf, docx, pptx, image`
+        `Accepted types: text, pdf, docx, pptx, xlsx, image`
       );
     }
 
@@ -173,6 +184,11 @@ export class FileTypeRouter {
         case 'pptx': {
           const result: PptxParsedContent = await this.pptxParser.parseBuffer(buffer, fileName);
           return this.normalizeResult(result, fileName, 'pptx');
+        }
+
+        case 'xlsx': {
+          const result: XlsxParsedContent = await this.xlsxParser.parseBuffer(buffer, fileName);
+          return this.normalizeResult(result, fileName, 'xlsx');
         }
 
         case 'text': {
@@ -220,6 +236,8 @@ export class FileTypeRouter {
         return this.docxParser.validate(filePath);
       case 'pptx':
         return this.pptxParser.validate(filePath);
+      case 'xlsx':
+        return this.xlsxParser.validate(filePath);
       case 'text':
         return this.textParser.validate(filePath);
       case 'image':

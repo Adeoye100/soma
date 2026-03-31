@@ -1,6 +1,7 @@
-import * as fs from 'fs/promises';
+import * as fs from 'fs';
 import * as path from 'path';
 import { TextSanitizer, SanitizedResult } from '../TextSanitizer';
+import { config } from '@/config';
 
 export interface ParsedContent {
   text: string;
@@ -9,21 +10,7 @@ export interface ParsedContent {
     fileName: string;
     parsedAt: string;
     format: string;
-    width: number;
-    height: number;
-    ocrConfidence: number;
     language?: string;
-    orientation?: string;
-    textBlocks: Array<{
-      text: string;
-      confidence: number;
-      boundingBox?: {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-      };
-    }>;
   };
 }
 
@@ -33,221 +20,247 @@ export interface ParserError {
   details?: Record<string, unknown>;
 }
 
+const MIME_MAP: Record<string, string> = {
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.gif': 'image/gif',
+  '.webp': 'image/webp',
+  '.bmp': 'image/bmp',
+};
+
+const FORMAT_MAP: Record<string, string> = {
+  '.jpg': 'JPEG',
+  '.jpeg': 'JPEG',
+  '.png': 'PNG',
+  '.gif': 'GIF',
+  '.webp': 'WEBP',
+  '.bmp': 'BMP',
+};
+
 export class ImageParser {
   private sanitizer: TextSanitizer;
-  private tesseract: any;
-  private sharp: any;
+  private apiKeys: string[];
+  private model: string;
+  private currentKeyIndex = 0;
 
   constructor() {
     this.sanitizer = new TextSanitizer();
-    this.tesseract = require('tesseract.js');
-    this.sharp = require('sharp');
+    this.apiKeys = config.openRouterApiKeys;
+    this.model = config.openRouterModel;
   }
 
-  async parse(filePath: string, options: { language?: string; enhance?: boolean } = {}): Promise<ParsedContent> {
+  async parse(
+    filePath: string,
+    options: { language?: string; enhance?: boolean } = {}
+  ): Promise<ParsedContent> {
     try {
-      const fileBuffer = await fs.readFile(filePath);
-      return await this.parseBuffer(fileBuffer, path.basename(filePath), options);
+      const fileName = path.basename(filePath);
+      const imageData = fs.readFileSync(filePath);
+      const ext = path.extname(filePath).toLowerCase();
+      const mimeType = MIME_MAP[ext] || 'image/jpeg';
+
+      const text = await this.extractTextViaVision(
+        imageData,
+        mimeType,
+        options.language
+      );
+
+      return this.buildResult(text, fileName, ext);
     } catch (error) {
-      throw new Error(`Failed to parse image file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `ImageParser failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
-  async parseBuffer(buffer: Buffer, fileName: string, options: { language?: string; enhance?: boolean } = {}): Promise<ParsedContent> {
+  async parseBuffer(
+    buffer: Buffer,
+    fileName: string,
+    options: { language?: string; enhance?: boolean } = {}
+  ): Promise<ParsedContent> {
     try {
-      const format = await this.detectImageFormat(buffer);
-      const dimensions = await this.getImageDimensions(buffer);
-      
-      let processedBuffer = buffer;
-      if (options.enhance !== false) {
-        processedBuffer = await this.enhanceImage(buffer);
-      }
+      const ext = path.extname(fileName).toLowerCase();
+      const mimeType = MIME_MAP[ext] || 'image/jpeg';
 
-      const { text, confidence, blocks, orientation } = await this.runOcr(processedBuffer, options.language);
-      const sanitized = this.sanitizer.sanitize(text);
+      const text = await this.extractTextViaVision(
+        buffer,
+        mimeType,
+        options.language
+      );
 
-      return {
-        text: sanitized.text,
-        sanitized,
-        metadata: {
-          fileName,
-          parsedAt: new Date().toISOString(),
-          format,
-          width: dimensions.width,
-          height: dimensions.height,
-          ocrConfidence: confidence,
-          language: options.language || 'eng',
-          orientation: orientation || 'UNKNOWN',
-          textBlocks: blocks
-        }
-      };
+      return this.buildResult(text, fileName, ext);
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.message.includes('Tesseract') || error.message.includes('OCR')) {
-          throw new Error(`OCR processing failed: ${error.message}`);
+      throw new Error(
+        `ImageParser failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
+  private async extractTextViaVision(
+    imageBuffer: Buffer,
+    mimeType: string,
+    language?: string
+  ): Promise<string> {
+    if (!this.apiKeys.length) {
+      throw new Error(
+        'No OpenRouter API keys configured. Set OPENROUTER_API_KEYS in .env'
+      );
+    }
+
+    const base64 = imageBuffer.toString('base64');
+    const langHint = language ? ` Respond in ${language}.` : '';
+
+    const prompt =
+      `Extract and transcribe ALL text content from this image. ` +
+      `Return only the extracted text, preserving line breaks where ` +
+      `appropriate. If no text is present, describe the visual content ` +
+      `that could be used as exam material.${langHint}`;
+
+    const messages = [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'image_url',
+            image_url: {
+              url: `data:${mimeType};base64,${base64}`,
+            },
+          },
+          {
+            type: 'text',
+            text: prompt,
+          },
+        ],
+      },
+    ];
+
+    const data = await this.callOpenRouter(messages);
+
+    const content =
+      data?.choices?.[0]?.message?.content;
+    if (!content) {
+      throw new Error('Empty response from vision model');
+    }
+
+    return content;
+  }
+
+  private async callOpenRouter(messages: any[]): Promise<any> {
+    const maxRetries = Math.max(this.apiKeys.length, 3);
+    let lastError: Error | null = null;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      const apiKey = this.apiKeys[this.currentKeyIndex % this.apiKeys.length];
+
+      try {
+        const response = await fetch(
+          'https://openrouter.ai/api/v1/chat/completions',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${apiKey}`,
+              'HTTP-Referer': 'https://smart-examination.app',
+              'X-Title': 'Smart Examination App',
+            },
+            body: JSON.stringify({
+              model: this.model,
+              messages,
+              temperature: 0.1,
+              max_tokens: 4096,
+            }),
+          }
+        );
+
+        if (response.ok) {
+          return await response.json();
         }
-        throw new Error(`Image parsing failed: ${error.message}`);
+
+        const errorText = await response.text();
+
+        if (response.status === 429 || response.status >= 500) {
+          lastError = new Error(
+            `OpenRouter ${response.status}: ${errorText}`
+          );
+          this.currentKeyIndex =
+            (this.currentKeyIndex + 1) % this.apiKeys.length;
+          await new Promise((r) =>
+            setTimeout(r, Math.pow(2, attempt) * 500)
+          );
+          continue;
+        }
+
+        throw new Error(`OpenRouter ${response.status}: ${errorText}`);
+      } catch (error) {
+        lastError = error as Error;
+        this.currentKeyIndex =
+          (this.currentKeyIndex + 1) % this.apiKeys.length;
       }
-      throw new Error('Image parsing failed: Unknown error');
     }
+
+    throw lastError || new Error('OpenRouter vision call failed after retries');
   }
 
-  private async detectImageFormat(buffer: Buffer): Promise<string> {
-    if (buffer.length < 4) {
-      return 'unknown';
-    }
+  private buildResult(
+    text: string,
+    fileName: string,
+    ext: string
+  ): ParsedContent {
+    const sanitized = this.sanitizer.sanitize(text);
 
-    if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) {
-      return 'PNG';
-    }
-    if (buffer[0] === 0xFF && buffer[1] === 0xD8) {
-      return 'JPEG';
-    }
-    if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46) {
-      return 'GIF';
-    }
-    if (buffer[0] === 0x42 && buffer[1] === 0x4D) {
-      return 'BMP';
-    }
-    if (buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46) {
-      return 'WEBP';
-    }
-
-    return 'unknown';
+    return {
+      text: sanitized.text,
+      sanitized,
+      metadata: {
+        fileName,
+        parsedAt: new Date().toISOString(),
+        format: FORMAT_MAP[ext] || 'UNKNOWN',
+      },
+    };
   }
 
-  private async getImageDimensions(buffer: Buffer): Promise<{ width: number; height: number }> {
+  canParse(mimeType: string): boolean {
+    return mimeType.startsWith('image/');
+  }
+
+  async validate(
+    filePath: string
+  ): Promise<{ valid: boolean; error?: ParserError }> {
     try {
-      const metadata = await this.sharp(buffer).metadata();
-      return {
-        width: metadata.width || 0,
-        height: metadata.height || 0
-      };
-    } catch {
-      return { width: 0, height: 0 };
-    }
-  }
+      const buffer = fs.readFileSync(filePath);
 
-  private async enhanceImage(buffer: Buffer): Promise<Buffer> {
-    try {
-      return await this.sharp(buffer)
-        .greyscale()
-        .normalize()
-        .sharpen()
-        .toBuffer();
-    } catch {
-      return buffer;
-    }
-  }
-
-  private async runOcr(buffer: Buffer, language?: string): Promise<{
-    text: string;
-    confidence: number;
-    blocks: Array<{
-      text: string;
-      confidence: number;
-      boundingBox?: {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-      };
-    }>;
-    orientation?: string;
-  }> {
-    const worker = await this.tesseract.createWorker(language || 'eng');
-
-    try {
-      const result = await worker.recognize(buffer);
-      
-      const blocks = (result.data.blocks || []).map((block: any) => ({
-        text: block.text || '',
-        confidence: block.confidence || 0,
-        boundingBox: block.boundingBox ? {
-          x: block.boundingBox.x0 || 0,
-          y: block.boundingBox.y0 || 0,
-          width: (block.boundingBox.x1 || 0) - (block.boundingBox.x0 || 0),
-          height: (block.boundingBox.y1 || 0) - (block.boundingBox.y0 || 0)
-        } : undefined
-      }));
-
-      const paragraphs = (result.data.paragraphs || []).map((para: any) => ({
-        text: para.text || '',
-        confidence: para.confidence || 0,
-        boundingBox: para.boundingBox ? {
-          x: para.boundingBox.x0 || 0,
-          y: para.boundingBox.y0 || 0,
-          width: (para.boundingBox.x1 || 0) - (para.boundingBox.x0 || 0),
-          height: (para.boundingBox.y1 || 0) - (para.boundingBox.y0 || 0)
-        } : undefined
-      }));
-
-      if (blocks.length === 0 && paragraphs.length > 0) {
-        blocks.push(...paragraphs);
-      }
-
-      const lines = (result.data.lines || []).map((line: any) => ({
-        text: line.text || '',
-        confidence: line.confidence || 0,
-        boundingBox: line.boundingBox ? {
-          x: line.boundingBox.x0 || 0,
-          y: line.boundingBox.y0 || 0,
-          width: (line.boundingBox.x1 || 0) - (line.boundingBox.x0 || 0),
-          height: (line.boundingBox.y1 || 0) - (line.boundingBox.y0 || 0)
-        } : undefined
-      }));
-
-      if (blocks.length === 0 && lines.length > 0) {
-        blocks.push(...lines);
-      }
-
-      return {
-        text: result.data.text || '',
-        confidence: result.data.confidence || 0,
-        blocks,
-        orientation: result.data.orientation
-      };
-    } finally {
-      await worker.terminate();
-    }
-  }
-
-  async validate(filePath: string): Promise<{ valid: boolean; error?: ParserError }> {
-    try {
-      const buffer = await fs.readFile(filePath);
-      
       if (buffer.length < 12) {
         return {
           valid: false,
           error: {
             code: 'INVALID_IMAGE_SIZE',
             message: 'File is too small to be a valid image',
-            details: { size: buffer.length }
-          }
+            details: { size: buffer.length },
+          },
         };
       }
 
-      const format = await this.detectImageFormat(buffer);
-      if (format === 'unknown') {
+      const ext = path.extname(filePath).toLowerCase();
+      if (!MIME_MAP[ext]) {
         return {
           valid: false,
           error: {
             code: 'INVALID_IMAGE_FORMAT',
-            message: 'File does not have a valid image header',
-            details: { detected: format }
-          }
+            message: `Unsupported image format: ${ext}`,
+            details: { detected: ext },
+          },
         };
       }
 
-      try {
-        await this.sharp(buffer).metadata();
-      } catch {
+      const format = this.detectFormatFromHeader(buffer);
+      if (format === 'unknown') {
         return {
           valid: false,
           error: {
-            code: 'CORRUPTED_IMAGE',
-            message: 'Image file appears to be corrupted'
-          }
+            code: 'INVALID_IMAGE_HEADER',
+            message: 'File does not have a valid image header',
+          },
         };
       }
 
@@ -257,38 +270,31 @@ export class ImageParser {
         valid: false,
         error: {
           code: 'IMAGE_VALIDATION_ERROR',
-          message: error instanceof Error ? error.message : 'Failed to validate image',
-          details: { filePath }
-        }
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Failed to validate image',
+          details: { filePath },
+        },
       };
     }
   }
 
-  async preprocessForOcr(buffer: Buffer, options: {
-    threshold?: number;
-    deskew?: boolean;
-    removeNoise?: boolean;
-  } = {}): Promise<Buffer> {
-    let processed = this.sharp(buffer);
-
-    processed = processed.grayscale();
-
-    if (options.threshold) {
-      processed = processed.threshold(options.threshold);
-    }
-
-    if (options.deskew) {
-      processed = processed.rotate();
-    }
-
-    if (options.removeNoise) {
-      processed = processed.blur(0.5);
-    }
-
-    processed = processed.normalize();
-    processed = processed.sharpen();
-
-    return processed.toBuffer();
+  private detectFormatFromHeader(buffer: Buffer): string {
+    if (buffer.length < 4) return 'unknown';
+    if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47)
+      return 'PNG';
+    if (buffer[0] === 0xff && buffer[1] === 0xd8) return 'JPEG';
+    if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46) return 'GIF';
+    if (buffer[0] === 0x42 && buffer[1] === 0x4d) return 'BMP';
+    if (
+      buffer[0] === 0x52 &&
+      buffer[1] === 0x49 &&
+      buffer[2] === 0x46 &&
+      buffer[3] === 0x46
+    )
+      return 'WEBP';
+    return 'unknown';
   }
 }
 

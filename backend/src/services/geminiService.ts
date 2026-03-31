@@ -222,7 +222,39 @@ export const generateExam = async (config: ExamConfig, materials: Material[]): P
       if (!parsedResult.questions || !Array.isArray(parsedResult.questions)) {
           throw new Error("Invalid JSON structure received. Expected a 'questions' array.");
       }
-      return parsedResult.questions as Question[];
+
+      // Normalize each question object — never trust AI response fields directly
+      const questions: Question[] = parsedResult.questions.map((q: any, i: number) => {
+        if (!q || typeof q !== 'object') {
+          throw new Error(`Question at index ${i} is not a valid object`);
+        }
+
+        const questionText = String(q.question || q.question_text || '').trim();
+        if (questionText.length < 5) {
+          throw new Error(`Question at index ${i}: text too short (got ${questionText.length} chars, minimum is 5)`);
+        }
+
+        const correctAnswer = String(q.correctAnswer || q.correct_answer || '').trim();
+        if (!correctAnswer) {
+          throw new Error(`Question at index ${i}: missing correctAnswer`);
+        }
+
+        const topic = String(q.topic || 'General').trim();
+
+        let options: string[] | undefined;
+        if (Array.isArray(q.options)) {
+          options = q.options.map((o: any) => String(o));
+        }
+
+        return {
+          question: questionText,
+          correctAnswer,
+          topic,
+          options
+        };
+      });
+
+      return questions;
   } catch (e) {
       winston.error("Failed to parse JSON response:", examResponse.choices?.[0]?.message?.content);
       throw new AIServiceError(`Error parsing exam questions: ${(e as Error).message}`);

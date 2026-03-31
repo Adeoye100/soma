@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
           "style-src 'self' 'unsafe-inline'",
           "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com",
           "frame-src 'self' https://accounts.google.com https://oauth2.googleapis.com",
-          "img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com",
+          "img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com https://api.dicebear.com",
           "font-src 'self' https://fonts.gstatic.com",
           "object-src 'none'",
           "frame-ancestors 'none'",
@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => {
           "style-src 'self' 'unsafe-inline'",
           "connect-src 'self' ws://localhost:* http://localhost:* https://*.supabase.co wss://*.supabase.co https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com",
           "frame-src 'self' https://accounts.google.com https://oauth2.googleapis.com",
-          "img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com",
+          "img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com https://api.dicebear.com",
           "font-src 'self' https://fonts.gstatic.com",
           "object-src 'none'",
           "frame-ancestors 'none'"
@@ -61,8 +61,10 @@ export default defineConfig(({ mode }) => {
       },
       resolve: {
         alias: {
-          '@': path.resolve(__dirname, '.'),
+          '@': path.resolve(__dirname, './src'),
           './txml': path.resolve(__dirname, 'node_modules/pptx2html/src/tXml.js'),
+          'react': path.resolve(__dirname, './node_modules/react'),
+          'react-dom': path.resolve(__dirname, './node_modules/react-dom'),
         }
       },
       optimizeDeps: {

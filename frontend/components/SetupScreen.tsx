@@ -1,26 +1,16 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { ExamConfig, ExamType, Difficulty, TimeIntensity, Material, Question } from '../types';
 import { generateExam } from '../services/geminiService';
 import { UploadIcon, DocumentTextIcon, XCircleIcon } from './icons';
 import Loader from './Loader';
 import InspirationCard from './InspirationCard';
-import ProfileCard from './ProfileCard';
 import ShaderBackground from './ShaderBackground';
-import { convertForExamProcessing, canConvertForExamProcessing } from '../utils/convertToPdf';
 import { extractTextFromFile } from '../utils/extractText';
 
 interface SetupScreenProps {
   onExamStart: (questions: Question[], config: ExamConfig) => void;
 }
-
-const fileToBase64 = (file: File): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve((reader.result as string).split(',')[1]);
-    reader.onerror = error => reject(error);
-  });
 
 // Enhanced file validation
 const validateFile = (file: File): string | null => {
@@ -31,13 +21,17 @@ const validateFile = (file: File): string | null => {
     'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.ms-excel',
     'text/plain',
+    'text/csv',
     'image/png',
     'image/jpeg',
     'image/jpg'
   ];
   
-  const allowedExtensions = ['.pdf', '.doc', '.docx', '.pptx', '.txt', '.png', '.jpg', '.jpeg'];
+  const allowedExtensions = ['.pdf', '.doc', '.docx', '.pptx', '.ppt', '.xlsx', '.xls', '.txt', '.csv', '.png', '.jpg', '.jpeg'];
   const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
   
   // Check file size
@@ -50,28 +44,10 @@ const validateFile = (file: File): string | null => {
   const hasValidType = allowedTypes.includes(file.type) || file.type.startsWith('image/');
   
   if (!hasValidExtension && !hasValidType) {
-    return `${file.name} is not a supported file type. Supported formats: PDF, DOCX, PPTX, TXT, PNG, JPG`;
+    return `${file.name} is not a supported file type. Supported formats: PDF, DOCX, PPTX, XLSX, TXT, CSV, PNG, JPG`;
   }
   
   return null;
-};
-
-// Enhanced MIME type detection
-const getMimeType = (file: File): string => {
-  const extension = file.name.toLowerCase().split('.').pop();
-  const mimeTypeMap: { [key: string]: string } = {
-    'pdf': 'application/pdf',
-    'doc': 'application/msword',
-    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    'txt': 'text/plain',
-    'png': 'image/png',
-    'jpg': 'image/jpeg',
-    'jpeg': 'image/jpeg'
-  };
-  
-  // Use browser-detected type first, fallback to extension-based detection
-  return file.type || mimeTypeMap[extension || ''] || 'application/octet-stream';
 };
 
 
@@ -115,7 +91,6 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [conversionProgress, setConversionProgress] = useState<{message: string, progress: number} | null>(null);
   
   // Calculate total time based on current config
   const totalTimeSeconds = calculateTotalTime(config.intensity, config.numQuestions);
@@ -125,7 +100,12 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
     'application/pdf',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/msword',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.ms-excel',
     'text/plain',
+    'text/csv',
     'image/png',
     'image/jpeg',
   ];
@@ -138,7 +118,7 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
       if (!ALLOWED_MIME_TYPES.includes(file.type)) {
         errors.push(
           `"${file.name}" is not a supported file type. ` +
-          `Please upload PDF, DOCX, PPTX, TXT, PNG, or JPG.`
+          `Please upload PDF, DOCX, PPTX, XLSX, TXT, CSV, PNG, or JPG.`
         );
         continue;
       }
@@ -279,21 +259,6 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
                 </div>
             )}
 
-            {conversionProgress && (
-              <div className="bg-blue-100 dark:bg-blue-900/30 border border-blue-400 text-blue-700 dark:text-blue-300 px-3 sm:px-4 py-3 rounded-lg relative mb-6 text-sm" role="alert">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-semibold">{conversionProgress.message}</span>
-                  <span>{conversionProgress.progress}%</span>
-                </div>
-                <div className="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-2">
-                  <div 
-                    className="bg-blue-600 dark:bg-blue-400 h-2 rounded-full transition-all duration-300" 
-                    style={{ width: `${conversionProgress.progress}%` }}
-                  ></div>
-                </div>
-              </div>
-            )}
-
             <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
               {/* Title Section */}
               <div>
@@ -383,11 +348,11 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
                     <div className="mt-4 flex flex-col sm:flex-row text-xs sm:text-sm leading-6 text-slate-600 dark:text-slate-400 gap-1">
                       <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white dark:bg-slate-800 font-semibold text-primary-600 dark:text-primary-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-600 focus-within:ring-offset-2 dark:focus-within:ring-offset-slate-800 hover:text-primary-500 transition-colors duration-300">
                         <span>Upload files</span>
-                        <input id="file-upload" name="file-upload" type="file" className="sr-only" multiple onChange={handleFileChange} accept=".pdf,.doc,.docx,.pptx,.txt,image/*" />
+                        <input id="file-upload" name="file-upload" type="file" className="sr-only" multiple onChange={handleFileChange} accept=".pdf,.doc,.docx,.pptx,.xlsx,.xls,.txt,.csv,image/*" />
                       </label>
                       <p className="sm:pl-1">or drag and drop</p>
                     </div>
-                    <p className="text-xs leading-5 text-slate-500 dark:text-slate-500 mt-2 transition-colors duration-300">PDF, DOCX, PPTX, TXT, PNG, JPG up to 10MB</p>
+                    <p className="text-xs leading-5 text-slate-500 dark:text-slate-500 mt-2 transition-colors duration-300">PDF, DOCX, PPTX, XLSX, TXT, CSV, PNG, JPG up to 10MB</p>
                   </div>
                 </div>
                  {materials.length > 0 && (

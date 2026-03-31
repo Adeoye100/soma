@@ -4,8 +4,6 @@ import { cacheService } from '@/infrastructure/cache';
 import { DatabaseError } from '@/middleware/errorHandler';
 import winston from 'winston';
 
-const sharp = require('sharp');
-
 export interface UserProfile {
   id: string;
   username: string | null;
@@ -117,17 +115,13 @@ export class UserProfileService {
   static async uploadAvatar(userId: string, fileBuffer: Buffer, mimeType: string): Promise<string> {
     const supabase = createSupabaseAdmin();
 
-    const resizedBuffer = await sharp(fileBuffer)
-      .resize(200, 200, { fit: 'cover' })
-      .jpeg({ quality: 80 })
-      .toBuffer();
-
-    const storagePath = `${userId}/avatar-${Date.now()}.jpg`;
+    const ext = mimeType.split('/')[1] || 'jpg';
+    const storagePath = `${userId}/avatar-${Date.now()}.${ext}`;
 
     const { error: uploadError } = await supabase.storage
       .from('avatars')
-      .upload(storagePath, resizedBuffer, {
-        contentType: 'image/jpeg',
+      .upload(storagePath, fileBuffer, {
+        contentType: mimeType,
         upsert: true
       });
 

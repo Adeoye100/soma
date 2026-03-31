@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { resetPassword } from '@/services/supabase';
+import { resetPassword } from '../services/supabase';
 import PasswordStrengthIndicator, { PasswordValidationState } from './PasswordStrengthIndicator';
 
 const ResetPasswordForm: React.FC = () => {

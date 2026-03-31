@@ -18,13 +18,20 @@ const upload = multer({
     const allowed = [
       'application/pdf',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/msword',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.ms-excel',
+      'text/plain',
+      'text/csv',
       'image/png',
-      'image/jpeg'
+      'image/jpeg',
     ];
     if (allowed.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error(`File type ${file.mimetype} not supported. Allowed: PDF, DOCX, PNG, JPG`));
+      cb(new Error(`File type ${file.mimetype} not supported. Allowed: PDF, DOCX, PPTX, XLSX, TXT, CSV, PNG, JPG`));
     }
   }
 });
@@ -72,6 +79,48 @@ router.post('/upload',
     } catch (error: any) {
       winston.error('Document upload error:', error);
       res.status(500).json({ error: 'Upload failed', message: error.message });
+    }
+  })
+);
+
+/**
+ * @route   POST /api/documents/extract-text
+ * @desc    Upload a file and get extracted text (for exam generation)
+ * @access  Private
+ */
+router.post('/extract-text',
+  upload.single('file'),
+  asyncHandler(async (req: Request, res: Response) => {
+    const file = req.file;
+    const userId = (req as AuthenticatedRequest).user?.id;
+
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized', message: 'User not authenticated' });
+      return;
+    }
+
+    if (!file) {
+      res.status(400).json({ error: 'Bad Request', message: 'No file provided' });
+      return;
+    }
+
+    try {
+      const text = await DocumentService.extractText(
+        file.buffer,
+        file.originalname,
+        file.mimetype
+      );
+
+      res.json({
+        message: 'Text extracted successfully',
+        filename: file.originalname,
+        mimeType: file.mimetype,
+        text: text.substring(0, 50000),
+        truncated: text.length > 50000
+      });
+    } catch (error: any) {
+      winston.error(`Text extraction error for ${file.originalname}:`, error);
+      res.status(500).json({ error: 'Extraction failed', message: error.message });
     }
   })
 );

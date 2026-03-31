@@ -14,7 +14,7 @@ import { DocumentService } from '@/services/documentService';
 import { cacheService } from '@/infrastructure/cache';
 import { config } from '@/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { sanitizeForTable, QUESTIONS_COLUMNS, EXAMS_COLUMNS } from '@/utils/dbUtils';
+import { sanitizeForTable, QUESTIONS_COLUMNS, EXAMS_COLUMNS, validateQuestionRow } from '@/utils/dbUtils';
 import winston from 'winston';
 
 const router = Router();
@@ -88,16 +88,20 @@ router.post('/generate',
         correct_answer: question.correctAnswer || question.correct_answer,
         explanation: question.explanation || null,
         difficulty: question.difficulty || difficulty,
-        order_index: index,
+        order_index: Number.isFinite(Number(question.order_index))
+          ? Math.max(0, Number(question.order_index))
+          : index,
         points: 10,
+        topic: question.topic ?? 'General',
+        subject: question.subject || examSubject,
         metadata: {
           topic: question.topic ?? 'General',
           subject: question.subject || examSubject
         }
       }));
 
-      const safeQuestionsData = questionsData.map((q: Record<string, unknown>) =>
-        sanitizeForTable(q, QUESTIONS_COLUMNS)
+      const safeQuestionsData = questionsData.map((q: Record<string, unknown>, i: number) =>
+        sanitizeForTable(validateQuestionRow(q, i), QUESTIONS_COLUMNS)
       );
 
       const { data: createdQuestions, error: questionsError } = await userSupabase
@@ -105,7 +109,7 @@ router.post('/generate',
 
       if (questionsError) {
         winston.error('Failed to create questions:', questionsError);
-        await userSupabase.from('exams').delete().eq('id', exam.id);
+        await userSupabase.from('exams').update({ status: 'failed' }).eq('id', exam.id);
         res.status(500).json({ error: 'Failed to save questions', message: questionsError.message });
         return;
       }

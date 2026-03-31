@@ -12,5 +12,6 @@ export {
 export { PdfParser } from './parsers/PdfParser';
 export { DocxParser } from './parsers/DocxParser';
 export { PptxParser } from './parsers/PptxParser';
+export { XlsxParser } from './parsers/XlsxParser';
 export { TextParser } from './parsers/TextParser';
 export { ImageParser } from './parsers/ImageParser';

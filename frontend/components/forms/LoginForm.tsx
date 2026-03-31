@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService, signInWithGoogle } from '@/services/authService';
+import { authService, signInWithGoogle } from '../../services/authService';
 import EmailField from './EmailField';
 import PasswordField from './PasswordField';
 import { validateEmail, validatePassword, formatAuthError, validateRedirect } from '../../utils/authValidation';
