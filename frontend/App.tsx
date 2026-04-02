@@ -14,9 +14,6 @@ import { useSessionHeartbeat } from './src/hooks/useSessionHeartbeat';
 
 // Admin routes and components
 import AdminProtectedRoute from './src/views/admin/AdminProtectedRoute';
-<<<<<<< HEAD
-import { AdminDashboardApp } from './src/pages/AdminDashboardApp';
-=======
 import AdminDashboard from './src/views/admin/pages/AdminDashboard';
 import SystemHealth from './src/views/admin/pages/SystemHealth';
 import Monitoring from './src/views/admin/pages/Monitoring';
@@ -25,7 +22,6 @@ import Queues from './src/views/admin/pages/Queues';
 import Configuration from './src/views/admin/pages/Configuration';
 import Alerts from './src/views/admin/pages/Alerts';
 import SystemInfo from './src/views/admin/pages/SystemInfo';
->>>>>>> e102c8a33e923e35d0f947d6551aac6d394a06ba
 
 // Check if we're in development mode
 const isDev = import.meta.env.DEV;
@@ -162,10 +158,6 @@ const App: React.FC = () => {
 
             {/* Admin Routes */}
             <Route element={<AdminProtectedRoute />}>
-<<<<<<< HEAD
-              <Route path="/admin" element={<AdminDashboardApp />} />
-              <Route path="/admin/*" element={<AdminDashboardApp />} />
-=======
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/system-health" element={<SystemHealth />} />
               <Route path="/admin/monitoring" element={<Monitoring />} />
@@ -174,7 +166,6 @@ const App: React.FC = () => {
               <Route path="/admin/configuration" element={<Configuration />} />
               <Route path="/admin/alerts" element={<Alerts />} />
               <Route path="/admin/system-info" element={<SystemInfo />} />
->>>>>>> e102c8a33e923e35d0f947d6551aac6d394a06ba
             </Route>
           </Routes>
         </BrowserRouter>
