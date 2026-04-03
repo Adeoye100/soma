@@ -31,6 +31,7 @@ import documentRoutes from '@/routes/documents';
 import leaderboardRoutes from '@/routes/leaderboard';
 import userRoutes from '@/routes/user';
 import adminRoutes from '@/routes/admin';
+import feedbackRoutes from '@/routes/feedback';
 
 // Import automation framework
 import { initializeAutomationFramework, checkAutomationHealth } from '@/automation';
@@ -142,16 +143,24 @@ if (config.helmetEnabled) {
   app.use(helmet({
     contentSecurityPolicy: {
       directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        scriptSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: ["'self'", "https://*.supabase.co", "https://generativelanguage.googleapis.com"],
+        defaultSrc:     ["'self'"],
+        styleSrc:       ["'self'", "'unsafe-inline'",
+                         "https://fonts.googleapis.com"],
+        stylesSrcElem:  ["'self'", "'unsafe-inline'",
+                         "https://fonts.googleapis.com"],
+        fontSrc:        ["'self'", "https://fonts.gstatic.com"],
+        scriptSrc:      ["'self'"],
+        imgSrc:         ["'self'", "data:", "blob:",
+                         "https://*.supabase.co",
+                         "https://lh3.googleusercontent.com"],
+        connectSrc:     ["'self'",
+                         "https://*.supabase.co",
+                         "https://generativelanguage.googleapis.com"],
         frameAncestors: ["'none'"],
-        objectSrc: ["'none'"],
-        upgradeInsecureRequests: [],
-      },
+        objectSrc:      ["'none'"],
+        baseUri:        ["'self'"],
+        formAction:     ["'self'"]
+      }
     },
     hsts: {
       maxAge: config.hstsMaxAge,
@@ -201,6 +210,7 @@ app.use('/api/documents', authMiddleware, documentRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/user', authMiddleware, userRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 // Serve static files in production
 if (config.nodeEnv === 'production') {

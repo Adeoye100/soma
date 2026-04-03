@@ -117,3 +117,72 @@ export const evaluateAnswer = async (question: Question, userAnswer: string): Pr
   const data = await response.json();
   return data.evaluation;
 };
+
+/**
+ * Evaluate an entire exam at once by calling the backend API
+ */
+export const evaluateExam = async (
+  questions: Question[],
+  userAnswers: string[]
+): Promise<Evaluation[]> => {
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
+
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  // Build the answers map: { questionId: userAnswer }
+  const answersMap: Record<string, string> = {};
+  const questionsPayload = questions.map((q, i) => {
+    const qId = q.id || `q_${i}`;
+    answersMap[qId] = userAnswers[i] || 'No answer provided.';
+    return {
+      id: qId,
+      question_text: q.question,
+      question_type: q.options ? 'OBJECTIVE' : 'SHORT_ANSWER',
+      options: q.options || [],
+      correct_answer: q.correctAnswer,
+      topic: q.topic || 'General',
+      points: 10
+    };
+  });
+
+  const response = await fetch('/api/exam/evaluate', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      examId: questions[0]?.examId || 'local-eval',
+      answers: answersMap,
+      questions: questionsPayload
+    })
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Failed to evaluate exam');
+  }
+
+  const data = await response.json();
+
+  // Map backend results to frontend Evaluation type
+  return data.results.map((r: any) => ({
+    score: r.score,
+    feedback: r.feedback,
+    isCorrect: r.isCorrect,
+    topic: r.topic || 'General'
+  }));
+};
+
+export const evaluateAnswerEnhanced = evaluateAnswer;
+
+export default {
+  generateExam,
+  evaluateAnswer,
+  evaluateExam,
+  evaluateAnswerEnhanced
+};

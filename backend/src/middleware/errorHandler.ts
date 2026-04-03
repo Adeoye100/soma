@@ -98,10 +98,10 @@ export const errorHandler = (
  * The handler function return value is discarded since Express only cares that
  * the request is processed. This prevents type errors when handlers return Response objects.
  */
-export const asyncHandler = (
-  fn: (req: Request, res: Response, next: NextFunction) => Promise<void> | void
-): ((req: Request, res: Response, next: NextFunction) => void) => {
-  return (req: Request, res: Response, next: NextFunction): void => {
+export const asyncHandler = <P = any, ResBody = any, ReqBody = any, ReqQuery = any>(
+  fn: (req: Request<P, ResBody, ReqBody, ReqQuery>, res: Response<ResBody>, next: NextFunction) => Promise<any> | any
+): ((req: Request<P, ResBody, ReqBody, ReqQuery>, res: Response<ResBody>, next: NextFunction) => void) => {
+  return (req: Request<P, ResBody, ReqBody, ReqQuery>, res: Response<ResBody>, next: NextFunction): void => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
 };

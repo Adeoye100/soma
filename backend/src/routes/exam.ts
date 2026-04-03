@@ -5,7 +5,7 @@ import { authMiddleware, AuthenticatedRequest } from '@/middleware/auth';
 import { checkValidationResult, examValidation } from '@/middleware/requestValidator';
 import { examGenerationValidation, answerSubmissionValidation } from '@/middleware/requestValidation';
 import { userRequestThrottler, aiGenerationThrottler } from '@/middleware/requestThrottling';
-import { generateExam } from '@/services/geminiService';
+import { generateExam, evaluateAnswer } from '@/services/geminiService';
 import { codeBasedExamService } from '@/services/CodeBasedExamService';
 import { codeBasedEvaluationService, Question as EvaluationQuestion } from '@/services/CodeBasedEvaluationService';
 import { ExamService, QuestionService } from '@/services/supabaseService';
@@ -180,6 +180,145 @@ router.post('/submit',
     } catch (error: any) {
       winston.error('Exam submission error:', error);
       res.status(500).json({ error: 'Exam submission failed', message: error.message });
+    }
+  })
+);
+
+/**
+ * @route   POST /api/exam/evaluate
+ * @desc    Evaluate exam answers — single question or full exam
+ * @access  Private
+ */
+router.post('/evaluate',
+  authMiddleware,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      res.status(401).json({ error: 'Unauthorized', message: 'Missing or invalid authorization header' });
+      return;
+    }
+    const authToken = authHeader.slice(7);
+
+    try {
+      const { examId, answers, questions, question, answer, options, correctAnswer, topic } = req.body;
+
+      // ─── MODE A: Full exam evaluation (examId + answers + questions) ───
+      if (examId && answers && questions && Array.isArray(questions)) {
+        const evaluationResults = await Promise.all(
+          questions.map(async (q: any) => {
+            const userAnswer = answers[q.id] ?? '';
+            const questionType = (q.question_type || q.type || 'OBJECTIVE').toUpperCase();
+
+            // Direct comparison for objective / true-false — NO API call
+            if (questionType === 'OBJECTIVE' || questionType === 'TRUE_FALSE') {
+              const isCorrect = userAnswer.trim().toLowerCase() === (q.correct_answer || q.correctAnswer || '').trim().toLowerCase();
+              return {
+                questionId: q.id,
+                isCorrect,
+                score: isCorrect ? (q.points ?? 10) : 0,
+                userAnswer,
+                correctAnswer: q.correct_answer || q.correctAnswer,
+                feedback: isCorrect ? 'Correct!' : `Incorrect. The correct answer is: ${q.correct_answer || q.correctAnswer}`,
+                topic: q.topic || 'General'
+              };
+            }
+
+            // AI evaluation for short-answer / essay
+            const evalQuestion = {
+              question: q.question_text || q.question,
+              options: q.options || undefined,
+              correctAnswer: q.correct_answer || q.correctAnswer,
+              topic: q.topic || 'General'
+            };
+            const evaluation = await evaluateAnswer(evalQuestion, { answer: userAnswer });
+            return {
+              questionId: q.id,
+              ...evaluation,
+              userAnswer,
+              correctAnswer: q.correct_answer || q.correctAnswer
+            };
+          })
+        );
+
+        const totalScore = evaluationResults.reduce((sum, r) => sum + r.score, 0);
+        const maxScore = questions.reduce((sum: number, q: any) => sum + (q.points ?? 10), 0);
+        const scorePercent = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
+        const correctCount = evaluationResults.filter(r => r.isCorrect).length;
+
+        // Save session
+        const userSupabase = createUserSupabaseClient(authToken);
+        const sessionData = {
+          exam_id: examId,
+          user_id: userId,
+          total_questions: questions.length,
+          correct_answers: correctCount,
+          score: totalScore,
+          percentage: scorePercent,
+          answers: answers,
+          status: 'graded',
+          submitted_at: new Date().toISOString()
+        };
+
+        const { data: session, error: sessionError } = await userSupabase
+          .from('exam_sessions')
+          .insert(sessionData)
+          .select()
+          .single();
+
+        if (sessionError) {
+          winston.error('[evaluate] Session save error:', sessionError);
+        }
+
+        // Update exam status
+        await userSupabase
+          .from('exams')
+          .update({ status: 'completed' })
+          .eq('id', examId)
+          .eq('user_id', userId);
+
+        return res.status(200).json({
+          success: true,
+          sessionId: session?.id,
+          score: totalScore,
+          maxScore,
+          scorePercent,
+          correctCount,
+          totalQuestions: questions.length,
+          results: evaluationResults,
+          grade: scorePercent >= 90 ? 'A' : scorePercent >= 80 ? 'B' : scorePercent >= 70 ? 'C' : scorePercent >= 60 ? 'D' : 'F'
+        });
+      }
+
+      // ─── MODE B: Single-question evaluation ───
+      if (question && answer !== undefined) {
+        const evalQuestion = {
+          question,
+          options,
+          correctAnswer: correctAnswer || '',
+          topic: topic || 'General'
+        };
+        const evaluation = await evaluateAnswer(evalQuestion, { answer });
+        return res.status(200).json({ evaluation });
+      }
+
+      // ─── Neither mode matched ───
+      return res.status(400).json({
+        error: 'Invalid request',
+        message: 'Provide either { examId, answers, questions } for full evaluation or { question, answer, correctAnswer } for single evaluation'
+      });
+
+    } catch (err: any) {
+      winston.error('[evaluate] Error:', err);
+      return res.status(500).json({
+        error: 'Evaluation failed',
+        message: err.message || 'An error occurred during evaluation'
+      });
     }
   })
 );

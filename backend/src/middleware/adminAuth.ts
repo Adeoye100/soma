@@ -1,21 +1,16 @@
 import { Response, NextFunction } from 'express';
 import { createClient } from '@supabase/supabase-js';
-import { authMiddleware, AuthenticatedRequest } from '@/middleware/auth';
-import { config } from '@/config';
+import { AuthenticatedRequest } from './auth';
+import { config } from '../config';
 import winston from 'winston';
 
 const supabaseAdmin = createClient(
   config.supabaseUrl,
-  config.supabaseServiceKey || config.supabaseAnonKey,
+  config.supabaseServiceKey,
   {
-    auth: { autoRefreshToken: false, persistSession: false },
-    global: { headers: { 'X-Client-Info': 'soma-admin-auth' } }
+    auth: { autoRefreshToken: false, persistSession: false }
   }
 );
-
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'admin@soma.app')
-  .split(',')
-  .map(e => e.trim().toLowerCase());
 
 export const requireAdmin = async (
   req: AuthenticatedRequest,
@@ -23,54 +18,34 @@ export const requireAdmin = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    // Step 1: Run standard JWT auth first
-    await new Promise<void>((resolve, reject) => {
-      authMiddleware(req, res, (err?: any) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
+    const authHeader = req.headers.authorization;
+    let token = '';
 
-    if (!req.user) {
-      res.status(401).json({ error: 'Unauthorized', message: 'Authentication required' });
+    if (authHeader) {
+      token = authHeader.replace('Bearer ', '');
+    } else if (req.query.token) {
+      token = req.query.token as string;
+    }
+
+    if (!token) {
+      res.status(401).json({ error: 'Unauthorized', message: 'Missing authorization token' });
       return;
     }
 
-    // Step 2: Check admin via email list
-    const userEmail = req.user.email?.toLowerCase();
-    if (userEmail && ADMIN_EMAILS.includes(userEmail)) {
+    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+
+    if (error || !user) {
+      res.status(401).json({ error: 'Unauthorized', message: 'Invalid or expired token' });
+      return;
+    }
+
+    // Check admin role in app_metadata
+    const role = user.app_metadata?.role;
+    if (role === 'admin') {
+      // Attach user to request for downstream use
+      req.user = user as any;
       next();
       return;
-    }
-
-    // Step 3: Check admin via Supabase app_metadata (service role)
-    try {
-      const { data: { user }, error } = await supabaseAdmin.auth.getUser(
-        req.headers.authorization?.replace('Bearer ', '') || ''
-      );
-
-      if (!error && user) {
-        const role = user.app_metadata?.role;
-        if (role === 'admin' || role === 'super_admin') {
-          next();
-          return;
-        }
-
-        // Step 4: Check public.user_roles table
-        const { data: roleData } = await supabaseAdmin
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('role', 'admin')
-          .single();
-
-        if (roleData) {
-          next();
-          return;
-        }
-      }
-    } catch (roleCheckErr) {
-      winston.warn('Admin role check via Supabase failed, falling back to email-only', roleCheckErr);
     }
 
     res.status(403).json({ error: 'Forbidden', message: 'Admin access required' });

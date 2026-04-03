@@ -161,39 +161,61 @@ async function callOpenRouter(
   }
 }
 
-const getExamPrompt = (config: ExamConfig, topics: string): string => {
+const getExamPrompt = (config: ExamConfig, topics: string, materialsContent: string): string => {
+    const difficultyDesc: Record<string, string> = {
+      easy: 'recall and recognition of key facts from the material',
+      medium: 'application and understanding of concepts in the material',
+      hard: 'analysis, synthesis, evaluation of complex concepts from the material'
+    };
+
+    const pointsForDifficulty = config.difficulty === 'hard' ? 3 : config.difficulty === 'medium' ? 2 : 1;
+
     let questionFormatDetails = '';
     switch (config.type) {
         case 'OBJECTIVE':
-            questionFormatDetails = 'Each question should be multiple-choice with exactly 4 options. Clearly indicate the single correct answer.';
+            questionFormatDetails = `- Multiple-choice with exactly 4 options
+- Wrong answers must be plausible misconceptions someone reading the material might hold
+- Do NOT make wrong options obviously incorrect`;
             break;
         case 'SHORT_ANSWER':
-            questionFormatDetails = 'Each question should require a concise answer, typically one or two sentences. Provide a model correct answer for evaluation purposes.';
+            questionFormatDetails = `- Requires a concise answer (1-2 sentences)
+- Provide a model correct answer for evaluation`;
             break;
         case 'ESSAY':
-            questionFormatDetails = 'Each question should be open-ended, requiring a detailed, multi-paragraph response. Provide a comprehensive model answer covering key points for evaluation.';
+            questionFormatDetails = `- Open-ended, requiring a detailed multi-paragraph response
+- Provide a comprehensive model answer covering key points`;
             break;
     }
 
     return `
-      You are an expert curriculum designer. Based on the following key topics, create a high-quality exam.
+You are an expert university examiner with deep subject matter expertise.
 
-      **Key Topics:**
-      ${topics}
+STUDY MATERIAL:
+${materialsContent.substring(0, 30000)}
 
-      **Exam Specifications:**
-      - **Type:** ${config.type}
-      - **Difficulty:** ${config.difficulty}
-      - **Number of Questions:** ${config.numQuestions}
+EXTRACTED KEY TOPICS:
+${topics}
 
-      **Instructions:**
-      - Generate exactly ${config.numQuestions} questions.
-      - Ensure questions are relevant to the provided topics and match the specified difficulty level.
-      - ${questionFormatDetails}
-      - For each question, identify the main 'topic' it covers from the key topics list.
-      - Respond ONLY with a JSON object containing a "questions" array.
-      - Each question object must have: "question", "correctAnswer", "topic", and (if OBJECTIVE) "options" (array of 4 strings).
-    `;
+EXAM CONFIGURATION:
+- Difficulty: ${config.difficulty} (${difficultyDesc[config.difficulty] || difficultyDesc.easy})
+- Question Type: ${config.type}
+- Number of Questions: ${config.numQuestions}
+- Points per question: ${pointsForDifficulty}
+
+STRICT REQUIREMENTS:
+1. Every question MUST be directly derived from the study material above — not generic knowledge
+2. Reference specific concepts, names, dates, formulas, or facts FROM THE MATERIAL
+3. ${questionFormatDetails}
+4. Difficulty guidance: ${difficultyDesc[config.difficulty] || difficultyDesc.easy}
+5. Never ask "What is [thing]?" — ask HOW, WHY, COMPARE, EVALUATE, APPLY based on the material
+6. Wrong options (if OBJECTIVE) must be plausible — not obviously wrong to anyone who read the material
+7. Explanation must teach WHY the correct answer is right and reference specific material content
+
+CRITICAL: If you cannot trace a question to the study material, do NOT generate it.
+
+Respond ONLY with a JSON object containing a "questions" array.
+Each question object must have: "question", "correctAnswer", "topic", "options" (if OBJECTIVE — array of 4 strings), and "explanation".
+`;
 };
 
 export const generateExam = async (config: ExamConfig, materials: Material[]): Promise<Question[]> => {
@@ -210,7 +232,7 @@ export const generateExam = async (config: ExamConfig, materials: Material[]): P
       throw new AIServiceError('Could not extract topics from the provided materials.');
   }
 
-  const examPrompt = getExamPrompt(config, topics);
+  const examPrompt = getExamPrompt(config, topics, materialsContent);
   const examResponse = await callOpenRouter([
     { role: 'system', content: 'You are an expert exam generator. Output only valid JSON.' },
     { role: 'user', content: examPrompt }

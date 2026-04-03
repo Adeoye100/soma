@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="randomn.js" type="NodeJSConfigurationType" singleton="false" path-to-node="node" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/randomn.js" working-dir="$PROJECT_DIR$/../smart-examination-app">
+    <method v="2" />
+  </configuration>
+</component>

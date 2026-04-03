@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ExamConfig, Question, TimeIntensity, UserAnswer, ExamType, Evaluation } from '../types';
-import { evaluateAnswer } from '../services/geminiService';
+import { evaluateExam } from '../services/geminiService';
 import Loader from './Loader';
 import ShaderBackground from './ShaderBackground';
 
@@ -63,13 +63,17 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ questions, config, onFinish }) 
 
   const handleSubmit = useCallback(async () => {
     setIsSubmitting(true);
-    const evaluations: Evaluation[] = [];
-    for (let i = 0; i < questions.length; i++) {
-        const evaluation = await evaluateAnswer(questions[i], userAnswers[i] || "No answer provided.");
-        evaluations.push(evaluation);
+    try {
+      const evaluations = await evaluateExam(questions, userAnswers.map(a => a || 'No answer provided.'));
+      const timeTaken = totalTime - timeLeft;
+      onFinish({ questions, userAnswers, evaluations, timeTaken, config });
+    } catch (error) {
+      console.error('[ExamScreen] Evaluation failed:', error);
+      // Fallback: finish with empty evaluations so the UI doesn't hang
+      const timeTaken = totalTime - timeLeft;
+      const fallbackEvals = questions.map(q => ({ score: 0, feedback: 'Evaluation failed', isCorrect: false, topic: q.topic || 'General' }));
+      onFinish({ questions, userAnswers, evaluations: fallbackEvals, timeTaken, config });
     }
-    const timeTaken = totalTime - timeLeft;
-    onFinish({ questions, userAnswers, evaluations, timeTaken, config });
   }, [questions, userAnswers, totalTime, timeLeft, onFinish, config]);
 
   const currentQuestion = questions[currentQuestionIndex];

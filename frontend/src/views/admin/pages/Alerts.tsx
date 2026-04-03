@@ -1,188 +1,95 @@
-import React, { useEffect, useState } from 'react';
-import AdminLayout from '../components/AdminLayout';
+import React, { useState, useEffect } from 'react';
+import { Bell, AlertCircle, AlertTriangle, Info, CheckCircle, RefreshCw, Loader } from 'lucide-react';
 import { AdminApiService } from '../../../services/admin/adminApiService';
 
-interface Alert {
-  id: string;
-  title: string;
-  message: string;
-  severity: 'critical' | 'warning' | 'info';
-  status: 'active' | 'acknowledged' | 'resolved';
-  timestamp: string;
-}
-
-const Alerts: React.FC = () => {
-  const [alerts, setAlerts] = useState<Alert[]>([]);
+export const Alerts: React.FC = () => {
+  const [alerts, setAlerts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'active' | 'resolved'>('all');
 
-  useEffect(() => {
-    const fetchAlerts = async () => {
-      try {
-        const data = await AdminApiService.getAlerts();
-        setAlerts(data);
-      } catch (error) {
-        console.error('[Alerts] Error:', error);
-        setAlerts([
-          {
-            id: '1',
-            title: 'High Memory Usage',
-            message: 'Memory usage exceeded 85%',
-            severity: 'warning',
-            status: 'active',
-            timestamp: '5 mins ago',
-          },
-          {
-            id: '2',
-            title: 'Database Connection',
-            message: 'Slow query detected',
-            severity: 'info',
-            status: 'acknowledged',
-            timestamp: '1 hour ago',
-          },
-          {
-            id: '3',
-            title: 'API Rate Limit',
-            message: 'Rate limit approached for user 123',
-            severity: 'warning',
-            status: 'resolved',
-            timestamp: '2 hours ago',
-          },
-        ]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAlerts();
-    const interval = setInterval(fetchAlerts, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleAlertAction = async (alertId: string, action: 'acknowledge' | 'resolve') => {
+  const fetchData = async () => {
     try {
-      if (action === 'acknowledge') {
-        await AdminApiService.acknowledgeAlert(alertId);
-      } else if (action === 'resolve') {
-        await AdminApiService.resolveAlert(alertId);
-      }
-      // Refresh alerts
-      const data = await AdminApiService.getAlerts();
-      setAlerts(data);
-    } catch (error) {
-      console.error('[Alerts] Action error:', error);
+      setLoading(true);
+      const res = await AdminApiService.getAlerts();
+      setAlerts(res.alerts);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getSeverityStyles = (severity: string) => {
-    const styles: Record<string, string> = {
-      critical: 'bg-red-900/30 text-red-400 border-red-800 text-red-300',
-      warning: 'bg-yellow-900/30 text-yellow-400 border-yellow-800 text-yellow-300',
-      info: 'bg-blue-900/30 text-blue-400 border-blue-800 text-blue-300',
-    };
-    return styles[severity] || styles.info;
-  };
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  const getStatusStyles = (status: string) => {
-    const styles: Record<string, string> = {
-      active: 'bg-red-900/30 text-red-400',
-      acknowledged: 'bg-yellow-900/30 text-yellow-400',
-      resolved: 'bg-green-900/30 text-green-400',
-    };
-    return styles[status] || styles.active;
-  };
-
-  const filteredAlerts = alerts.filter(alert => {
-    if (filter === 'all') return true;
-    if (filter === 'active') return alert.status === 'active' || alert.status === 'acknowledged';
-    return alert.status === 'resolved';
-  });
-
-  if (loading) return <AdminLayout title="Alerts">Loading...</AdminLayout>;
+  const counts = alerts.reduce((acc: any, curr: any) => {
+    acc[curr.severity] = (acc[curr.severity] || 0) + 1;
+    return acc;
+  }, { critical: 0, warning: 0, info: 0 });
 
   return (
-    <AdminLayout
-      title="Alerts & Notifications"
-      subtitle="Manage system alerts and notifications"
-    >
-      <div className="flex gap-4 mb-6">
-        <button
-          onClick={() => setFilter('all')}
-          className={`px-4 py-2 rounded-lg transition-colors ${
-            filter === 'all'
-              ? 'bg-blue-600 text-white'
-              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-          }`}
-        >
-          All ({alerts.length})
+    <div className="space-y-8">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold flex items-center">
+            <Bell className="mr-3 text-indigo-500" /> System Alerts
+        </h2>
+        <button onClick={fetchData} className="text-indigo-400 hover:text-indigo-300 flex items-center text-sm">
+            <RefreshCw size={14} className="mr-2" /> Refresh
         </button>
-        <button
-          onClick={() => setFilter('active')}
-          className={`px-4 py-2 rounded-lg transition-colors ${
-            filter === 'active'
-              ? 'bg-blue-600 text-white'
-              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-          }`}
-        >
-          Active ({alerts.filter(a => a.status === 'active' || a.status === 'acknowledged').length})
-        </button>
-        <button
-          onClick={() => setFilter('resolved')}
-          className={`px-4 py-2 rounded-lg transition-colors ${
-            filter === 'resolved'
-              ? 'bg-blue-600 text-white'
-              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-          }`}
-        >
-          Resolved ({alerts.filter(a => a.status === 'resolved').length})
-        </button>
+      </div>
+
+      <div className="flex space-x-4">
+          <div className="flex-1 bg-[#1a1d27] p-4 rounded-xl border border-[#2a2d3e] flex items-center justify-between">
+              <span className="text-slate-400 text-sm font-medium">Critical</span>
+              <span className="text-2xl font-bold text-red-500">{counts.critical}</span>
+          </div>
+          <div className="flex-1 bg-[#1a1d27] p-4 rounded-xl border border-[#2a2d3e] flex items-center justify-between">
+              <span className="text-slate-400 text-sm font-medium">Warning</span>
+              <span className="text-2xl font-bold text-amber-500">{counts.warning}</span>
+          </div>
+          <div className="flex-1 bg-[#1a1d27] p-4 rounded-xl border border-[#2a2d3e] flex items-center justify-between">
+              <span className="text-slate-400 text-sm font-medium">Info</span>
+              <span className="text-2xl font-bold text-blue-500">{counts.info}</span>
+          </div>
       </div>
 
       <div className="space-y-4">
-        {filteredAlerts.length === 0 ? (
-          <div className="bg-slate-900 rounded-lg p-8 text-center border border-slate-800">
-            <p className="text-slate-400">No alerts to display</p>
-          </div>
-        ) : (
-          filteredAlerts.map((alert) => (
-            <div
-              key={alert.id}
-              className={`rounded-lg p-6 border flex justify-between items-start ${getSeverityStyles(alert.severity)}`}
-            >
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h3 className="font-semibold text-lg">{alert.title}</h3>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusStyles(alert.status)}`}>
-                    {alert.status}
-                  </span>
-                </div>
-                <p className="text-sm opacity-90 mb-2">{alert.message}</p>
-                <p className="text-xs opacity-75">{alert.timestamp}</p>
+          {loading ? (
+              <div className="py-20 text-center"><Loader className="animate-spin text-indigo-500 mx-auto" size={32} /></div>
+          ) : alerts.length === 0 ? (
+              <div className="bg-[#1a1d27] border border-green-500/20 p-12 rounded-2xl text-center">
+                  <CheckCircle className="text-green-500 mx-auto mb-4" size={48} />
+                  <h3 className="text-xl font-bold text-slate-200">All Systems Operational</h3>
+                  <p className="text-slate-500 mt-1">No active alerts at this time.</p>
               </div>
-
-              <div className="flex gap-2 ml-4">
-                {alert.status === 'active' && (
-                  <button
-                    onClick={() => handleAlertAction(alert.id, 'acknowledge')}
-                    className="px-3 py-1 rounded bg-slate-800 hover:bg-slate-700 transition-colors text-xs font-medium"
-                  >
-                    Acknowledge
-                  </button>
-                )}
-                {alert.status !== 'resolved' && (
-                  <button
-                    onClick={() => handleAlertAction(alert.id, 'resolve')}
-                    className="px-3 py-1 rounded bg-green-600 hover:bg-green-700 transition-colors text-xs font-medium text-white"
-                  >
-                    Resolve
-                  </button>
-                )}
-              </div>
-            </div>
-          ))
-        )}
+          ) : (
+              alerts.map((alert, i) => (
+                  <div key={i} className={`bg-[#1a1d27] border-l-4 rounded-xl p-6 border-[#2a2d3e] shadow-lg flex items-start space-x-4 ${
+                      alert.severity === 'critical' ? 'border-l-red-500' : 
+                      alert.severity === 'warning' ? 'border-l-amber-500' : 
+                      'border-l-blue-500'
+                  }`}>
+                      <div className={`p-2 rounded-lg ${
+                          alert.severity === 'critical' ? 'bg-red-500/10 text-red-500' : 
+                          alert.severity === 'warning' ? 'bg-amber-500/10 text-amber-500' : 
+                          'bg-blue-500/10 text-blue-500'
+                      }`}>
+                          {alert.severity === 'critical' ? <AlertCircle size={24}/> : <AlertTriangle size={24}/>}
+                      </div>
+                      <div className="flex-1">
+                          <div className="flex justify-between items-start">
+                              <h4 className="font-bold text-slate-200">{alert.title}</h4>
+                              <span className="text-xs text-slate-500 font-mono">
+                                  {new Date(alert.timestamp).toLocaleTimeString()}
+                              </span>
+                          </div>
+                          <p className="text-slate-400 mt-1">{alert.message}</p>
+                      </div>
+                  </div>
+              ))
+          )}
       </div>
-    </AdminLayout>
+    </div>
   );
 };
 
