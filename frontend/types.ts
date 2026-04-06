@@ -3,6 +3,7 @@ export enum ExamType {
   OBJECTIVE = 'Objective',
   SHORT_ANSWER = 'Short Answer',
   ESSAY = 'Essay',
+  TRUE_FALSE = 'True/False',
 }
 
 export enum Difficulty {

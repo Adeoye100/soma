@@ -36,7 +36,7 @@ router.post('/generate',
   examGenerationValidation,
   examValidation.createExam,
   asyncHandler(async (req: Request, res: Response) => {
-    const { title, topics, description, type, difficulty, numQuestions, timeLimit, materials } = req.body;
+    const { title, topics, subject, description, type, difficulty, numQuestions, timeLimit, materials } = req.body;
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       res.status(401).json({ error: 'Unauthorized', message: 'Missing or invalid authorization header' });
@@ -49,12 +49,12 @@ router.post('/generate',
       return;
     }
 
+    const userSupabase = createUserSupabaseClient(authToken);
+    let examId: string | null = null;
+
     try {
       winston.info(`Generating exam with topics: ${topics} for user ${userId}`);
-      const examConfig = { type, difficulty, numQuestions };
-      const generatedQuestions = await codeBasedExamService.generateExam(examConfig, materials, topics);
-
-      const userSupabase = createUserSupabaseClient(authToken);
+      
       const examData = {
         title: title || topics.split(',').map((t: string) => t.trim()).slice(0, 3).join(', ') + (topics.split(',').length > 3 ? '...' : ''),
         description: description || `Exam covering ${topics.split(',').map((t: string) => t.trim()).length} topics`,
@@ -63,7 +63,7 @@ router.post('/generate',
         num_questions: numQuestions,
         time_limit: timeLimit,
         user_id: userId,
-        status: 'completed',
+        status: 'pending',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -75,28 +75,77 @@ router.post('/generate',
       if (examError) {
         throw new DatabaseError(`Failed to create exam: ${examError.message}`, { error: examError });
       }
-
+      
+      examId = exam.id;
       await cacheService.invalidateUserCache(exam.user_id);
 
-      const examSubject = topics.split(',')[0]?.trim() || 'General';
+      const examConfig = { 
+        subject: subject || topics.split(',')[0]?.trim() || 'General',
+        type, 
+        difficulty, 
+        numQuestions,
+        timeLimit
+      };
+
+      let generatedQuestions;
+      try {
+        generatedQuestions = await generateExam(examConfig, materials);
+      } catch (parseError: any) {
+        winston.error('[exam/generate] Parse failed:', parseError);
+        
+        await userSupabase.from('exams')
+          .update({ 
+            status: 'failed',
+            metadata: { 
+              error: parseError.message,
+              // rawResponsePreview is handled inside geminiService logging, but we can add more here if needed
+            }
+          })
+          .eq('id', examId);
+
+        return res.status(500).json({
+          error: 'Question generation failed',
+          detail: parseError.message,
+          hint: 'The AI could not generate questions from this material. Try a different file or check that the material has sufficient content.'
+        });
+      }
+
+      if (!generatedQuestions || generatedQuestions.length === 0) {
+        await userSupabase.from('exams').update({ status: 'failed' }).eq('id', examId);
+        return res.status(500).json({
+          error: 'No questions were generated',
+          hint: 'The study material may be too short or not contain enough content for exam generation.'
+        });
+      }
+
+      // Log what was generated for debugging
+      winston.info(
+        `[exam/generate] Generated ${generatedQuestions.length} questions. Sample Q1: ` +
+        JSON.stringify({
+          text:    generatedQuestions[0]?.question_text?.slice(0, 80),
+          options: generatedQuestions[0]?.options,
+          answer:  generatedQuestions[0]?.correct_answer
+        })
+      );
+
       const questionsData = generatedQuestions.map((question: any, index: number) => ({
         exam_id: exam.id,
         user_id: userId,
-        question_text: question.question || question.question_text,
-        question_type: 'OBJECTIVE',
+        question_text: question.question_text,
+        question_type: question.question_type || type || 'OBJECTIVE',
         options: question.options ?? [],
-        correct_answer: question.correctAnswer || question.correct_answer,
+        correct_answer: question.correct_answer,
         explanation: question.explanation || null,
         difficulty: question.difficulty || difficulty,
-        order_index: Number.isFinite(Number(question.order_index))
-          ? Math.max(0, Number(question.order_index))
+        order_index: typeof question.order_index === 'number'
+          ? Math.max(0, question.order_index)
           : index,
-        points: 10,
+        points: question.points || 10,
         topic: question.topic ?? 'General',
-        subject: question.subject || examSubject,
+        subject: question.subject || examConfig.subject,
         metadata: {
           topic: question.topic ?? 'General',
-          subject: question.subject || examSubject
+          subject: question.subject || examConfig.subject
         }
       }));
 
@@ -114,8 +163,11 @@ router.post('/generate',
         return;
       }
 
+      // Update exam status to completed
+      await userSupabase.from('exams').update({ status: 'completed' }).eq('id', exam.id);
+
       await cacheService.cacheExamData(exam.id, 'full', async () => ({
-        exam, questions: createdQuestions
+        exam: { ...exam, status: 'completed' }, questions: createdQuestions
       }), { ttl: 3600 });
 
       winston.info(`Successfully generated exam ${exam.id} with ${createdQuestions.length} questions`);
@@ -143,9 +195,13 @@ router.post('/generate',
           points: q.points
         }))
       });
+      return;
     } catch (error: any) {
       winston.error('Exam generation error:', error);
-      res.status(500).json({
+      if (examId) {
+        await userSupabase.from('exams').update({ status: 'failed' }).eq('id', examId);
+      }
+      return res.status(500).json({
         error: 'Exam generation failed',
         message: error.message || 'An error occurred while generating the exam'
       });
@@ -176,10 +232,10 @@ router.post('/submit',
 
     try {
       const result = await NewExamService.submitExam({ examId, answers, userId });
-      res.json({ message: 'Exam submitted successfully', result });
+      return res.json({ message: 'Exam submitted successfully', result });
     } catch (error: any) {
       winston.error('Exam submission error:', error);
-      res.status(500).json({ error: 'Exam submission failed', message: error.message });
+      return res.status(500).json({ error: 'Exam submission failed', message: error.message });
     }
   })
 );
@@ -230,10 +286,10 @@ router.post('/evaluate',
             }
 
             // AI evaluation for short-answer / essay
-            const evalQuestion = {
-              question: q.question_text || q.question,
-              options: q.options || undefined,
-              correctAnswer: q.correct_answer || q.correctAnswer,
+            const evalQuestion: any = {
+              question_text: q.question_text || q.question,
+              options: q.options || [],
+              correct_answer: q.correct_answer || q.correctAnswer,
               topic: q.topic || 'General'
             };
             const evaluation = await evaluateAnswer(evalQuestion, { answer: userAnswer });
@@ -297,10 +353,10 @@ router.post('/evaluate',
 
       // ─── MODE B: Single-question evaluation ───
       if (question && answer !== undefined) {
-        const evalQuestion = {
-          question,
-          options,
-          correctAnswer: correctAnswer || '',
+        const evalQuestion: any = {
+          question_text: question,
+          options: options || [],
+          correct_answer: correctAnswer || '',
           topic: topic || 'General'
         };
         const evaluation = await evaluateAnswer(evalQuestion, { answer });
@@ -350,7 +406,7 @@ router.get('/history',
     try {
       const { data, total } = await NewExamService.getExamHistory(userId, page, limit, subject, sortBy);
 
-      res.json({
+      return res.json({
         message: 'Exam history retrieved successfully',
         exams: data.map((r: any) => ({
           id: r.id,
@@ -369,7 +425,7 @@ router.get('/history',
       });
     } catch (error: any) {
       winston.error('Get exam history error:', error);
-      res.status(500).json({ error: 'Failed to retrieve exam history', message: error.message });
+      return res.status(500).json({ error: 'Failed to retrieve exam history', message: error.message });
     }
   })
 );
@@ -407,14 +463,13 @@ router.get('/:id', asyncHandler(async (req: AuthenticatedRequest, res: Response)
       { ttl: 1800 }
     );
 
-    res.json({ message: 'Exam retrieved successfully', ...examData });
+    return res.json({ message: 'Exam retrieved successfully', ...examData });
   } catch (error: any) {
     if (error.message === 'Exam not found') {
-      res.status(404).json({ error: 'Exam not found', message: 'The requested exam could not be found' });
-      return;
+      return res.status(404).json({ error: 'Exam not found', message: 'The requested exam could not be found' });
     }
     winston.error('Get exam error:', error);
-    res.status(500).json({ error: 'Failed to retrieve exam', message: 'An error occurred while retrieving the exam' });
+    return res.status(500).json({ error: 'Failed to retrieve exam', message: 'An error occurred while retrieving the exam' });
   }
 }));
 
@@ -434,7 +489,7 @@ router.get('/', asyncHandler(async (req: AuthenticatedRequest, res: Response) =>
       return;
     }
     const { data: exams, total } = await ExamService.findByUserId(userId, page, limit);
-    res.json({
+    return res.json({
       message: 'Exams retrieved successfully',
       exams: exams.map(exam => ({
         id: exam.id, title: exam.title, description: exam.description,
@@ -445,7 +500,7 @@ router.get('/', asyncHandler(async (req: AuthenticatedRequest, res: Response) =>
     });
   } catch (error: any) {
     winston.error('Get user exams error:', error);
-    res.status(500).json({ error: 'Failed to retrieve exams', message: 'An error occurred while retrieving exams' });
+    return res.status(500).json({ error: 'Failed to retrieve exams', message: 'An error occurred while retrieving exams' });
   }
 }));
 
@@ -478,13 +533,13 @@ router.post('/:id/answer',
       };
 
       const evaluation = await codeBasedEvaluationService.evaluateAnswer(codeQuestion, { answer });
-      res.json({
+      return res.json({
         message: 'Answer evaluated successfully',
         evaluation: { score: evaluation.score, feedback: evaluation.feedback, isCorrect: evaluation.isCorrect, correctAnswer: question.correct_answer }
       });
     } catch (error: any) {
       winston.error('Answer evaluation error:', error);
-      res.status(500).json({ error: 'Answer evaluation failed', message: 'An error occurred while evaluating the answer' });
+      return res.status(500).json({ error: 'Answer evaluation failed', message: 'An error occurred while evaluating the answer' });
     }
   })
 );
@@ -532,13 +587,13 @@ router.post('/:id/complete',
 
       winston.info(`User completed exam ${examId} with score: ${finalScore}%`);
 
-      res.json({
+      return res.json({
         message: 'Exam completed successfully',
         results: { score: finalScore, percentage, totalQuestions: answers.length, correctAnswers, evaluations }
       });
     } catch (error: any) {
       winston.error('Exam completion error:', error);
-      res.status(500).json({ error: 'Exam completion failed', message: 'An error occurred while completing the exam' });
+      return res.status(500).json({ error: 'Exam completion failed', message: 'An error occurred while completing the exam' });
     }
   })
 );
@@ -560,10 +615,10 @@ router.delete('/:id', asyncHandler(async (req: AuthenticatedRequest, res: Respon
     await cacheService.invalidateExamCache(id);
     await cacheService.invalidateUserCache(exam.user_id);
 
-    res.json({ message: 'Exam deleted successfully' });
+    return res.json({ message: 'Exam deleted successfully' });
   } catch (error: any) {
     winston.error('Exam deletion error:', error);
-    res.status(500).json({ error: 'Exam deletion failed', message: 'An error occurred while deleting the exam' });
+    return res.status(500).json({ error: 'Exam deletion failed', message: 'An error occurred while deleting the exam' });
   }
 }));
 

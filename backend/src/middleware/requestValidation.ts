@@ -360,8 +360,8 @@ export const examGenerationValidation = createValidationMiddleware({
       field: 'type',
       required: true,
       custom: (value) => ({
-        valid: ['OBJECTIVE', 'SHORT_ANSWER', 'ESSAY'].includes(value),
-        message: 'Type must be OBJECTIVE, SHORT_ANSWER, or ESSAY'
+        valid: ['OBJECTIVE', 'SHORT_ANSWER', 'ESSAY', 'TRUE_FALSE'].includes(value),
+        message: 'Type must be OBJECTIVE, SHORT_ANSWER, ESSAY, or TRUE_FALSE'
       })
     },
     {

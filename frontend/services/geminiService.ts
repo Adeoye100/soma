@@ -42,6 +42,7 @@ export const generateExam = async (config: ExamConfig, materials: Material[]): P
   const payload = {
     title: config.title?.trim(),
     topics: config.topics,
+    subject: config.topics.split(',')[0]?.trim() || '', // Use first topic as subject
     description: config.description || '',
     type: config.type.toUpperCase().replace(' ', '_'),
     difficulty: difficultyMap[config.difficulty] || 'medium',
