@@ -17,6 +17,42 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { sanitizeForTable, QUESTIONS_COLUMNS, EXAMS_COLUMNS, validateQuestionRow } from '@/utils/dbUtils';
 import winston from 'winston';
 
+function handleSupabaseError(
+  error: any,
+  context: string
+): never {
+  const msg = error?.message || String(error);
+
+  if (msg.includes('check constraint')) {
+    const constraintMatch = msg.match(/"([^"]+_check)"/);
+    const constraint = constraintMatch?.[1] ?? 'unknown';
+
+    throw new Error(
+      `${context}: Database constraint violation ` +
+      `on constraint "${constraint}". ` +
+      `Check that all field values match allowed values. ` +
+      `Original: ${msg}`
+    );
+  }
+
+  if (msg.includes('violates row-level security')) {
+    throw new Error(
+      `${context}: RLS policy rejected the operation. ` +
+      `Ensure user_id matches the authenticated user.`
+    );
+  }
+
+  if (msg.includes('not found in the schema cache')) {
+    const colMatch = msg.match(/'([^']+)' column/);
+    throw new Error(
+      `${context}: Column "${colMatch?.[1]}" does not exist. ` +
+      `Check the insert payload against the table schema.`
+    );
+  }
+
+  throw new Error(`${context}: ${msg}`);
+}
+
 const router = Router();
 
 function createUserSupabaseClient(authToken: string): SupabaseClient {
@@ -63,7 +99,7 @@ router.post('/generate',
         num_questions: numQuestions,
         time_limit: timeLimit,
         user_id: userId,
-        status: 'pending',
+        status: 'draft',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -73,10 +109,20 @@ router.post('/generate',
         .from('exams').insert([safeExamData]).select().single();
 
       if (examError) {
-        throw new DatabaseError(`Failed to create exam: ${examError.message}`, { error: examError });
+        handleSupabaseError(examError, 'createExam');
       }
       
       examId = exam.id;
+
+      // Update status to 'processing' before AI generation starts
+      const { error: processingError } = await userSupabase
+        .from('exams')
+        .update({ status: 'processing' })
+        .eq('id', examId);
+      
+      if (processingError) {
+        handleSupabaseError(processingError, 'updateStatusProcessing');
+      }
       await cacheService.invalidateUserCache(exam.user_id);
 
       const examConfig = { 
@@ -93,15 +139,18 @@ router.post('/generate',
       } catch (parseError: any) {
         winston.error('[exam/generate] Parse failed:', parseError);
         
-        await userSupabase.from('exams')
+        const { error: updateError } = await userSupabase.from('exams')
           .update({ 
             status: 'failed',
             metadata: { 
               error: parseError.message,
-              // rawResponsePreview is handled inside geminiService logging, but we can add more here if needed
             }
           })
           .eq('id', examId);
+        
+        if (updateError) {
+          handleSupabaseError(updateError, 'updateStatusFailedGeneration');
+        }
 
         return res.status(500).json({
           error: 'Question generation failed',
@@ -111,7 +160,8 @@ router.post('/generate',
       }
 
       if (!generatedQuestions || generatedQuestions.length === 0) {
-        await userSupabase.from('exams').update({ status: 'failed' }).eq('id', examId);
+        const { error: noQuestionsError } = await userSupabase.from('exams').update({ status: 'failed' }).eq('id', examId);
+        if (noQuestionsError) handleSupabaseError(noQuestionsError, 'updateStatusFailedNoQuestions');
         return res.status(500).json({
           error: 'No questions were generated',
           hint: 'The study material may be too short or not contain enough content for exam generation.'
@@ -158,13 +208,16 @@ router.post('/generate',
 
       if (questionsError) {
         winston.error('Failed to create questions:', questionsError);
-        await userSupabase.from('exams').update({ status: 'failed' }).eq('id', exam.id);
-        res.status(500).json({ error: 'Failed to save questions', message: questionsError.message });
-        return;
+        const { error: updateStatusError } = await userSupabase.from('exams').update({ status: 'failed' }).eq('id', exam.id);
+        if (updateStatusError) handleSupabaseError(updateStatusError, 'updateStatusFailedSaveQuestions');
+        handleSupabaseError(questionsError, 'insertQuestions');
       }
 
       // Update exam status to completed
-      await userSupabase.from('exams').update({ status: 'completed' }).eq('id', exam.id);
+      const { error: completedError } = await userSupabase.from('exams').update({ status: 'completed' }).eq('id', exam.id);
+      if (completedError) {
+        handleSupabaseError(completedError, 'updateStatusCompleted');
+      }
 
       await cacheService.cacheExamData(exam.id, 'full', async () => ({
         exam: { ...exam, status: 'completed' }, questions: createdQuestions
@@ -199,7 +252,10 @@ router.post('/generate',
     } catch (error: any) {
       winston.error('Exam generation error:', error);
       if (examId) {
-        await userSupabase.from('exams').update({ status: 'failed' }).eq('id', examId);
+        const { error: updateError } = await userSupabase.from('exams').update({ status: 'failed' }).eq('id', examId);
+        if (updateError) {
+          winston.error('Failed to update status to failed in catch block:', updateError);
+        }
       }
       return res.status(500).json({
         error: 'Exam generation failed',
@@ -329,14 +385,19 @@ router.post('/evaluate',
 
         if (sessionError) {
           winston.error('[evaluate] Session save error:', sessionError);
+          handleSupabaseError(sessionError, 'saveExamSession');
         }
 
         // Update exam status
-        await userSupabase
+        const { error: updateStatusError } = await userSupabase
           .from('exams')
           .update({ status: 'completed' })
           .eq('id', examId)
           .eq('user_id', userId);
+
+        if (updateStatusError) {
+          handleSupabaseError(updateStatusError, 'updateExamStatusCompleted');
+        }
 
         return res.status(200).json({
           success: true,
