@@ -371,7 +371,7 @@ router.post('/evaluate',
           total_questions: questions.length,
           correct_answers: correctCount,
           score: totalScore,
-          percentage: scorePercent,
+          score_percent: scorePercent,
           answers: answers,
           status: 'graded',
           submitted_at: new Date().toISOString()
@@ -385,6 +385,17 @@ router.post('/evaluate',
 
         if (sessionError) {
           winston.error('[evaluate] Session save error:', sessionError);
+          
+          // Check if it's a schema cache issue or missing column
+          if (sessionError.message?.includes("column \"score\" of relation \"exam_sessions\" does not exist") || 
+              sessionError.message?.includes("Could not find the 'score' column")) {
+            return res.status(500).json({
+              error: 'Database schema mismatch',
+              message: 'The evaluation could not be saved because the "score" column is missing from "exam_sessions". Please run the latest migrations or refresh the PostgREST cache.',
+              details: sessionError
+            });
+          }
+
           handleSupabaseError(sessionError, 'saveExamSession');
         }
 
@@ -432,9 +443,15 @@ router.post('/evaluate',
 
     } catch (err: any) {
       winston.error('[evaluate] Error:', err);
-      return res.status(500).json({
-        error: 'Evaluation failed',
-        message: err.message || 'An error occurred during evaluation'
+      
+      const statusCode = err.status || 500;
+      const errorMessage = err.message || 'An error occurred during evaluation';
+      const errorTitle = err.error || 'Evaluation failed';
+
+      return res.status(statusCode).json({
+        error: errorTitle,
+        message: errorMessage,
+        details: process.env.NODE_ENV === 'development' ? err : undefined
       });
     }
   })

@@ -143,8 +143,8 @@ export function AcademicPerformance() {
           </Badge>
         </div>
 
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="h-[300px] min-h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%" minHeight={300}>
             <BarChart data={subjectPerformance} barGap={8}>
               <CartesianGrid
                 strokeDasharray="3 3"
@@ -208,8 +208,8 @@ export function AcademicPerformance() {
             </div>
           </div>
 
-          <div className="h-[250px]">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-[250px] min-h-[250px] w-full">
+            <ResponsiveContainer width="100%" height="100%" minHeight={250}>
               <AreaChart data={scoreDistribution}>
                 <defs>
                   <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
@@ -290,8 +290,8 @@ export function AcademicPerformance() {
             </Tabs>
           </div>
 
-          <div className="h-[250px]">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-[250px] min-h-[250px] w-full">
+            <ResponsiveContainer width="100%" height="100%" minHeight={250}>
               <LineChart data={performanceTrends as any[]}>
                 <CartesianGrid
                   strokeDasharray="3 3"

@@ -166,7 +166,7 @@ const DocumentConverter: React.FC<DocumentConverterProps> = ({
         type="button"
         onClick={handleConvert}
         disabled={!selectedFile || isConverting}
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors active:scale-95 active:shadow-lg duration-300"
+        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors active:scale-95 active:shadow-lg duration-300"
       >
         {isConverting ? (
           <span className="flex items-center justify-center">

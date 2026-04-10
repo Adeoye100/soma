@@ -45,9 +45,24 @@ router.post('/login', asyncHandler(async (req: Request, res: Response) => {
 
     const authResponse = await authService.login({ email, password });
 
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days (matching Supabase default)
+      path: '/'
+    };
+
+    res.cookie('refreshToken', authResponse.session.refresh_token, cookieOptions);
+
+    const { refresh_token, ...sessionWithoutRefresh } = authResponse.session;
+
     res.status(200).json({
       success: true,
-      data: authResponse,
+      data: {
+        user: authResponse.user,
+        session: sessionWithoutRefresh
+      },
       message: 'Login successful'
     });
 
@@ -151,9 +166,24 @@ router.post('/signup', asyncHandler(async (req: Request, res: Response) => {
       return;
     }
 
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: '/'
+    };
+
+    res.cookie('refreshToken', authResponse.session.refresh_token, cookieOptions);
+
+    const { refresh_token, ...sessionWithoutRefresh } = authResponse.session;
+
     res.status(201).json({
       success: true,
-      data: authResponse,
+      data: {
+        user: authResponse.user,
+        session: sessionWithoutRefresh
+      },
       message: 'Account created successfully'
     });
 
@@ -188,10 +218,10 @@ router.post('/signup', asyncHandler(async (req: Request, res: Response) => {
  */
 router.post('/refresh', asyncHandler(async (req: Request, res: Response) => {
   try {
-    const { refreshToken } = req.body;
+    const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
 
     if (!refreshToken) {
-      res.status(400).json({
+      res.status(401).json({
         error: 'Validation Error',
         message: 'Refresh token is required',
         code: 'MISSING_REFRESH_TOKEN'
@@ -294,6 +324,13 @@ router.post('/logout', asyncHandler(async (req: Request, res: Response) => {
       const token = authHeader.slice(7);
       await authService.logout(token);
     }
+
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+      path: '/'
+    });
 
     res.status(200).json({
       success: true,

@@ -308,7 +308,8 @@ export class ApiClient {
       const options: RequestInit = {
         method: config.method || 'GET',
         headers: { ...this.defaultHeaders, ...config.headers },
-        signal: controller.signal
+        signal: controller.signal,
+        credentials: 'include'
       };
 
       if (config.body && options.method !== 'GET') {

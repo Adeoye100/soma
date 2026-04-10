@@ -1,4 +1,5 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -172,6 +173,9 @@ if (config.helmetEnabled) {
 
 // CORS Configuration
 app.use(cors(corsOptions));
+
+// Cookie Parser middleware
+app.use(cookieParser());
 
 // Compression middleware
 app.use(compression());

@@ -40,7 +40,6 @@ export interface AuthState {
   isAuthenticated: boolean;
   user: AuthResponse['user'] | null;
   token: string | null;
-  refreshToken: string | null;
   isLoading: boolean;
   error: string | null;
 }
@@ -54,7 +53,6 @@ export class AuthService {
     isAuthenticated: false,
     user: null,
     token: null,
-    refreshToken: null,
     isLoading: false,
     error: null
   };
@@ -104,7 +102,6 @@ export class AuthService {
   private initializeAuth(): void {
     try {
       const token = this.getStoredToken();
-      const refreshToken = this.getStoredRefreshToken();
       const user = this.getStoredUser();
 
       if (token && user) {
@@ -112,7 +109,6 @@ export class AuthService {
           isAuthenticated: true,
           user,
           token,
-          refreshToken,
           isLoading: false,
           error: null
         });
@@ -145,7 +141,6 @@ export class AuthService {
         isAuthenticated: true,
         user: authResponse.user,
         token: authResponse.session.access_token,
-        refreshToken: authResponse.session.refresh_token,
         isLoading: false,
         error: null
       });
@@ -209,7 +204,6 @@ export class AuthService {
           isAuthenticated: true,
           user: result.data.user,
           token: result.data.session.access_token,
-          refreshToken: result.data.session.refresh_token,
           isLoading: false,
           error: null
         });
@@ -240,14 +234,8 @@ export class AuthService {
     this.updateState({ isLoading: true, error: null });
 
     try {
-      // Call logout endpoint if authenticated
-      if (this.authState.token) {
-        await apiClient.post(CONFIG.API.endpoints.auth.logout, {}, {
-          headers: {
-            Authorization: `Bearer ${this.authState.token}`
-          }
-        });
-      }
+      // Call logout endpoint
+      await apiClient.post(CONFIG.API.endpoints.auth.logout, {});
     } catch (error) {
       // Continue with logout even if API call fails
       console.warn('Logout API call failed:', error);
@@ -258,7 +246,6 @@ export class AuthService {
         isAuthenticated: false,
         user: null,
         token: null,
-        refreshToken: null,
         isLoading: false,
         error: null
       });
@@ -314,14 +301,9 @@ export class AuthService {
    * Refresh authentication token
    */
   async refreshToken(): Promise<{ success: boolean; token?: string; error?: AuthError }> {
-    if (!this.authState.refreshToken) {
-      return { success: false, error: { code: 'NO_REFRESH_TOKEN', message: 'No refresh token available' } };
-    }
-
     try {
       const result = await apiClient.post<{ access_token: string; expires_at: number }>(
-        CONFIG.API.endpoints.auth.refresh,
-        { refreshToken: this.authState.refreshToken }
+        CONFIG.API.endpoints.auth.refresh
       );
 
       if (!result.success || !result.data) {
@@ -374,6 +356,10 @@ export class AuthService {
       localStorage.removeItem(CONFIG.AUTH.tokenKey);
       localStorage.removeItem(CONFIG.AUTH.refreshTokenKey);
       localStorage.removeItem('user');
+      
+      sessionStorage.removeItem(CONFIG.AUTH.tokenKey);
+      sessionStorage.removeItem(CONFIG.AUTH.refreshTokenKey);
+      sessionStorage.removeItem('user');
     } catch (error) {
       console.warn('Failed to clear auth data from storage:', error);
     }
@@ -385,7 +371,6 @@ export class AuthService {
   private storeAuthData(authResponse: AuthResponse): void {
     try {
       this.storeToken(authResponse.session.access_token);
-      this.storeRefreshToken(authResponse.session.refresh_token);
       this.storeUser(authResponse.user);
     } catch (error) {
       console.error('Failed to store auth data:', error);
