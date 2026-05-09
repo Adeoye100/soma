@@ -67,7 +67,7 @@ router.post('/upload',
 
       winston.info(`Document uploaded: ${result.documentId} by user ${userId}`);
 
-      res.status(201).json({
+      return res.status(201).json({
         message: 'Document uploaded successfully',
         document: {
           documentId: result.documentId,
@@ -78,7 +78,7 @@ router.post('/upload',
       });
     } catch (error: any) {
       winston.error('Document upload error:', error);
-      res.status(500).json({ error: 'Upload failed', message: error.message });
+      return res.status(500).json({ error: 'Upload failed', message: error.message });
     }
   })
 );
@@ -111,7 +111,16 @@ router.post('/extract-text',
         file.mimetype
       );
 
-      res.json({
+      // Validate extracted text
+      if (!text || text.trim().length < 50) {
+        return res.status(400).json({
+          error: 'File contains insufficient text',
+          detail: 'The file must contain at least 50 characters of text.',
+          hint: 'Ensure the file is not scanned as an image-only PDF.'
+        });
+      }
+
+      return res.json({
         message: 'Text extracted successfully',
         filename: file.originalname,
         mimeType: file.mimetype,
@@ -120,7 +129,20 @@ router.post('/extract-text',
       });
     } catch (error: any) {
       winston.error(`Text extraction error for ${file.originalname}:`, error);
-      res.status(500).json({ error: 'Extraction failed', message: error.message });
+      
+      // Determine if it's an iLovePDF configuration error
+      if (error.message.includes('iLovePDF API keys not configured')) {
+        return res.status(503).json({
+          error: 'File processing service unavailable',
+          hint: 'iLovePDF keys not configured. Admin must configure iLovePDF service.'
+        });
+      }
+
+      return res.status(502).json({ 
+        error: 'File processing failed', 
+        detail: error.message,
+        hint: 'The file may be corrupted, scanned as image, or in an unsupported format.'
+      });
     }
   })
 );
@@ -147,7 +169,7 @@ router.get('/',
     try {
       const { data, total } = await DocumentService.getDocumentsByUser(userId, page, limit);
 
-      res.json({
+      return res.json({
         message: 'Documents retrieved successfully',
         documents: data.map(d => ({
           id: d.id,
@@ -162,7 +184,7 @@ router.get('/',
       });
     } catch (error: any) {
       winston.error('Get documents error:', error);
-      res.status(500).json({ error: 'Failed to retrieve documents', message: error.message });
+      return res.status(500).json({ error: 'Failed to retrieve documents', message: error.message });
     }
   })
 );
@@ -184,10 +206,10 @@ router.get('/:id/content',
 
     try {
       const content = await DocumentService.getDocumentContent(id!, userId);
-      res.json({ message: 'Content retrieved', content: content.substring(0, 10000) });
+      return res.json({ message: 'Content retrieved', content: content.substring(0, 10000) });
     } catch (error: any) {
       winston.error('Get document content error:', error);
-      res.status(500).json({ error: 'Failed to get content', message: error.message });
+      return res.status(500).json({ error: 'Failed to get content', message: error.message });
     }
   })
 );

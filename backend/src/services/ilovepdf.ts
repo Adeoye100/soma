@@ -17,11 +17,20 @@ interface TaskResponse {
 export class ILovePDFService {
 
   private static async getToken(): Promise<string> {
-    const res = await axios.post(`${BASE_URL}/auth`, {
-      public_key: PUBLIC_KEY,
-      secret_key: SECRET_KEY,
-    });
-    return res.data.token;
+    try {
+      const res = await axios.post(`${BASE_URL}/auth`, {
+        public_key: PUBLIC_KEY,
+        secret_key: SECRET_KEY,
+      }, {
+        timeout: 10000 // 10s timeout for auth
+      });
+      return res.data.token;
+    } catch (err: any) {
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        throw new Error('iLovePDF authentication failed. Please check ILOVEPDF_PUBLIC_KEY and ILOVEPDF_SECRET_KEY in .env');
+      }
+      throw err;
+    }
   }
 
   private static async startTask(
@@ -62,22 +71,33 @@ export class ILovePDFService {
     serverFilename: string,
     originalName: string
   ): Promise<void> {
-    await axios.post(
-      `https://${server}/v1/process`,
-      {
-        task,
-        tool,
-        files: [
-          {
-            server_filename: serverFilename,
-            filename: originalName,
-          },
-        ],
-      },
-      {
-        headers: { Authorization: `Bearer ${token}` },
+    try {
+      await axios.post(
+        `https://${server}/v1/process`,
+        {
+          task,
+          tool,
+          files: [
+            {
+              server_filename: serverFilename,
+              filename: originalName,
+            },
+          ],
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 60000 // 60s timeout for processing
+        }
+      );
+    } catch (err: any) {
+      if (err.code === 'ECONNABORTED' || err.message.includes('timeout')) {
+        throw new Error('Processing timeout. The file may be too large or complex.');
       }
-    );
+      if (err.response?.status === 400) {
+        throw new Error('Request failed with status code 400. File format may be incompatible or corrupted.');
+      }
+      throw err;
+    }
   }
 
   private static async downloadResult(
