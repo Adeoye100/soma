@@ -1,9 +1,41 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { authenticateUser } from '../middleware/auth';
 import { enforceApiQuota } from '../middleware/apiQuotaMiddleware';
 import { analyzeFileForProcessing } from '../services/fileProcessingService';
 import { supabase } from '../lib/supabase';
 import { File } from 'buffer';
+import { compressPDF } from '../services/compressionService';
+
+interface UploadedFile {
+  data: Buffer;
+  name: string;
+  mimetype: string;
+  size: number;
+}
+
+async function extractTextLocally(buffer: Buffer): Promise<string> {
+  return buffer.toString('utf-8');
+}
+
+async function processViaILovePDF(buffer: Buffer, filename: string, userId: string): Promise<string> {
+  // Placeholder: integrate with iLovePDF API
+  // For now, return mock extracted text
+  return 'Mock extracted text from iLovePDF';
+}
+
+function buildExamPrompt(extractedText: string, config: any): string {
+  return `Generate exam questions from: ${extractedText}`;
+}
+
+async function generateExamQuestions(prompt: string): Promise<string> {
+  // Placeholder: integrate with Gemini API
+  return 'Mock raw text from Gemini';
+}
+
+function parseGeminiResponse(rawText: string, config: any): any[] {
+  // Placeholder: parse response
+  return [{ question_text: 'Mock question', correct_answer: 'A' }];
+}
 
 export const examRouter = Router();
 
