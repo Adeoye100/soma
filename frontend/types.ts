@@ -81,3 +81,4 @@ export interface PerformanceInsight {
   topic?: string;
   metric?: number;
 }
+
