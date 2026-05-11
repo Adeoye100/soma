@@ -11,24 +11,7 @@ import ResetPasswordForm from './components/ResetPasswordForm';
 import AuthCallback from './pages/auth/callback';
 import { AuthProvider } from './context/AuthContext';
 import { useSessionHeartbeat } from './src/hooks/useSessionHeartbeat';
-
-// Admin routes and components
-import AdminProtectedRoute from './src/views/admin/AdminProtectedRoute';
-import AdminLayout from './src/views/admin/components/AdminLayout';
-import AdminDashboard from './src/views/admin/pages/AdminDashboard';
-import SystemHealth from './src/views/admin/pages/SystemHealth';
-import Monitoring from './src/views/admin/pages/Monitoring';
-import Automation from './src/views/admin/pages/Automation';
-import Queues from './src/views/admin/pages/Queues';
-import Configuration from './src/views/admin/pages/Configuration';
-import Alerts from './src/views/admin/pages/Alerts';
-import SystemInfo from './src/views/admin/pages/SystemInfo';
-import FeedbackAdmin from './src/views/admin/pages/FeedbackAdmin';
 import FeedbackForm from './src/components/FeedbackForm';
-
-// Check if we're in development mode
-const isDev = import.meta.env.DEV;
-// Removed SignUpScreen import - now handled by LoginScreen component
 
 const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -158,20 +141,6 @@ const App: React.FC = () => {
                 }
               />
               <Route path="/app" element={<Navigate to="/dashboard" replace />} />
-            </Route>
-
-            <Route element={<AdminProtectedRoute />}>
-              <Route element={<AdminLayout />}>
-                <Route index path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/system-health" element={<SystemHealth />} />
-                <Route path="/admin/monitoring" element={<Monitoring />} />
-                <Route path="/admin/automation" element={<Automation />} />
-                <Route path="/admin/queues" element={<Queues />} />
-                <Route path="/admin/configuration" element={<Configuration />} />
-                <Route path="/admin/alerts" element={<Alerts />} />
-                <Route path="/admin/system-info" element={<SystemInfo />} />
-                <Route path="/admin/feedback" element={<FeedbackAdmin />} />
-              </Route>
             </Route>
           </Routes>
         </BrowserRouter>

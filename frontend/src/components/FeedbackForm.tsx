@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MessageSquare, X, Send, AlertCircle, CheckCircle } from 'lucide-react';
+import { MessageSquare, X, Send, AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
 import { submitFeedback } from '../services/admin/adminApiService';
 
 export const FeedbackForm: React.FC = () => {
