@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -28,8 +28,6 @@ import healthRoutes from '@/routes/health';
 import automationRoutes from '@/routes/automation';
 import fileUploadRoutes from '@/routes/fileUpload';
 import documentRoutes from '@/routes/documents';
-import leaderboardRoutes from '@/routes/leaderboard';
-import userRoutes from '@/routes/user';
 import feedbackRoutes from '@/routes/feedback';
 
 // Import automation framework
@@ -45,6 +43,31 @@ const app = express();
 if (config.nodeEnv === 'production') {
   app.set('trust proxy', 1);
 }
+
+// CRITICAL: CORS must be BEFORE routes
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:3000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization',
+    'X-Requested-With'
+  ],
+  exposedHeaders: [
+    'X-RateLimit-Limit',
+    'X-RateLimit-Remaining',
+    'X-RateLimit-Reset'
+  ]
+}));
+
+// Body parsers AFTER CORS
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Track whether Redis unavailable warning was already logged
 let redisUnavailableLogged = false;
@@ -169,44 +192,6 @@ if (config.helmetEnabled) {
   }));
 }
 
-// CRITICAL: CORS must be BEFORE routes
-app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'http://localhost:3000'
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type', 
-    'Authorization',
-    'X-Requested-With'
-  ],
-  exposedHeaders: [
-    'X-RateLimit-Limit',
-    'X-RateLimit-Remaining',
-    'X-RateLimit-Reset'
-  ]
-}));
-
-// Body parsers AFTER CORS
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// Cookie Parser middleware
-app.use(cookieParser());
-
-// Compression middleware
-app.use(compression());
-
-// Request logging
-app.use(morgan('combined', {
-  stream: {
-    write: (message: string) => logger.info(message.trim())
-  }
-}));
-
 // Health check route (no authentication required)
 app.use('/api/health', healthRoutes);
 
@@ -227,8 +212,6 @@ app.use('/api/result', authMiddleware, resultRoutes);
 app.use('/api/automation', automationRoutes);
 app.use('/api/files', authMiddleware, fileUploadRoutes);
 app.use('/api/documents', authMiddleware, documentRoutes);
-app.use('/api/leaderboard', leaderboardRoutes);
-app.use('/api/user', authMiddleware, userRoutes);
 app.use('/api/feedback', feedbackRoutes);
 
 // Serve static files in production
@@ -242,20 +225,17 @@ if (config.nodeEnv === 'production') {
 }
 
 // Global error handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('[ERROR]', err);
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error('[ERROR]', err)
   
   // Don't leak stack traces in production
-  const isDev = process.env.NODE_ENV === 'development';
+  const isDev = config.nodeEnv === 'development'
   
   res.status(err.status || 500).json({
     error: err.message || 'Internal server error',
     ...(isDev && { stack: err.stack })
-  });
-});
-
-// Error handling middleware (must be last)
-app.use(errorHandler);
+  })
+})
 
 // 404 handler
 app.use('*', (req, res) => {

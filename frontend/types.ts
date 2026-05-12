@@ -1,0 +1,84 @@
+
+export enum ExamType {
+  OBJECTIVE = 'Objective',
+  SHORT_ANSWER = 'Short Answer',
+  ESSAY = 'Essay',
+  TRUE_FALSE = 'True/False',
+}
+
+export enum Difficulty {
+  BEGINNER = 'Beginner',
+  INTERMEDIATE = 'Intermediate',
+  ADVANCED = 'Advanced',
+}
+
+export enum TimeIntensity {
+  RELAXED = 'Relaxed', // 3 mins per question
+  MODERATE = 'Moderate', // 1.5 mins per question
+  CHALLENGING = 'Challenging', // 45 secs per question
+}
+
+export interface ExamConfig {
+  title: string;
+  topics: string;
+  description?: string;
+  type: ExamType;
+  difficulty: Difficulty;
+  intensity: TimeIntensity;
+  numQuestions: number;
+}
+
+export interface Material {
+  name: string;
+  content: string; // plain text extracted from file
+  mimeType: string;
+}
+
+export interface Question {
+  id?: string;
+  examId?: string;
+  question: string;
+  options?: string[];
+  correctAnswer: string;
+  topic: string;
+}
+
+export type UserAnswer = string;
+
+export interface Evaluation {
+  score: number;
+  feedback: string;
+  isCorrect: boolean;
+  topic: string;
+}
+
+export interface ExamResult {
+  id?: string;
+  examId?: string;
+  questions: Question[];
+  userAnswers: UserAnswer[];
+  evaluations: Evaluation[];
+  timeTaken: number;
+  config: ExamConfig;
+  score: number;
+  totalQuestions: number;
+  date?: string;
+}
+
+export interface WeeklyPerformance {
+  weekStart: string;
+  weekEnd: string;
+  examsCompleted: number;
+  averageScore: number;
+  totalTimeSpent: number;
+  topicBreakdown: { [key: string]: number };
+  improvementTrend: number;
+}
+
+export interface PerformanceInsight {
+  type: 'improvement' | 'strength' | 'weakness' | 'recommendation';
+  message: string;
+  topic?: string;
+  metric?: number;
+}
+

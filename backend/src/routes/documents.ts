@@ -1,15 +1,13 @@
 import { Router, Request, Response } from 'express';
 import { query, body } from 'express-validator';
 import multer from 'multer';
+import pdfParse from 'pdf-parse';
 import { asyncHandler } from '@/middleware/errorHandler';
-import { AuthenticatedRequest } from '@/middleware/auth';
+import { AuthenticatedRequest, authMiddleware } from '@/middleware/auth';
 import { checkValidationResult } from '@/middleware/requestValidator';
 import { DocumentService } from '@/services/documentService';
 import { config } from '@/config';
 import winston from 'winston';
-
-import pdfParse from 'pdf-parse';
-const pdf = pdfParse;
 
 const router = Router();
 
@@ -26,7 +24,7 @@ const upload = multer({
     if (allowed.includes(ext ?? '')) {
       cb(null, true)
     } else {
-      cb(new Error(`File type .${ext} not supported`) as any)
+      cb(new Error(`File type .${ext} not supported`))
     }
   }
 })
@@ -37,6 +35,7 @@ const upload = multer({
  * @access  Private
  */
 router.post('/upload',
+  authMiddleware,
   upload.single('file'),
   asyncHandler(async (req: Request, res: Response) => {
     const file = (req as any).file
@@ -85,6 +84,7 @@ router.post('/upload',
  */
 router.post(
   '/extract-text',
+  authMiddleware,
   upload.single('file'),
   async (req: Request, res: Response) => {
     try {
@@ -103,7 +103,7 @@ router.post(
         try {
           console.log('[documents] Local PDF extraction starting')
           
-          const pdfData = await pdf(file.buffer, {
+          const pdfData = await pdfParse(file.buffer, {
             max: 100  // Limit to first 100 pages
           })
           
@@ -163,7 +163,6 @@ router.post(
         preview: extractedText.slice(0, 200) + '...',
         extractedText
       })
-      return;
 
     } catch (err: any) {
       console.error('[documents/extract-text] Error:', err)
@@ -171,11 +170,9 @@ router.post(
         error: 'File processing failed',
         detail: err.message
       })
-      return;
     }
   }
-)
-
+);
 /**
  * @route   GET /api/documents
  * @desc    List user's documents

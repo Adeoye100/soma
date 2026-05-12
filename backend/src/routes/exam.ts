@@ -68,14 +68,16 @@ function createUserSupabaseClient(authToken: string): SupabaseClient {
  * @access  Private
  */
 router.post('/generate',
-  aiGenerationThrottler,
+  authMiddleware,
   [
     body('documentId').optional().isUUID().withMessage('Invalid document ID'),
     body('questionCount').optional().isInt({ min: 1, max: 50 }).withMessage('Question count must be 1-50'),
-    body('difficulty').optional().isIn(['easy', 'medium', 'hard']).withMessage('Invalid difficulty'),
-    body('topics').notEmpty().withMessage('Topics are required')
+    body('difficulty').optional().isIn(['easy', 'medium', 'hard']).withMessage('Invalid difficulty')
   ],
   checkValidationResult,
+  aiGenerationThrottler,
+  examGenerationValidation,
+  examValidation.createExam,
   asyncHandler(async (req: Request, res: Response) => {
     const { title, topics, subject, description, type, difficulty, numQuestions, timeLimit, materials } = req.body;
     const authHeader = req.headers.authorization;
