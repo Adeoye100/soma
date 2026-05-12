@@ -15,7 +15,6 @@ import { config, validateConfig } from '@/config';
 import { authMiddleware } from '@/middleware/auth';
 import { errorHandler } from '@/middleware/errorHandler';
 import { checkValidationResult } from '@/middleware/requestValidator';
-import { corsOptions } from '@/middleware/cors';
 
 // Import infrastructure
 import { authRateLimiter, examGenerationRateLimiter, generalRateLimiter } from '@/infrastructure/rateLimiter';
@@ -31,7 +30,6 @@ import fileUploadRoutes from '@/routes/fileUpload';
 import documentRoutes from '@/routes/documents';
 import leaderboardRoutes from '@/routes/leaderboard';
 import userRoutes from '@/routes/user';
-import adminRoutes from '@/routes/admin';
 import feedbackRoutes from '@/routes/feedback';
 
 // Import automation framework
@@ -171,18 +169,36 @@ if (config.helmetEnabled) {
   }));
 }
 
-// CORS Configuration
-app.use(cors(corsOptions));
+// CRITICAL: CORS must be BEFORE routes
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:3000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization',
+    'X-Requested-With'
+  ],
+  exposedHeaders: [
+    'X-RateLimit-Limit',
+    'X-RateLimit-Remaining',
+    'X-RateLimit-Reset'
+  ]
+}));
+
+// Body parsers AFTER CORS
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Cookie Parser middleware
 app.use(cookieParser());
 
 // Compression middleware
 app.use(compression());
-
-// Request parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Request logging
 app.use(morgan('combined', {
@@ -213,7 +229,6 @@ app.use('/api/files', authMiddleware, fileUploadRoutes);
 app.use('/api/documents', authMiddleware, documentRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/user', authMiddleware, userRoutes);
-app.use('/api/admin', adminRoutes);
 app.use('/api/feedback', feedbackRoutes);
 
 // Serve static files in production
@@ -225,6 +240,19 @@ if (config.nodeEnv === 'production') {
     res.sendFile(path.join(__dirname, '../public/index.html'));
   });
 }
+
+// Global error handler
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('[ERROR]', err);
+  
+  // Don't leak stack traces in production
+  const isDev = process.env.NODE_ENV === 'development';
+  
+  res.status(err.status || 500).json({
+    error: err.message || 'Internal server error',
+    ...(isDev && { stack: err.stack })
+  });
+});
 
 // Error handling middleware (must be last)
 app.use(errorHandler);

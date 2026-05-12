@@ -48,8 +48,8 @@ const upload = multer({
 });
 
 router.post('/upload', upload.array('files', 10), asyncHandler(async (req: Request, res: Response) => {
-  const files = req.files as Express.Multer.File[];
-  const userId = (req as AuthenticatedRequest).user?.id;
+  const files = (req as any).files as Express.Multer.File[];
+  const userId = (req as any).user?.id;
   const correlationId = req.headers['x-correlation-id'] as string || uuidv4();
 
   if (!files || files.length === 0) {
@@ -143,8 +143,8 @@ router.post('/upload', upload.array('files', 10), asyncHandler(async (req: Reque
 }));
 
 router.post('/upload/single', upload.single('file'), asyncHandler(async (req: Request, res: Response) => {
-  const file = req.file;
-  const userId = (req as AuthenticatedRequest).user?.id;
+  const file = (req as any).file;
+  const userId = (req as any).user?.id;
   const correlationId = req.headers['x-correlation-id'] as string || uuidv4();
 
   if (!file) {
@@ -204,7 +204,7 @@ router.post('/upload/single', upload.single('file'), asyncHandler(async (req: Re
 
 router.post('/process-base64', asyncHandler(async (req: Request, res: Response) => {
   const { fileName, content } = req.body;
-  const userId = (req as AuthenticatedRequest).user?.id;
+  const userId = (req as any).user?.id;
   const correlationId = req.headers['x-correlation-id'] as string || uuidv4();
 
   if (!fileName || !content) {

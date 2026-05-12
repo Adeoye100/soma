@@ -8,33 +8,28 @@ import { DocumentService } from '@/services/documentService';
 import { config } from '@/config';
 import winston from 'winston';
 
+import pdfParse from 'pdf-parse';
+const pdf = pdfParse;
+
 const router = Router();
 
-const storage = multer.memoryStorage();
+// Multer config
 const upload = multer({
-  storage,
-  limits: { fileSize: config.fileUpload.maxFileSize },
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024  // 10MB
+  },
   fileFilter: (req, file, cb) => {
-    const allowed = [
-      'application/pdf',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/msword',
-      'application/vnd.ms-powerpoint',
-      'application/vnd.ms-excel',
-      'text/plain',
-      'text/csv',
-      'image/png',
-      'image/jpeg',
-    ];
-    if (allowed.includes(file.mimetype)) {
-      cb(null, true);
+    const allowed = ['pdf', 'txt', 'md']
+    const ext = file.originalname.split('.').pop()?.toLowerCase()
+    
+    if (allowed.includes(ext ?? '')) {
+      cb(null, true)
     } else {
-      cb(new Error(`File type ${file.mimetype} not supported. Allowed: PDF, DOCX, PPTX, XLSX, TXT, CSV, PNG, JPG`));
+      cb(new Error(`File type .${ext} not supported`) as any)
     }
   }
-});
+})
 
 /**
  * @route   POST /api/documents/upload
@@ -44,8 +39,8 @@ const upload = multer({
 router.post('/upload',
   upload.single('file'),
   asyncHandler(async (req: Request, res: Response) => {
-    const file = req.file;
-    const userId = (req as AuthenticatedRequest).user?.id;
+    const file = (req as any).file
+    const userId = (req as any).user?.id
 
     if (!userId) {
       res.status(401).json({ error: 'Unauthorized', message: 'User not authenticated' });
@@ -88,64 +83,98 @@ router.post('/upload',
  * @desc    Upload a file and get extracted text (for exam generation)
  * @access  Private
  */
-router.post('/extract-text',
+router.post(
+  '/extract-text',
   upload.single('file'),
-  asyncHandler(async (req: Request, res: Response) => {
-    const file = req.file;
-    const userId = (req as AuthenticatedRequest).user?.id;
-
-    if (!userId) {
-      res.status(401).json({ error: 'Unauthorized', message: 'User not authenticated' });
-      return;
-    }
-
-    if (!file) {
-      res.status(400).json({ error: 'Bad Request', message: 'No file provided' });
-      return;
-    }
-
+  async (req: Request, res: Response) => {
     try {
-      const text = await DocumentService.extractText(
-        file.buffer,
-        file.originalname,
-        file.mimetype
-      );
+      const file = (req as any).file
+      const userId = (req as any).user?.id
+
+      if (!file) {
+        return res.status(400).json({ error: 'No file uploaded' })
+      }
+
+      const ext = file.originalname.split('.').pop()?.toLowerCase()
+      let extractedText: string
+
+      // PDF extraction with pdf-parse (local, free)
+      if (ext === 'pdf') {
+        try {
+          console.log('[documents] Local PDF extraction starting')
+          
+          const pdfData = await pdf(file.buffer, {
+            max: 100  // Limit to first 100 pages
+          })
+          
+          extractedText = pdfData.text
+            .replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '')  // Remove control chars
+            .trim()
+
+          console.log('[documents] PDF extraction succeeded:', {
+            pages: pdfData.numpages,
+            textLength: extractedText.length
+          })
+
+          if (extractedText.length < 100) {
+            return res.status(400).json({
+              error: 'PDF contains insufficient text',
+              detail: 'The PDF must contain at least 100 characters of extractable text.',
+              hint: 'Scanned PDFs require OCR. Try a text-based PDF.'
+            })
+          }
+
+        } catch (pdfError: any) {
+          console.error('[documents] PDF extraction failed:', pdfError.message)
+          return res.status(500).json({
+            error: 'PDF extraction failed',
+            detail: pdfError.message,
+            hint: 'The PDF may be corrupted, encrypted, or scanned as images.'
+          })
+        }
+      }
+
+      // Plain text files
+      else if (ext === 'txt' || ext === 'md') {
+        extractedText = file.buffer.toString('utf-8').trim()
+      }
+
+      // Unsupported file type
+      else {
+        return res.status(400).json({
+          error: `Unsupported file type: .${ext}`,
+          detail: 'Only PDF and TXT files are currently supported.'
+        })
+      }
 
       // Validate extracted text
-      if (!text || text.trim().length < 50) {
+      if (!extractedText || extractedText.length < 50) {
         return res.status(400).json({
-          error: 'File contains insufficient text',
-          detail: 'The file must contain at least 50 characters of text.',
-          hint: 'Ensure the file is not scanned as an image-only PDF.'
-        });
+          error: 'Insufficient content',
+          detail: 'File must contain at least 50 characters of text.'
+        })
       }
 
-      return res.json({
-        message: 'Text extracted successfully',
+      // Return extracted text
+      res.json({
+        success: true,
         filename: file.originalname,
-        mimeType: file.mimetype,
-        text: text.substring(0, 50000),
-        truncated: text.length > 50000
-      });
-    } catch (error: any) {
-      winston.error(`Text extraction error for ${file.originalname}:`, error);
-      
-      // Determine if it's an iLovePDF configuration error
-      if (error.message.includes('iLovePDF API keys not configured')) {
-        return res.status(503).json({
-          error: 'File processing service unavailable',
-          hint: 'iLovePDF keys not configured. Admin must configure iLovePDF service.'
-        });
-      }
+        textLength: extractedText.length,
+        preview: extractedText.slice(0, 200) + '...',
+        extractedText
+      })
+      return;
 
-      return res.status(502).json({ 
-        error: 'File processing failed', 
-        detail: error.message,
-        hint: 'The file may be corrupted, scanned as image, or in an unsupported format.'
-      });
+    } catch (err: any) {
+      console.error('[documents/extract-text] Error:', err)
+      res.status(500).json({
+        error: 'File processing failed',
+        detail: err.message
+      })
+      return;
     }
-  })
-);
+  }
+)
 
 /**
  * @route   GET /api/documents
