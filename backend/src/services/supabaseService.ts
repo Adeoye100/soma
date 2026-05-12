@@ -126,8 +126,8 @@ const createSupabaseClient = (serviceKey?: string): SupabaseClient => {
 };
 
 // Service role client for server operations
-export const supabase = createSupabaseClient(config.supabaseServiceKey);
-const supabaseAdmin = supabase;
+const supabaseService = createSupabaseClient(config.supabaseServiceKey);
+const supabaseAdmin = supabaseService;
 
 // User service
 export class UserService {
