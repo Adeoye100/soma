@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { TextSanitizer, SanitizedResult } from '../TextSanitizer';
-import { ILovePDFService } from '../../ilovepdf';
+import { officeDocumentService } from '../../officeDocumentService';
 
 export interface ParsedContent {
   text: string;
@@ -9,14 +9,16 @@ export interface ParsedContent {
   metadata: {
     fileName: string;
     parsedAt: string;
-    slides: number;
-    totalTextElements: number;
-    slideContents: Array<{
+    slides?: number;
+    totalTextElements?: number;
+    slideContents?: Array<{
       slideNumber: number;
-      title?: string;
       content: string;
-      notes?: string;
+      confidence?: number;
     }>;
+    extractionMethod: string;
+    confidence?: number;
+    processingDetails?: any;
   };
 }
 
@@ -36,13 +38,14 @@ export class PptxParser {
   async parse(filePath: string): Promise<ParsedContent> {
     try {
       const fileName = path.basename(filePath);
-      const text = await ILovePDFService.extractText(
-        filePath,
-        fileName,
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-      );
-      return this.buildResult(text, fileName);
+      const buffer = await fs.readFile(filePath);
+      
+      console.log(`[PptxParser] Processing file: ${fileName}`);
+
+      const conversionResult = await officeDocumentService.extractFromPptx(buffer, fileName);
+      return this.buildResult(conversionResult, fileName);
     } catch (error) {
+      console.error(`[PptxParser] Error processing ${filePath}:`, error);
       throw new Error(
         `PptxParser failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -51,27 +54,27 @@ export class PptxParser {
 
   async parseBuffer(buffer: Buffer, fileName: string): Promise<ParsedContent> {
     try {
-      const text = await ILovePDFService.extractTextFromBuffer(
-        buffer,
-        fileName,
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-      );
-      return this.buildResult(text, fileName);
+      console.log(`[PptxParser] Processing buffer for file: ${fileName}`);
+
+      const conversionResult = await officeDocumentService.extractFromPptx(buffer, fileName);
+      return this.buildResult(conversionResult, fileName);
     } catch (error) {
+      console.error(`[PptxParser] Error processing buffer for ${fileName}:`, error);
       throw new Error(
         `PptxParser failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
   }
 
-  private buildResult(text: string, fileName: string): ParsedContent {
-    const sanitized = this.sanitizer.sanitize(text);
-    const slideBlocks = sanitized.text.split(/\n\n+/).filter(s => s.trim().length > 0);
+  private buildResult(conversionResult: any, fileName: string): ParsedContent {
+    const sanitized = this.sanitizer.sanitize(conversionResult.text);
 
-    const slideContents = slideBlocks.map((content, index) => ({
-      slideNumber: index + 1,
-      content: content.trim()
-    }));
+    // Map slides from conversion result
+    const slideContents = conversionResult.metadata.slides?.map((slide: any) => ({
+      slideNumber: slide.slideNumber,
+      content: slide.text.trim(),
+      confidence: slide.confidence,
+    })) || [];
 
     return {
       text: sanitized.text,
@@ -81,7 +84,10 @@ export class PptxParser {
         parsedAt: new Date().toISOString(),
         slides: slideContents.length,
         totalTextElements: slideContents.length,
-        slideContents
+        slideContents,
+        extractionMethod: conversionResult.metadata.conversionMethod,
+        confidence: conversionResult.confidence,
+        processingDetails: conversionResult.metadata.processingDetails,
       }
     };
   }
@@ -108,6 +114,7 @@ export class PptxParser {
         };
       }
 
+      // Check for ZIP file signature (PPTX files are ZIP archives)
       const zipHeader = buffer.slice(0, 4);
       const isZip =
         zipHeader[0] === 0x50 &&
@@ -136,6 +143,13 @@ export class PptxParser {
         }
       };
     }
+  }
+
+  /**
+   * Get supported PPTX formats
+   */
+  static getSupportedFormats(): string[] {
+    return ['.pptx', '.ppt'];
   }
 }
 

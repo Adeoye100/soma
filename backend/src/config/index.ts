@@ -75,6 +75,8 @@ interface Config {
   automationCircuitBreakerEnabled: boolean;
   automationRetryMaxAttempts: number;
   automationMonitoringEnabled: boolean;
+  
+  geminiApiKey?: string;
 
   fileUpload: FileUploadConfig;
 }
@@ -164,6 +166,8 @@ export const config: Config = {
   automationRetryMaxAttempts: getOptionalEnvVarAsNumber('AUTOMATION_RETRY_MAX_ATTEMPTS', 3),
   automationMonitoringEnabled: getOptionalEnvVarAsBoolean('AUTOMATION_MONITORING_ENABLED', true),
 
+  geminiApiKey: getOptionalEnvVar('GEMINI_API_KEY', ''),
+
   // File upload configuration — see src/middleware/upload.ts
   fileUpload: {
     uploadPath: getOptionalEnvVar('UPLOAD_PATH', './uploads'),
@@ -172,20 +176,28 @@ export const config: Config = {
     quarantinePath: getOptionalEnvVar('QUARANTINE_PATH', './quarantine'),
     allowedMimeTypes: [
       'application/pdf',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      'text/plain',
       'image/png',
       'image/jpeg',
+      'image/webp',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/msword',
+      'text/plain',
+      'text/markdown',
     ],
     allowedExtensions: [
       '.pdf',
-      '.docx',
-      '.pptx',
-      '.txt',
       '.png',
       '.jpg',
       '.jpeg',
+      '.webp',
+      '.pptx',
+      '.ppt',
+      '.docx',
+      '.doc',
+      '.txt',
+      '.md',
     ],
     malwareScanningEnabled: getOptionalEnvVarAsBoolean('MALWARE_SCANNING_ENABLED', true),
     malwareScanEndpoint: getOptionalEnvVar('MALWARE_SCAN_ENDPOINT', ''),

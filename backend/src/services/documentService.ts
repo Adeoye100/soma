@@ -1,9 +1,9 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { config } from '@/config';
 import { DatabaseError } from '@/middleware/errorHandler';
-import { ILovePDFService } from '@/services/ilovepdf';
-import winston from 'winston';
-const pdfParse = require('pdf-parse');
+import { logger } from '@/shared/utils/logger';
+import { googleVisionService } from './googleVisionService';
+import { officeDocumentService } from './officeDocumentService';
 
 export interface DocumentUploadResult {
   documentId: string;
@@ -50,7 +50,7 @@ export class DocumentService {
     try {
       preview = await this.extractTextPreview(fileBuffer, filename, fileType);
     } catch (err) {
-      winston.warn(`Could not extract text preview for ${filename}: ${(err as Error).message}`);
+      logger.warn(`Could not extract text preview for ${filename}: ${(err as Error).message}`);
       preview = 'Preview not available for this file type.';
     }
 
@@ -125,46 +125,26 @@ export class DocumentService {
   }
 
   /**
-   * Extract text from any supported file type.
-   * Tries local pdf-parse first for PDFs, falls back to iLovePDF.
+   * Extract text using Google Vision API and Office Document Service.
    */
   static async extractText(buffer: Buffer, filename: string, mimeType: string): Promise<string> {
-    // 1. Try local extraction first for PDFs
-    if (mimeType === 'application/pdf' || filename.toLowerCase().endsWith('.pdf')) {
-      try {
-        const pdfData = await pdfParse(buffer);
-        if (pdfData.text && pdfData.text.trim().length > 0) {
-          winston.info(`Successfully extracted text locally from ${filename} using pdf-parse`);
-          return pdfData.text;
-        }
-        winston.warn(`Local extraction from ${filename} returned empty text, falling back to iLovePDF`);
-      } catch (err: any) {
-        winston.warn(`Local extraction failed for ${filename}: ${err.message}, falling back to iLovePDF`);
-      }
-    }
-
-    // 2. Fall back to iLovePDF (required for OCR/scanned PDFs and Office docs)
     try {
-      return await ILovePDFService.extractTextFromBuffer(buffer, filename, mimeType);
+      const ext = filename.split('.').pop()?.toLowerCase();
+      logger.info(`Extracting text from ${filename} (${ext}) using Unified Pipeline...`);
+
+      if (ext === 'pptx' || ext === 'ppt') {
+        const result = await officeDocumentService.extractFromPptx(buffer, filename);
+        return result.text;
+      } else if (ext === 'docx' || ext === 'doc') {
+        const result = await officeDocumentService.extractFromDocx(buffer, filename);
+        return result.text;
+      } else {
+        const result = await googleVisionService.extractText(buffer, filename, mimeType);
+        return result.text;
+      }
     } catch (err: any) {
-      // Determine if it's an iLovePDF configuration error
-      if (err.message.includes('iLovePDF API keys not configured') || err.message.includes('iLovePDF authentication failed')) {
-        throw new Error(
-          'File conversion service auth failed. Check ILOVEPDF_PUBLIC_KEY in .env'
-        );
-      }
-      if (err.response?.status === 422 || err.message.includes('status code 400')) {
-        throw new Error('File format not supported for conversion or incompatible PDF.');
-      }
-      if (err.message.includes('Processing timeout')) {
-        throw new Error('Processing timeout. File may be too large or corrupted.');
-      }
-      if (err.code === 'ECONNREFUSED') {
-        throw new Error(
-          'File conversion service unreachable. Check internet connection.'
-        );
-      }
-      throw new Error(`File processing failed: ${err.message}`);
+      logger.error(`Text extraction failed for ${filename}: ${err.message}`);
+      throw new Error(`Document extraction failed: ${err.message}`);
     }
   }
 
