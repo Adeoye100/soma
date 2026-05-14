@@ -20,6 +20,7 @@ export abstract class OutputGenerator implements IOutputGenerator {
     this.version = generator.version;
     this.supportedFormats = generator.supportedFormats;
     this.config = generator.config;
+    this.type = generator.type;
     this.enabled = generator.enabled;
   }
 

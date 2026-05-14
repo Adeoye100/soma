@@ -27,33 +27,49 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     let isMounted = true;
 
     const hydrateSession = async (): Promise<void> => {
-      const {
-        data: { session: initialSession },
-      } = await supabase.auth.getSession();
-
-      if (!isMounted) {
-        return;
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (!isMounted) return;
+        
+        if (error) {
+          console.error('[AuthContext] Session hydration error:', error);
+          setSession(null);
+          setUser(null);
+        } else {
+          setSession(session);
+          setUser(session?.user ?? null);
+        }
+      } catch (err) {
+        console.error('[AuthContext] Unexpected error during hydration:', err);
+        if (isMounted) {
+          setSession(null);
+          setUser(null);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-
-      setSession(initialSession);
-      setUser(initialSession?.user ?? null);
-      setLoading(false);
     };
 
-    void hydrateSession();
+    hydrateSession();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      console.log('[AuthContext] auth event:', _event, 'session:', !!nextSession);
-      setSession(nextSession);
-      setUser(nextSession?.user ?? null);
-      setLoading(false);
-    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, nextSession) => {
+        console.log('[AuthContext] auth event:', event, 'session:', !!nextSession);
+        
+        if (isMounted) {
+          setSession(nextSession);
+          setUser(nextSession?.user ?? null);
+          setLoading(false);
+        }
+      }
+    );
 
     return () => {
       isMounted = false;
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
   }, []);
 
@@ -65,3 +81,5 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 };
 
 export const useAuth = (): AuthContextValue => useContext(AuthContext);
+
+export default AuthProvider;

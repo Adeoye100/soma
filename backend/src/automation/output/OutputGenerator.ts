@@ -155,7 +155,7 @@ export class JsonOutputGenerator extends BaseOutputGenerator {
   public name = 'JSON Output Generator';
   public format = 'json' as const;
 
-  protected validateSpecific(data: any): ValidationResult {
+  protected override validateSpecific(data: any): ValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 
@@ -236,7 +236,7 @@ export class HtmlOutputGenerator extends BaseOutputGenerator {
   public name = 'HTML Output Generator';
   public format = 'html' as const;
 
-  protected validateSpecific(data: any): ValidationResult {
+  protected override validateSpecific(data: any): ValidationResult {
     const errors: string[] = [];
 
     // Check if data has content that can be rendered as HTML
@@ -505,7 +505,7 @@ export class CsvOutputGenerator extends BaseOutputGenerator {
   public name = 'CSV Output Generator';
   public format = 'csv' as const;
 
-  protected validateSpecific(data: any): ValidationResult {
+  protected override validateSpecific(data: any): ValidationResult {
     const errors: string[] = [];
 
     if (!Array.isArray(data)) {

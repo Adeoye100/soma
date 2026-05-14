@@ -266,7 +266,7 @@ export class JsonOutputGenerator extends OutputGenerator {
   /**
    * Get generator statistics
    */
-  async getStats(): Promise<ServiceResult<any>> {
+  override override async getStats(): Promise<ServiceResult<any>> {
     return {
       success: true,
       data: {

@@ -9,7 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import LandingPage from './components/LandingPage';
 import ResetPasswordForm from './components/ResetPasswordForm';
 import AuthCallback from './pages/auth/callback';
-import { AuthProvider } from './context/AuthContext';
+import AuthProvider from './context/AuthContext';
 import { useSessionHeartbeat } from './src/hooks/useSessionHeartbeat';
 import FeedbackForm from './src/components/FeedbackForm';
 

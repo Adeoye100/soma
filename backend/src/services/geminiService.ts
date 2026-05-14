@@ -613,14 +613,14 @@ async function generateWithRetry(
 
 export const generateExam = async (config: ExamConfig, materials: Material[]): Promise<Question[]> => {
   const extractedText = materials.map(m => m.content).join('\n\n');
-  
+
   const prompt = buildExamPrompt(extractedText, {
-    subject:      config.subject      || '',
-    type:         config.type         || 'OBJECTIVE',
-    difficulty:   config.difficulty   || 'medium',
-    numQuestions: config.numQuestions || 10,
-    timeLimit:    config.timeLimit
-  });
+    subject: config.subject || '',
+    type: config.type,
+    difficulty: config.difficulty,
+    numQuestions: config.numQuestions,
+    ...(config.timeLimit !== undefined && { timeLimit: config.timeLimit })
+  })
 
   const rawText = await generateWithRetry(prompt);
   

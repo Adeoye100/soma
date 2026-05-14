@@ -35,6 +35,38 @@ import { initializeAutomationFramework, checkAutomationHealth } from '@/automati
 
 // Import Supabase client for schema cache reload
 import { supabase } from '@/services/supabaseService';
+const corsOptions = {
+  origin: function (origin: string | undefined, callback: Function) {
+    const allowedOrigins = [
+      'http://localhost:5173',  // Vite dev server
+      'http://localhost:3000',  // Alternative frontend
+      'http://127.0.0.1:5173',
+      'http://127.0.0.1:3000'
+    ];
+
+    // Allow requests with no origin (mobile apps, Postman, curl)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('🚫 CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept',
+    'Origin'
+  ],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  maxAge: 600, // Cache preflight for 10 minutes
+  optionsSuccessStatus: 204
+};
 
 // Create Express application
 const app = express();
@@ -165,31 +197,22 @@ if (config.helmetEnabled) {
   app.use(helmet({
     contentSecurityPolicy: {
       directives: {
-        defaultSrc:     ["'self'"],
-        styleSrc:       ["'self'", "'unsafe-inline'",
-                         "https://fonts.googleapis.com"],
-        stylesSrcElem:  ["'self'", "'unsafe-inline'",
-                         "https://fonts.googleapis.com"],
-        fontSrc:        ["'self'", "https://fonts.gstatic.com"],
-        scriptSrc:      ["'self'"],
-        imgSrc:         ["'self'", "data:", "blob:",
-                         "https://*.supabase.co",
-                         "https://lh3.googleusercontent.com"],
-        connectSrc:     ["'self'",
-                         "https://*.supabase.co",
-                         "https://generativelanguage.googleapis.com"],
-        frameAncestors: ["'none'"],
-        objectSrc:      ["'none'"],
-        baseUri:        ["'self'"],
-        formAction:     ["'self'"]
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        stylesSrcElem: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],  // ← ADD THIS LINE
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "blob:", "https://*.supabase.co"],
+        connectSrc: ["'self'", "https://*.supabase.co"]
       }
     },
+
     hsts: {
       maxAge: config.hstsMaxAge,
       includeSubDomains: true,
       preload: true
     }
-  }));
+  }))
 }
 
 // Health check route (no authentication required)

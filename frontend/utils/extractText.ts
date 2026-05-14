@@ -12,15 +12,6 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
 }
 
 export async function extractTextFromFile(file: File): Promise<string> {
-  const ext = file.name.toLowerCase().split('.').pop();
-
-  if (ext === 'txt' || ext === 'md' || ext === 'csv' || file.type === 'text/plain') {
-    const text = await file.text();
-    return text.length > MAX_CONTENT_CHARS
-      ? text.slice(0, MAX_CONTENT_CHARS)
-      : text;
-  }
-
   const headers = await getAuthHeaders();
   const formData = new FormData();
   formData.append('file', file);
@@ -33,9 +24,9 @@ export async function extractTextFromFile(file: File): Promise<string> {
 
   if (!response.ok) {
     const errBody = await response.json().catch(() => ({}));
-    throw new Error(errBody.message || `File extraction failed (${response.status})`);
+    throw new Error(errBody.error || errBody.message || errBody.detail || `File extraction failed (${response.status})`);
   }
 
   const data = await response.json();
-  return data.text || '';
+  return data.extractedText || data.text || '';
 }

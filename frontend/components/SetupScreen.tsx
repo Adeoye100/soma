@@ -15,23 +15,7 @@ interface SetupScreenProps {
 // Enhanced file validation
 const validateFile = (file: File): string | null => {
   const maxSize = 10 * 1024 * 1024; // 10MB
-  const allowedTypes = [
-    'application/pdf',
-    'application/docx',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'application/vnd.ms-powerpoint',
-    'application/vnd.ms-excel',
-    'text/plain',
-    'text/csv',
-    'image/png',
-    'image/jpeg',
-    'image/jpg'
-  ];
-  
-  const allowedExtensions = ['.pdf', '.doc', '.docx', '.pptx', '.ppt', '.xlsx', '.xls', '.txt', '.csv', '.png', '.jpg', '.jpeg'];
+  const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.webp'];
   const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
   
   // Check file size
@@ -39,12 +23,9 @@ const validateFile = (file: File): string | null => {
     return `${file.name} is too large. Maximum size is 10MB.`;
   }
   
-  // Check file type and extension
-  const hasValidExtension = allowedExtensions.includes(fileExtension);
-  const hasValidType = allowedTypes.includes(file.type) || file.type.startsWith('image/');
-  
-  if (!hasValidExtension && !hasValidType) {
-    return `${file.name} is not a supported file type. Supported formats: PDF, DOCX, PPTX, XLSX, TXT, CSV, PNG, JPG`;
+  // Check file extension
+  if (!allowedExtensions.includes(fileExtension)) {
+    return `${file.name} is not a supported file type. Supported formats: PDF, JPG, PNG, WebP`;
   }
   
   return null;
@@ -98,16 +79,9 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
 
   const ALLOWED_MIME_TYPES = [
     'application/pdf',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'application/msword',
-    'application/vnd.ms-powerpoint',
-    'application/vnd.ms-excel',
-    'text/plain',
-    'text/csv',
     'image/png',
     'image/jpeg',
+    'image/webp',
   ];
 
   const processFiles = async (files: File[]) => {
@@ -118,7 +92,7 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
       if (!ALLOWED_MIME_TYPES.includes(file.type)) {
         errors.push(
           `"${file.name}" is not a supported file type. ` +
-          `Please upload PDF, DOCX, PPTX, XLSX, TXT, CSV, PNG, or JPG.`
+          `Please upload PDF, JPG, PNG, or WebP.`
         );
         continue;
       }
@@ -348,11 +322,11 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onExamStart }) => {
                     <div className="mt-4 flex flex-col sm:flex-row text-xs sm:text-sm leading-6 text-slate-600 dark:text-slate-400 gap-1">
                       <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white dark:bg-slate-800 font-semibold text-primary-600 dark:text-primary-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-600 focus-within:ring-offset-2 dark:focus-within:ring-offset-slate-800 hover:text-primary-500 transition-colors duration-300">
                         <span>Upload files</span>
-                        <input id="file-upload" name="file-upload" type="file" className="sr-only" multiple onChange={handleFileChange} accept=".pdf,.doc,.docx,.pptx,.xlsx,.xls,.txt,.csv,image/*" />
+                        <input id="file-upload" name="file-upload" type="file" className="sr-only" multiple onChange={handleFileChange} accept=".pdf,.jpg,.jpeg,.png,.webp" />
                       </label>
                       <p className="sm:pl-1">or drag and drop</p>
                     </div>
-                    <p className="text-xs leading-5 text-slate-500 dark:text-slate-500 mt-2 transition-colors duration-300">PDF, DOCX, PPTX, XLSX, TXT, CSV, PNG, JPG up to 10MB</p>
+                    <p className="text-xs leading-5 text-slate-500 dark:text-slate-500 mt-2 transition-colors duration-300">PDF, JPG, PNG, WebP up to 10MB</p>
                   </div>
                 </div>
                  {materials.length > 0 && (
