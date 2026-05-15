@@ -1,282 +1,291 @@
-import * as path from 'path';
-import { PdfParser, ParsedContent as PdfParsedContent } from './parsers/PdfParser';
-import { DocxParser, ParsedContent as DocxParsedContent } from './parsers/DocxParser';
-import { PptxParser, ParsedContent as PptxParsedContent } from './parsers/PptxParser';
-import { XlsxParser, ParsedContent as XlsxParsedContent } from './parsers/XlsxParser';
-import { TextParser, ParsedContent as TextParsedContent } from './parsers/TextParser';
-import { ImageParser, ParsedContent as ImageParsedContent } from './parsers/ImageParser';
-import { TextSanitizer, SanitizedResult } from './TextSanitizer';
+// src/services/file-processing/FileTypeRouter.ts
 
-export interface ParsedContent {
-  text: string;
-  sanitized: SanitizedResult;
-  metadata: Record<string, unknown>;
-}
+const pdfParse = require('pdf-parse')
+import { promises as fs } from 'fs'
+import * as path from 'path'
+import { PdfParser, ParsedContent as PdfParsedContent } from './parsers/PdfParser'
+import { TextSanitizer, SanitizedResult } from './TextSanitizer'
 
-export interface ParserError {
-  code: string;
-  message: string;
-  details?: Record<string, unknown>;
-}
-
+/**
+ * Configuration for FileTypeRouter
+ */
 export interface FileTypeRouterConfig {
-  defaultLanguage?: string;
-  enableOcrEnhancement?: boolean;
-  maxParsingTime?: number;
+  defaultLanguage?: string
+  enableOcrEnhancement?: boolean
+  maxParsingTime?: number
 }
 
-interface UnifiedParsedContent {
-  text: string;
-  sanitized: SanitizedResult;
+/**
+ * Parsed file structure
+ */
+export interface ParsedFile {
+  text: string
+  sanitized: SanitizedResult
   metadata: {
-    fileName: string;
-    fileType: string;
-    parsedAt: string;
-    [key: string]: unknown;
-  };
+    fileType: string
+    pages?: number
+    title?: string
+    author?: string
+    [key: string]: any
+  }
 }
 
-type SupportedFileType = "text" | "pdf" | "docx" | "pptx" | "xlsx" | "image";
-
-function isSupportedFileType(value: string): value is SupportedFileType {
-  return ["text", "pdf", "docx", "pptx", "xlsx", "image"].includes(value);
+/**
+ * Custom error class for parsing errors
+ */
+export class ParserError extends Error {
+  constructor(
+      public code: string,
+      public details?: Record<string, any>
+  ) {
+    super(`[${code}] ${details?.message || 'Unknown error'}`)
+    this.name = 'ParserError'
+    Object.setPrototypeOf(this, ParserError.prototype)
+  }
 }
 
+/**
+ * Routes files to appropriate parsers based on type
+ */
 export class FileTypeRouter {
-  private pdfParser: PdfParser;
-  private docxParser: DocxParser;
-  private pptxParser: PptxParser;
-  private xlsxParser: XlsxParser;
-  private textParser: TextParser;
-  private imageParser: ImageParser;
-  private sanitizer: TextSanitizer;
-  private config: FileTypeRouterConfig;
+  private config: FileTypeRouterConfig
+  private pdfParser: PdfParser
+  private sanitizer: TextSanitizer
+  private supportedExtensions: Map<string, string> = new Map([
+    ['.pdf', 'application/pdf'],
+    ['.doc', 'application/msword'],
+    ['.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+    ['.txt', 'text/plain'],
+    ['.md', 'text/markdown'],
+    ['.jpg', 'image/jpeg'],
+    ['.jpeg', 'image/jpeg'],
+    ['.png', 'image/png'],
+    ['.gif', 'image/gif'],
+    ['.webp', 'image/webp']
+  ])
 
-  private readonly fileTypeMap: Map<string, SupportedFileType> = new Map([
-    ['.pdf', 'pdf'],
-    ['.docx', 'docx'],
-    ['.pptx', 'pptx'],
-    ['.xlsx', 'xlsx'],
-    ['.xls', 'xlsx'],
-    ['.txt', 'text'],
-    ['.csv', 'text'],
-    ['.png', 'image'],
-    ['.jpg', 'image'],
-    ['.jpeg', 'image']
-  ]);
-
+  /**
+   * Initialize FileTypeRouter with configuration
+   */
   constructor(config: FileTypeRouterConfig = {}) {
-    this.pdfParser = new PdfParser();
-    this.docxParser = new DocxParser();
-    this.pptxParser = new PptxParser();
-    this.xlsxParser = new XlsxParser();
-    this.textParser = new TextParser();
-    this.imageParser = new ImageParser();
-    this.sanitizer = new TextSanitizer();
     this.config = {
       defaultLanguage: config.defaultLanguage || 'eng',
       enableOcrEnhancement: config.enableOcrEnhancement ?? true,
       maxParsingTime: config.maxParsingTime || 120000
-    };
+    }
+
+    this.pdfParser = new PdfParser()
+    this.sanitizer = new TextSanitizer()
   }
 
-  async parse(filePath: string, fileType?: string): Promise<UnifiedParsedContent> {
-    const extension = path.extname(filePath).toLowerCase();
-    const detectedType = fileType || this.fileTypeMap.get(extension);
-
-    if (!detectedType) {
-      throw new Error(`Unsupported file type: ${extension}`);
-    }
-
-    if (!isSupportedFileType(detectedType)) {
-      throw new Error(
-        `FileTypeRouter: unsupported file type detected — "${detectedType}". ` +
-        `Accepted types: text, pdf, docx, pptx, xlsx, image`
-      );
-    }
-
-    const timeout = this.config.maxParsingTime;
-    const parsePromise = this.performParse(filePath, detectedType);
-
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => {
-        reject(new Error(`Parsing timed out after ${timeout}ms for file type: ${detectedType}`));
-      }, timeout);
-    });
-
-    return Promise.race([parsePromise, timeoutPromise]);
-  }
-
-  private async performParse(filePath: string, fileType: SupportedFileType): Promise<UnifiedParsedContent> {
-    try {
-      switch (fileType) {
-        case 'pdf': {
-          const result: PdfParsedContent = await this.pdfParser.parse(filePath);
-          return this.normalizeResult(result, filePath, 'pdf');
-        }
-
-        case 'docx': {
-          const result: DocxParsedContent = await this.docxParser.parse(filePath);
-          return this.normalizeResult(result, filePath, 'docx');
-        }
-
-        case 'pptx': {
-          const result: PptxParsedContent = await this.pptxParser.parse(filePath);
-          return this.normalizeResult(result, filePath, 'pptx');
-        }
-
-        case 'xlsx': {
-          const result: XlsxParsedContent = await this.xlsxParser.parse(filePath);
-          return this.normalizeResult(result, filePath, 'xlsx');
-        }
-
-        case 'text': {
-          const result: TextParsedContent = await this.textParser.parse(filePath);
-          return this.normalizeResult(result, filePath, 'text');
-        }
-
-        case 'image': {
-          const result: ImageParsedContent = await this.imageParser.parse(filePath, {
-            language: this.config.defaultLanguage,
-            enhance: this.config.enableOcrEnhancement
-          });
-          return this.normalizeResult(result, filePath, 'image');
-        }
-
-        default:
-          throw new Error(`No parser available for file type: ${fileType}`);
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Failed to parse ${fileType} file: ${error.message}`);
-      }
-      throw new Error(`Failed to parse ${fileType} file: Unknown error`);
-    }
-  }
-
-  async parseBuffer(buffer: Buffer, fileName: string, fileType?: string): Promise<UnifiedParsedContent> {
-    const extension = path.extname(fileName).toLowerCase();
-    const detectedType = fileType || this.fileTypeMap.get(extension);
-
-    if (!detectedType) {
-      throw new Error(`Unsupported file type: ${extension}`);
-    }
-
-    if (!isSupportedFileType(detectedType)) {
-      throw new Error(
-        `FileTypeRouter: unsupported file type detected — "${detectedType}". ` +
-        `Accepted types: text, pdf, docx, pptx, xlsx, image`
-      );
-    }
+  /**
+   * Parse file from buffer
+   */
+  async parseBuffer(fileBuffer: Buffer, originalName: string): Promise<ParsedFile> {
+    const extension = path.extname(originalName).toLowerCase()
+    const startTime = Date.now()
 
     try {
-      switch (detectedType) {
-        case 'pdf': {
-          const result: PdfParsedContent = await this.pdfParser.parseBuffer(buffer, fileName);
-          return this.normalizeResult(result, fileName, 'pdf');
-        }
-
-        case 'docx': {
-          const result: DocxParsedContent = await this.docxParser.parseBuffer(buffer, fileName);
-          return this.normalizeResult(result, fileName, 'docx');
-        }
-
-        case 'pptx': {
-          const result: PptxParsedContent = await this.pptxParser.parseBuffer(buffer, fileName);
-          return this.normalizeResult(result, fileName, 'pptx');
-        }
-
-        case 'xlsx': {
-          const result: XlsxParsedContent = await this.xlsxParser.parseBuffer(buffer, fileName);
-          return this.normalizeResult(result, fileName, 'xlsx');
-        }
-
-        case 'text': {
-          const result: TextParsedContent = await this.textParser.parseBuffer(buffer, fileName);
-          return this.normalizeResult(result, fileName, 'text');
-        }
-
-        case 'image': {
-          const result: ImageParsedContent = await this.imageParser.parseBuffer(buffer, fileName, {
-            language: this.config.defaultLanguage,
-            enhance: this.config.enableOcrEnhancement
-          });
-          return this.normalizeResult(result, fileName, 'image');
-        }
-
-        default:
-          throw new Error(`No parser available for file type: ${detectedType}`);
+      // Check if supported
+      if (!this.supportedExtensions.has(extension)) {
+        throw new ParserError('UNSUPPORTED_FILE_TYPE', {
+          extension,
+          supported: Array.from(this.supportedExtensions.keys())
+        })
       }
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Failed to parse ${detectedType} file: ${error.message}`);
+
+      // Check timeout
+      const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(
+              () => reject(new ParserError('PARSING_TIMEOUT', { maxTime: this.config.maxParsingTime })),
+              this.config.maxParsingTime
+          )
+      )
+
+      let parsedResult: { text: string; metadata: Record<string, any> }
+
+      if (extension === '.pdf') {
+        parsedResult = await Promise.race([
+          this.parsePdf(fileBuffer),
+          timeoutPromise as Promise<any>
+        ])
+      } else if (['.txt', '.md'].includes(extension)) {
+        parsedResult = await Promise.race([
+          this.parseText(fileBuffer),
+          timeoutPromise as Promise<any>
+        ])
+      } else {
+        throw new ParserError('UNSUPPORTED_FILE_TYPE', { extension })
       }
-      throw new Error(`Failed to parse ${detectedType} file: Unknown error`);
-    }
-  }
 
-  async validate(filePath: string): Promise<{ valid: boolean; error?: ParserError }> {
-    const extension = path.extname(filePath).toLowerCase();
-    const fileType = this.fileTypeMap.get(extension);
+      // Sanitize content
+      const sanitized = this.sanitizer.sanitize(parsedResult.text)
 
-    if (!fileType) {
+      const elapsedTime = Date.now() - startTime
+
       return {
-        valid: false,
-        error: {
-          code: 'UNSUPPORTED_FILE_TYPE',
-          message: `File type ${extension} is not supported`
+        text: sanitized.text,
+        sanitized,
+        metadata: {
+          fileType: extension,
+          parsingTime: elapsedTime,
+          ...parsedResult.metadata
         }
-      };
-    }
-
-    switch (fileType) {
-      case 'pdf':
-        return this.pdfParser.validate(filePath);
-      case 'docx':
-        return this.docxParser.validate(filePath);
-      case 'pptx':
-        return this.pptxParser.validate(filePath);
-      case 'xlsx':
-        return this.xlsxParser.validate(filePath);
-      case 'text':
-        return this.textParser.validate(filePath);
-      case 'image':
-        return this.imageParser.validate(filePath);
-      default:
-        return {
-          valid: false,
-          error: {
-            code: 'UNKNOWN_FILE_TYPE',
-            message: `Unable to validate file type: ${fileType}`
-          }
-        };
-    }
-  }
-
-  private normalizeResult(result: any, filePath: string, fileType: SupportedFileType): UnifiedParsedContent {
-    return {
-      text: result.text,
-      sanitized: result.sanitized,
-      metadata: {
-        ...result.metadata,
-        fileName: path.basename(filePath),
-        fileType,
-        parsedAt: new Date().toISOString()
       }
-    };
+    } catch (error) {
+      if (error instanceof ParserError) {
+        throw error
+      }
+
+      throw new ParserError('PARSING_ERROR', {
+        originalName,
+        extension,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
   }
 
-  isSupported(extension: string): boolean {
-    return this.fileTypeMap.has(extension.toLowerCase());
+  /**
+   * Parse file from file path
+   */
+  async parse(filePath: string): Promise<ParsedFile> {
+    try {
+      // Validate file exists
+      const stats = await fs.stat(filePath)
+      if (!stats.isFile()) {
+        throw new ParserError('NOT_A_FILE', { filePath })
+      }
+
+      // Read file buffer
+      const fileBuffer = await fs.readFile(filePath)
+      const originalName = path.basename(filePath)
+
+      // Parse using parseBuffer
+      return await this.parseBuffer(fileBuffer, originalName)
+    } catch (error) {
+      if (error instanceof ParserError) {
+        throw error
+      }
+
+      throw new ParserError('FILE_READ_ERROR', {
+        filePath,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
   }
 
+  /**
+   * Parse PDF file
+   */
+  private async parsePdf(buffer: Buffer): Promise<{ text: string; metadata: Record<string, any> }> {
+    try {
+      const data = await pdfParse(buffer, { max: 100 })
+
+      const text = data.text
+          .replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '')
+          .replace(/\s+/g, ' ')
+          .trim()
+
+      if (text.length < 10) {
+        throw new ParserError('INSUFFICIENT_CONTENT', {
+          textLength: text.length,
+          minimum: 10
+        })
+      }
+
+      return {
+        text,
+        metadata: {
+          pages: data.numpages,
+          title: data.info?.Title || 'Unknown',
+          author: data.info?.Author || 'Unknown',
+          subject: data.info?.Subject,
+          keywords: data.info?.Keywords,
+          creator: data.info?.Creator,
+          producer: data.info?.Producer
+        }
+      }
+    } catch (error) {
+      if (error instanceof ParserError) {
+        throw error
+      }
+
+      throw new ParserError('PDF_PARSING_ERROR', {
+        message: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
+  }
+
+  /**
+   * Parse text file (TXT, MD, etc)
+   */
+  private async parseText(buffer: Buffer): Promise<{ text: string; metadata: Record<string, any> }> {
+    try {
+      const text = buffer.toString('utf-8').trim()
+
+      if (text.length < 10) {
+        throw new ParserError('INSUFFICIENT_CONTENT', {
+          textLength: text.length,
+          minimum: 10
+        })
+      }
+
+      return {
+        text,
+        metadata: {
+          encoding: 'utf-8',
+          byteLength: buffer.length,
+          charLength: text.length
+        }
+      }
+    } catch (error) {
+      if (error instanceof ParserError) {
+        throw error
+      }
+
+      throw new ParserError('TEXT_PARSING_ERROR', {
+        message: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
+  }
+
+  /**
+   * Get supported MIME types
+   */
   getSupportedTypes(): string[] {
-    return Array.from(new Set(this.fileTypeMap.values()));
+    return Array.from(this.supportedExtensions.values())
   }
 
+  /**
+   * Get supported file extensions
+   */
   getSupportedExtensions(): string[] {
-    return Array.from(this.fileTypeMap.keys());
+    return Array.from(this.supportedExtensions.keys())
+  }
+
+  /**
+   * Check if file extension is supported
+   */
+  isSupported(extension: string): boolean {
+    const normalized = extension.startsWith('.') ? extension : `.${extension}`
+    return this.supportedExtensions.has(normalized.toLowerCase())
+  }
+
+  /**
+   * Add custom file type support
+   */
+  addSupportedType(extension: string, mimeType: string): void {
+    const normalized = extension.startsWith('.') ? extension : `.${extension}`
+    this.supportedExtensions.set(normalized.toLowerCase(), mimeType)
+  }
+
+  /**
+   * Remove file type support
+   */
+  removeSupportedType(extension: string): void {
+    const normalized = extension.startsWith('.') ? extension : `.${extension}`
+    this.supportedExtensions.delete(normalized.toLowerCase())
   }
 }
 
-export default FileTypeRouter;
+export default FileTypeRouter

@@ -1,17 +1,21 @@
-export { FileSecurityValidator, FileValidationConfig, ValidationResult, MalwareScanResult, UploadLogEntry, createFileValidationConfig } from './FileSecurityValidator';
-export { TextSanitizer, SanitizationOptions, SanitizedResult } from './TextSanitizer';
-export { FileTypeRouter, ParsedContent, ParserError } from './FileTypeRouter';
-export { 
-  SecureFileProcessor, 
-  FileProcessorConfig, 
+// src/services/file-processing/index.ts
+
+// Main exports
+export { TextSanitizer, SanitizedResult } from './TextSanitizer';
+export { FileTypeRouter, ParserError } from './FileTypeRouter';
+export { ParsedContent, PdfParser } from './parsers/PdfParser';
+export { FileSecurityValidator, ValidationResult, FileValidationConfig } from './FileSecurityValidator';
+export { SecureFileProcessor } from './SecureFileProcessor';
+
+// Type exports
+export type { 
+  FileProcessorConfig,
   ProcessedFile, 
   ProcessingError, 
   ProcessingResult, 
-  UploadLogEntry as ProcessingLogEntry 
+  UploadLogEntry 
 } from './SecureFileProcessor';
-export { PdfParser } from './parsers/PdfParser';
-export { DocxParser } from './parsers/DocxParser';
-export { PptxParser } from './parsers/PptxParser';
-export { XlsxParser } from './parsers/XlsxParser';
-export { TextParser } from './parsers/TextParser';
-export { ImageParser } from './parsers/ImageParser';
+export type { 
+  ParsedFile, 
+  FileTypeRouterConfig 
+} from './FileTypeRouter';

@@ -106,7 +106,7 @@ router.post(
       let extractedText: string;
       let confidence: number = 0;
       let metadata: any = {};
-      let extractionMethod: string;
+      let extractionMethod: string = 'unknown';
 
       try {
         // Route to appropriate processing method based on file type

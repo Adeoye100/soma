@@ -1,176 +1,169 @@
-export interface SanitizationOptions {
-  stripScripts: boolean;
-  normalizeUnicode: boolean;
-  preventPathTraversal: boolean;
-  maxLength?: number;
-  allowedTags?: string[];
-}
+// src/services/file-processing/TextSanitizer.ts
 
+/**
+ * Result of text sanitization
+ */
 export interface SanitizedResult {
-  text: string;
-  warnings: string[];
-  removedElements: string[];
+  text: string              // ✅ This is the cleaned text property
+  warnings: string[]
+  removedPatterns: {
+    malicious: number
+    suspicious: number
+    problematic: number
+  }
+  statistics: {
+    originalLength: number
+    sanitizedLength: number
+    reductionPercent: number
+  }
 }
 
+/**
+ * Sanitizes user input text to remove malicious content
+ */
 export class TextSanitizer {
-  private options: SanitizationOptions;
+  private readonly maliciousPatterns = [
+    /<script[^>]*>[\s\S]*?<\/script>/gi,
+    /<iframe[^>]*>[\s\S]*?<\/iframe>/gi,
+    /on\w+\s*=\s*["'][^"']*["']/gi,
+    /javascript:/gi,
+    /data:text\/html/gi,
+    /vbscript:/gi,
+    /<embed[^>]*>/gi,
+    /<object[^>]*>/gi
+  ]
 
-  constructor(options: Partial<SanitizationOptions> = {}) {
-    this.options = {
-      stripScripts: options.stripScripts ?? true,
-      normalizeUnicode: options.normalizeUnicode ?? true,
-      preventPathTraversal: options.preventPathTraversal ?? true,
-      maxLength: options.maxLength ?? 10 * 1024 * 1024,
-      allowedTags: options.allowedTags ?? []
-    };
-  }
+  private readonly suspiciousPatterns = [
+    /eval\(/gi,
+    /expression\(/gi,
+    /import\(/gi,
+    /require\(/gi
+  ]
 
-  sanitize(input: string): SanitizedResult {
-    const warnings: string[] = [];
-    const removedElements: string[] = [];
-    let text = input;
+  private readonly problematicPatterns = [
+    /[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g,
+    /[\uFDD0-\uFDEF\uFFFE\uFFFF]/g
+  ]
 
-    if (text.length > this.options.maxLength!) {
-      warnings.push(`Text truncated from ${text.length} to ${this.options.maxLength} characters`);
-      text = text.substring(0, this.options.maxLength!);
+  /**
+   * Sanitize text input
+   */
+  sanitize(text: string): SanitizedResult {
+    if (!text || typeof text !== 'string') {
+      return {
+        text: '',
+        warnings: ['Input is not a valid string'],
+        removedPatterns: { malicious: 0, suspicious: 0, problematic: 0 },
+        statistics: {
+          originalLength: 0,
+          sanitizedLength: 0,
+          reductionPercent: 0
+        }
+      }
     }
 
-    if (this.options.stripScripts) {
-      const { cleaned, removed } = this.stripScriptsAndDangerousContent(text);
-      text = cleaned;
-      removedElements.push(...removed);
-    }
+    const originalLength = text.length
+    let sanitized = text
+    let maliciousCount = 0
+    let suspiciousCount = 0
+    let problematicCount = 0
+    const warnings: string[] = []
 
-    if (this.options.normalizeUnicode) {
-      text = this.normalizeUnicode(text);
-    }
+    // Remove malicious patterns
+    this.maliciousPatterns.forEach(pattern => {
+      const matches = sanitized.match(pattern)
+      if (matches) {
+        maliciousCount += matches.length
+        warnings.push(`Removed ${matches.length} malicious pattern(s)`)
+        sanitized = sanitized.replace(pattern, '')
+      }
+    })
 
-    if (this.options.preventPathTraversal) {
-      text = this.preventPathTraversal(text);
-    }
+    // Remove suspicious patterns
+    this.suspiciousPatterns.forEach(pattern => {
+      const matches = sanitized.match(pattern)
+      if (matches) {
+        suspiciousCount += matches.length
+        warnings.push(`Removed ${matches.length} suspicious pattern(s)`)
+        sanitized = sanitized.replace(pattern, '')
+      }
+    })
+
+    // Remove problematic patterns
+    this.problematicPatterns.forEach(pattern => {
+      const matches = sanitized.match(pattern)
+      if (matches) {
+        problematicCount += matches.length
+        sanitized = sanitized.replace(pattern, '')
+      }
+    })
+
+    // Normalize whitespace
+    sanitized = sanitized
+        .replace(/\s+/g, ' ')
+        .trim()
+
+    // Escape HTML entities for safety
+    sanitized = this.escapeHtml(sanitized)
+
+    const sanitizedLength = sanitized.length
+    const reductionPercent = originalLength > 0
+        ? Math.round(((originalLength - sanitizedLength) / originalLength) * 100)
+        : 0
 
     return {
-      text: text.trim(),
+      text: sanitized,  // ✅ THIS IS THE PROPERTY NAME
       warnings,
-      removedElements
-    };
-  }
-
-  private stripScriptsAndDangerousContent(text: string): { cleaned: string; removed: string[] } {
-    const removed: string[] = [];
-
-    const scriptPatterns = [
-      /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-      /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi,
-      /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi,
-      /<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi,
-      /<embed\b[^>]*>/gi,
-      /<applet\b[^<]*(?:(?!<\/applet>)<[^<]*)*<\/applet>/gi,
-      /<!--[\s\S]*?-->/g,
-      /<![CDATA\[[\s\S]*?\]]>/g
-    ];
-
-    for (const pattern of scriptPatterns) {
-      const matches = text.match(pattern);
-      if (matches) {
-        removed.push(...matches);
-        text = text.replace(pattern, '');
+      removedPatterns: {
+        malicious: maliciousCount,
+        suspicious: suspiciousCount,
+        problematic: problematicCount
+      },
+      statistics: {
+        originalLength,
+        sanitizedLength,
+        reductionPercent
       }
     }
-
-    const eventHandlers = [
-      /\s+on\w+\s*=\s*(['"][^'"]*['"]|[^\s>]*)/gi,
-      /javascript\s*:/gi,
-      /data\s*:\s*text\/html/gi,
-      /vbscript\s*:/gi
-    ];
-
-    for (const pattern of eventHandlers) {
-      const matches = text.match(pattern);
-      if (matches) {
-        removed.push(...matches);
-        text = text.replace(pattern, '');
-      }
-    }
-
-    const dangerousAttrs = [
-      /formaction\s*=/gi,
-      /xlink:href\s*=/gi,
-      /dynsrc\s*=/gi,
-      /lowsrc\s*=/gi
-    ];
-
-    for (const pattern of dangerousAttrs) {
-      if (pattern.test(text)) {
-        removed.push(pattern.source);
-        text = text.replace(pattern, '');
-      }
-    }
-
-    return { cleaned: text, removed };
   }
 
-  private normalizeUnicode(text: string): string {
-    return text
-      .normalize('NFC')
-      .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
-      .replace(/\uFEFF/g, '')
-      .replace(/[\u200B-\u200D\uFEFF]/g, '')
-      .replace(/[\u00A0\u202F\u205F\u3000]/g, ' ')
-      .replace(/\r\n/g, '\n')
-      .replace(/\r/g, '\n');
+  /**
+   * Escape HTML special characters
+   */
+  private escapeHtml(text: string): string {
+    const escapeMap: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+      '/': '&#x2F;'
+    }
+
+    return text.replace(/[&<>"'\/]/g, char => escapeMap[char] || char)
   }
 
-  private preventPathTraversal(text: string): string {
-    return text
-      .replace(/\.\.\//g, '')
-      .replace(/\.\.\\/g, '')
-      .replace(/\.\./g, '')
-      .replace(/[<>:"|?*]/g, '')
-      .replace(/[\x00-\x1F]/g, '');
+  /**
+   * Check if text contains malicious content
+   */
+  isMalicious(text: string): boolean {
+    return this.maliciousPatterns.some(pattern => pattern.test(text))
   }
 
-  preserveStructure(html: string): SanitizedResult {
-    const warnings: string[] = [];
-    const removedElements: string[] = [];
-    let text = html;
+  /**
+   * Get sanitization statistics
+   */
+  getStatistics(original: string, sanitized: string): {
+    reduction: number
+    percent: number
+  } {
+    const reduction = original.length - sanitized.length
+    const percent = original.length > 0
+        ? Math.round((reduction / original.length) * 100)
+        : 0
 
-    if (this.options.maxLength && text.length > this.options.maxLength) {
-      warnings.push(`Text truncated from ${text.length} to ${this.options.maxLength} characters`);
-      text = text.substring(0, this.options.maxLength!);
-    }
-
-    const scriptPatterns = [
-      /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-      /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi
-    ];
-
-    for (const pattern of scriptPatterns) {
-      const matches = text.match(pattern);
-      if (matches) {
-        removedElements.push(...matches);
-        text = text.replace(pattern, '');
-      }
-    }
-
-    const eventHandlers = /\s+on\w+\s*=\s*(['"][^'"]*['"]|[^\s>]*)/gi;
-    const handlerMatches = text.match(eventHandlers);
-    if (handlerMatches) {
-      removedElements.push(...handlerMatches);
-      text = text.replace(eventHandlers, '');
-    }
-
-    const dangerousProtocols = /javascript\s*:/gi;
-    text = text.replace(dangerousProtocols, '');
-
-    text = this.normalizeUnicode(text);
-
-    return {
-      text: text.trim(),
-      warnings,
-      removedElements
-    };
+    return { reduction, percent }
   }
 }
 
-export default TextSanitizer;
+export default TextSanitizer

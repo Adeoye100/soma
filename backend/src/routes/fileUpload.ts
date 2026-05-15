@@ -88,7 +88,7 @@ router.post('/upload', upload.array('files', 10), asyncHandler(async (req: Reque
         content: {
           text: result.file.parsedContent.text,
           sanitizedWarnings: result.file.parsedContent.sanitized.warnings,
-          removedElements: result.file.parsedContent.sanitized.removedElements,
+          removedPatterns: result.file.parsedContent.sanitized.removedPatterns,
           metadata: result.file.parsedContent.metadata
         }
       });
@@ -193,7 +193,7 @@ router.post('/upload/single', upload.single('file'), asyncHandler(async (req: Re
       content: {
         text: result.file?.parsedContent.text,
         sanitizedWarnings: result.file?.parsedContent.sanitized.warnings,
-        removedElements: result.file?.parsedContent.sanitized.removedElements,
+        removedPatterns: result.file?.parsedContent.sanitized.removedPatterns,
         metadata: result.file?.parsedContent.metadata
       },
       processedAt: result.file?.processedAt,
@@ -260,7 +260,7 @@ router.post('/process-base64', asyncHandler(async (req: Request, res: Response) 
       content: {
         text: result.file?.parsedContent.text,
         sanitizedWarnings: result.file?.parsedContent.sanitized.warnings,
-        removedElements: result.file?.parsedContent.sanitized.removedElements,
+        removedPatterns: result.file?.parsedContent.sanitized.removedPatterns,
         metadata: result.file?.parsedContent.metadata
       },
       processedAt: result.file?.processedAt,

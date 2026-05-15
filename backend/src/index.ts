@@ -1,373 +1,203 @@
-import express, { Request, Response, NextFunction } from 'express';
-import cookieParser from 'cookie-parser';
+import express, { Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import rateLimit from 'express-rate-limit';
 import compression from 'compression';
-import { createClient, RedisClientType } from 'redis';
-import winston from 'winston';
-import path from 'path';
+import dotenv from 'dotenv';
 
-// Import configuration and validation
-import { config, validateConfig } from '@/config';
+// Load environment variables
+dotenv.config();
 
-// Import middleware
+import { logger } from '@/shared/utils/logger';
+import { errorHandler, asyncHandler } from '@/middleware/errorHandler';
 import { authMiddleware } from '@/middleware/auth';
-import { errorHandler } from '@/middleware/errorHandler';
-import { checkValidationResult } from '@/middleware/requestValidator';
+import documentsRouter from '@/routes/documents-free';
 
-// Import infrastructure
-import { authRateLimiter, examGenerationRateLimiter, generalRateLimiter } from '@/infrastructure/rateLimiter';
+const app: Express = express();
+const PORT = process.env.PORT || 3000;
 
-// Import routes
-import authRoutes from '@/routes/auth';
-import examRoutes from '@/routes/exam';
-import materialRoutes from '@/routes/material';
-import resultRoutes from '@/routes/result';
-import healthRoutes from '@/routes/health';
-import automationRoutes from '@/routes/automation';
-import fileUploadRoutes from '@/routes/fileUpload';
-import documentRoutes from '@/routes/documents';
-import feedbackRoutes from '@/routes/feedback';
+// ============================================
+// SECURITY MIDDLEWARE
+// ============================================
 
-// Import automation framework
-import { initializeAutomationFramework, checkAutomationHealth } from '@/automation';
+// Helmet for security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", 'data:', 'blob:', 'https://*.supabase.co'],
+      connectSrc: ["'self'", 'https://*.supabase.co']
+    }
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  }
+}));
 
-// Import Supabase client for schema cache reload
-import { supabase } from '@/services/supabaseService';
+// CORS Configuration
 const corsOptions = {
   origin: function (origin: string | undefined, callback: Function) {
     const allowedOrigins = [
-      'http://localhost:5173',  // Vite dev server
-      'http://localhost:3000',  // Alternative frontend
+      'http://localhost:5173',
+      'http://localhost:3000',
       'http://127.0.0.1:5173',
-      'http://127.0.0.1:3000'
-    ];
+      'http://127.0.0.1:3000',
+      process.env.FRONTEND_URL
+    ].filter(Boolean);
 
-    // Allow requests with no origin (mobile apps, Postman, curl)
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.log('🚫 CORS blocked origin:', origin);
+      logger.warn(`[CORS] Blocked origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-Requested-With',
-    'Accept',
-    'Origin'
-  ],
-  exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  maxAge: 600, // Cache preflight for 10 minutes
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range', 'X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'],
+  maxAge: 600,
   optionsSuccessStatus: 204
 };
 
-// Create Express application
-const app = express();
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
-// Trust proxy for accurate IP addresses in production
-if (config.nodeEnv === 'production') {
-  app.set('trust proxy', 1);
-}
-
-// CRITICAL: CORS must be BEFORE routes
-app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'http://localhost:3000'
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type', 
-    'Authorization',
-    'X-Requested-With'
-  ],
-  exposedHeaders: [
-    'X-RateLimit-Limit',
-    'X-RateLimit-Remaining',
-    'X-RateLimit-Reset'
-  ]
-}));
-
-// Body parsers AFTER CORS
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// Track whether Redis unavailable warning was already logged
-let redisUnavailableLogged = false;
-
-// Create Redis client for rate limiting
-const redisClient: RedisClientType = createClient({
-  url: config.redisUrl,
-  socket: {
-    reconnectStrategy: (retries) => {
-      if (retries > 3) {
-        return false; // Stop retrying after 3 attempts
-      }
-      return Math.min(retries * 50, 500);
-    }
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => {
+    // Skip rate limit for health checks
+    return req.path === '/health' || req.path === '/api/documents/health';
   }
 });
 
-redisClient.on('error', (err) => {
-  if (!redisUnavailableLogged) {
-    redisUnavailableLogged = true;
-    console.warn('⚠️  Redis unavailable, using in-memory store');
-  }
-});
+app.use(limiter);
 
-// Initialize Redis connection
-const initializeRedis = async (): Promise<void> => {
-  if (!config.redisEnabled) {
-    console.log('ℹ️  Redis disabled via REDIS_ENABLED=false, using in-memory store');
-    return;
-  }
+// Body parsers
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-  try {
-    await redisClient.connect();
-    console.log('✅ Redis connected successfully');
-  } catch (error) {
-    if (!redisUnavailableLogged) {
-      redisUnavailableLogged = true;
-    }
-    console.warn('⚠️  Redis connection failed, falling back to memory store');
-  }
-};
+// Compression
+app.use(compression());
 
-// Helper function to convert log size string to bytes
-const parseLogSizeToBytes = (logSize: string | undefined): number => {
-  if (!logSize) return 10 * 1024 * 1024; // Default to 10MB
-  
-  const units = { 'b': 1, 'k': 1024, 'm': 1024 * 1024, 'g': 1024 * 1024 * 1024 };
-  const normalizedSize = logSize.toLowerCase();
-  const match = normalizedSize.match(/^(\d+)([kmg]?)b?$/);
-  if (!match) return 10 * 1024 * 1024; // Default to 10MB
-  
-  const value = parseInt(match[1] || '10', 10);
-  const unit = (match[2] || 'm') as keyof typeof units;
-  return value * (units[unit] || 1);
-};
+// Logging
+app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
 
-// Configure Winston logger
-const logger = winston.createLogger({
-  level: config.logLevel,
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.errors({ stack: true }),
-    winston.format.json()
-  ),
-  defaultMeta: { service: 'smart-examination-backend' },
-  transports: [
-    // Write all logs to files
-    new winston.transports.File({
-      filename: path.join(process.cwd(), config.logFilePath || 'logs/app.log'),
-      maxsize: parseLogSizeToBytes(config.logMaxSize),
-      maxFiles: config.logMaxFiles
-    }),
-    // Write error logs to separate file
-    new winston.transports.File({
-      filename: path.join(process.cwd(), 'logs', 'error.log'),
-      level: 'error',
-      maxsize: parseLogSizeToBytes(config.logMaxSize),
-      maxFiles: config.logMaxFiles
-    })
-  ]
-});
+// ============================================
+// DEBUG MIDDLEWARE
+// ============================================
 
-// Add console logging in development
-if (config.nodeEnv !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.combine(
-      winston.format.colorize(),
-      winston.format.simple()
-    )
-  }));
-}
-
-// Security Middleware
-if (config.helmetEnabled) {
-  app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        stylesSrcElem: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],  // ← ADD THIS LINE
-        fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        scriptSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "blob:", "https://*.supabase.co"],
-        connectSrc: ["'self'", "https://*.supabase.co"]
-      }
-    },
-
-    hsts: {
-      maxAge: config.hstsMaxAge,
-      includeSubDomains: true,
-      preload: true
-    }
-  }))
-}
-
-// Health check route (no authentication required)
-app.use('/api/health', healthRoutes);
-
-// Enhanced rate limiting using the new infrastructure
-app.use(generalRateLimiter);
-
-// Strict rate limiting for authentication routes
-app.use('/api/auth', authRateLimiter);
-
-// Strict rate limiting for exam generation
-app.use('/api/exam/generate', examGenerationRateLimiter);
-
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/exam', authMiddleware, examRoutes);
-app.use('/api/material', authMiddleware, materialRoutes);
-app.use('/api/result', authMiddleware, resultRoutes);
-app.use('/api/automation', automationRoutes);
-app.use('/api/files', authMiddleware, fileUploadRoutes);
-app.use('/api/documents', authMiddleware, documentRoutes);
-app.use('/api/feedback', feedbackRoutes);
-
-// Serve static files in production
-if (config.nodeEnv === 'production') {
-  app.use(express.static(path.join(__dirname, '../public')));
-  
-  // Catch all handler: send back React's index.html file in production
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/index.html'));
+app.use((req: Request, res: Response, next: NextFunction) => {
+  logger.debug(`${req.method} ${req.path}`, {
+    origin: req.headers.origin,
+    userAgent: req.headers['user-agent']
   });
-}
+  next();
+});
 
-// Global error handler
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error('[ERROR]', err)
-  
-  // Don't leak stack traces in production
-  const isDev = config.nodeEnv === 'development'
-  
-  res.status(err.status || 500).json({
-    error: err.message || 'Internal server error',
-    ...(isDev && { stack: err.stack })
-  })
-})
+// ============================================
+// ROUTES
+// ============================================
 
-// 404 handler
-app.use('*', (req, res) => {
-  // If it's a GET request to the root, it might be a redirect from Supabase
-  // or a user just hitting the backend URL. In production we serve static files,
-  // but in development we can provide a more helpful message or redirect.
-  if (req.method === 'GET' && (req.originalUrl === '/' || req.originalUrl === '')) {
-    res.status(200).json({
-      message: 'Smart Examination Backend API is running',
-      status: 'healthy',
-      docs: '/api/health'
-    });
-    return;
-  }
-
-  res.status(404).json({
-    error: 'Route not found',
-    message: `The requested endpoint ${req.originalUrl} does not exist.`
+// Health check
+app.get('/health', (req: Request, res: Response) => {
+  return res.status(200).json({
+    status: 'healthy',
+    service: 'smart-examination-backend',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
-// Graceful shutdown function
-const gracefulShutdown = (serverInstance: any, signal: string): void => {
-  logger.info(`Received ${signal}, starting graceful shutdown...`);
-  
-  serverInstance.close(async () => {
+// API health
+app.get('/api/health', (req: Request, res: Response) => {
+  return res.status(200).json({
+    status: 'healthy',
+    service: 'api',
+    timestamp: new Date().toISOString(),
+    features: {
+      document_extraction: 'free-ocr',
+      auth: 'supabase',
+      database: 'supabase-postgres'
+    }
+  });
+});
+
+// Document routes (FREE OCR VERSION)
+app.use('/api/documents', documentsRouter);
+
+// ============================================
+// 404 HANDLER
+// ============================================
+
+app.use((req: Request, res: Response) => {
+  logger.warn(`[404] Route not found: ${req.method} ${req.path}`);
+  return res.status(404).json({
+    error: 'Not found',
+    path: req.path,
+    method: req.method,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// ============================================
+// ERROR HANDLER
+// ============================================
+
+app.use(errorHandler);
+
+// ============================================
+// START SERVER
+// ============================================
+
+const server = app.listen(PORT, () => {
+  logger.info(`🚀 Server running on port ${PORT}`);
+  logger.info(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.info(`✅ Document extraction: FREE OCR (Tesseract + pdf-parse + Mammoth)`);
+  logger.info(`✅ CORS enabled for: http://localhost:5173`);
+  logger.info(`📊 Health check: GET /health`);
+  logger.info(`📤 Document upload: POST /api/documents/extract-text`);
+});
+
+// ============================================
+// GRACEFUL SHUTDOWN
+// ============================================
+
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM signal received: closing HTTP server');
+  server.close(() => {
     logger.info('HTTP server closed');
-    
-    try {
-      if (redisClient.isReady) {
-        await redisClient.quit();
-        logger.info('Redis connection closed');
-      }
-      
-      logger.info('Graceful shutdown completed');
-      process.exit(0);
-    } catch (error) {
-      logger.error('Error during graceful shutdown:', error);
-      process.exit(1);
-    }
+    process.exit(0);
   });
-  
-  // Force close server after 30 seconds
-  setTimeout(() => {
-    logger.error('Could not close connections in time, forcefully shutting down');
-    process.exit(1);
-  }, 30000);
-};
+});
 
-// Start server function
-const startServer = async (): Promise<void> => {
-  try {
-    // Validate configuration
-    validateConfig();
+process.on('SIGINT', () => {
+  logger.info('SIGINT signal received: closing HTTP server');
+  server.close(() => {
+    logger.info('HTTP server closed');
+    process.exit(0);
+  });
+});
 
-    // Initialize Redis connection
-    await initializeRedis();
+process.on('uncaughtException', (error) => {
+  logger.error('Uncaught Exception:', error);
+  process.exit(1);
+});
 
-    // Initialize automation framework
-    await initializeAutomationFramework();
-    logger.info('🤖 Automation framework initialized');
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
 
-    // Force Supabase schema cache reload
-    try {
-      await supabase.rpc('pgrst_watch');
-      logger.info('🔄 Supabase schema cache reload triggered');
-    } catch (schemaErr: any) {
-      // Non-critical: schema cache reload is best-effort
-      logger.debug('Schema cache reload skipped (non-critical):', schemaErr.message);
-    }
-    
-    // Start the server
-    const port = config.port;
-    const host = config.host;
-    
-    const serverInstance = app.listen(port, host, () => {
-      logger.info(`🚀 Smart Examination Backend server started on ${host}:${port}`);
-      logger.info(`📊 Environment: ${config.nodeEnv}`);
-      logger.info(`🔒 JWT Expiration: ${config.jwtExpiresIn}`);
-      logger.info(`📁 Upload Path: ${config.fileUpload.uploadPath}`);
-      logger.info(`📝 Max File Size: ${config.fileUpload.maxFileSize} bytes`);
-    });
-    
-    // Listen for termination signals
-    process.on('SIGTERM', () => gracefulShutdown(serverInstance, 'SIGTERM'));
-    process.on('SIGINT', () => gracefulShutdown(serverInstance, 'SIGINT'));
-    
-    // Handle uncaught exceptions
-    process.on('uncaughtException', (error) => {
-      logger.error('Uncaught Exception:', error);
-      gracefulShutdown(serverInstance, 'uncaughtException');
-    });
-    
-    process.on('unhandledRejection', (reason, promise) => {
-      logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
-      gracefulShutdown(serverInstance, 'unhandledRejection');
-    });
-    
-  } catch (error) {
-    logger.error('Failed to start server:', error);
-    process.exit(1);
-  }
-};
-
-// Start the server if this file is run directly
-if (require.main === module) {
-  startServer();
-}
-
-// Export for testing and external use
 export default app;
-export { app, redisClient, logger };
