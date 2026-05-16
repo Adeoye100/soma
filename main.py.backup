@@ -1,0 +1,388 @@
+from fastapi import FastAPI, UploadFile, File, Form
+from fastapi.middleware.cors import CORSMiddleware
+import face_recognition
+import numpy as np
+import cv2
+import pickle
+import os
+import time
+import mediapipe as mp
+import math
+import csv
+from datetime import datetime
+
+app = FastAPI()
+mp_face_mesh = mp.solutions.face_mesh
+
+face_mesh = mp_face_mesh.FaceMesh(
+    static_image_mode=False,
+    max_num_faces=1,
+    refine_landmarks=True,
+    min_detection_confidence=0.5,
+    min_tracking_confidence=0.5
+)
+
+@app.get("/")
+def home():
+    return {
+        "message": "Face AI service is running",
+        "docs": "Go to /docs"
+    }
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+ENCODING_FILE = "encodings.pkl"
+suspicious_tracker = {}
+
+def load_encodings():
+    if not os.path.exists(ENCODING_FILE):
+        return {"encodings": [], "names": []}
+
+    with open(ENCODING_FILE, "rb") as file:
+        return pickle.load(file)
+
+def save_encodings(data):
+    with open(ENCODING_FILE, "wb") as file:
+        pickle.dump(data, file)
+
+def file_to_image(file_bytes):
+    np_array = np.frombuffer(file_bytes, np.uint8)
+    image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
+    rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    return rgb_image
+
+@app.post("/register-face")
+async def register_face(
+    student_id: str = Form(...),
+    image: UploadFile = File(...)
+):
+    file_bytes = await image.read()
+    rgb_image = file_to_image(file_bytes)
+
+    face_encodings = face_recognition.face_encodings(rgb_image)
+
+    if len(face_encodings) == 0:
+        return {
+            "status": "failed",
+            "message": "No face detected"
+        }
+
+    if len(face_encodings) > 1:
+        return {
+            "status": "failed",
+            "message": "Multiple faces detected"
+        }
+
+    data = load_encodings()
+
+    data["encodings"].append(face_encodings[0])
+    data["names"].append(student_id)
+
+    save_encodings(data)
+
+    return {
+        "status": "success",
+        "message": "Face registered successfully",
+        "student_id": student_id
+    }
+
+
+@app.post("/verify-face")
+async def verify_face(
+    student_id: str = Form(...),
+    image: UploadFile = File(...)
+):
+    file_bytes = await image.read()
+    rgb_image = file_to_image(file_bytes)
+
+    face_encodings = face_recognition.face_encodings(rgb_image)
+
+    if len(face_encodings) == 0:
+        return {
+            "status": "failed",
+            "message": "No face detected"
+        }
+
+    if len(face_encodings) > 1:
+        return {
+            "status": "failed",
+            "message": "Multiple faces detected"
+        }
+
+    data = load_encodings()
+
+    for saved_encoding, saved_student_id in zip(data["encodings"], data["names"]):
+        if saved_student_id == student_id:
+            match = face_recognition.compare_faces(
+                [saved_encoding],
+                face_encodings[0],
+                tolerance=0.45
+            )[0]
+
+            if match:
+                return {
+                    "status": "verified",
+                    "message": "Face verified",
+                    "student_id": student_id
+                }
+
+    return {
+        "status": "failed",
+        "message": "Face does not match registered student"
+    }
+
+def detect_head_direction(image):
+
+    rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    results = face_mesh.process(rgb_image)
+
+    if not results.multi_face_landmarks:
+        return "NO_FACE"
+
+    face_landmarks = results.multi_face_landmarks[0]
+
+    nose = face_landmarks.landmark[1]
+
+    left_cheek = face_landmarks.landmark[234]
+    right_cheek = face_landmarks.landmark[454]
+
+    nose_x = nose.x
+    left_x = left_cheek.x
+    right_x = right_cheek.x
+
+    center = (left_x + right_x) / 2
+
+    difference = nose_x - center
+
+    if difference > 0.04:
+        return "LOOKING_RIGHT"
+
+    elif difference < -0.04:
+        return "LOOKING_LEFT"
+
+    return "LOOKING_FORWARD"
+
+def save_proctoring_log(student_id, status, reason, duration, action):
+    file_name = "proctoring_logs.csv"
+
+    file_exists = os.path.exists(file_name)
+
+    with open(file_name, mode="a", newline="") as file:
+        writer = csv.writer(file)
+
+        if not file_exists:
+            writer.writerow([
+                "student_id",
+                "status",
+                "reason",
+                "duration",
+                "action",
+                "time"
+            ])
+
+        writer.writerow([
+            student_id,
+            status,
+            reason,
+            duration,
+            action,
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        ])
+@app.post("/monitor")
+async def monitor_exam(
+    student_id: str = Form(...),
+    image: UploadFile = File(...)
+):
+
+    file_bytes = await image.read()
+
+    np_array = np.frombuffer(file_bytes, np.uint8)
+
+    frame = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
+
+    face_locations = face_recognition.face_locations(frame)
+
+    suspicious = False
+    reason = ""
+
+    # No face detected
+    if len(face_locations) == 0:
+
+        suspicious = True
+        reason = "No face detected"
+
+    # Multiple faces detected
+    elif len(face_locations) > 1:
+
+        suspicious = True
+        reason = "Multiple faces detected"
+
+    else:
+
+        face_encodings = face_recognition.face_encodings(
+            frame,
+            face_locations
+        )
+
+        if len(face_encodings) == 0:
+
+            suspicious = True
+            reason = "Unable to encode face"
+
+        else:
+
+            data = load_encodings()
+
+            student_found = False
+            student_matched = False
+
+            for saved_encoding, saved_student_id in zip(
+                data["encodings"],
+                data["names"]
+            ):
+
+                if saved_student_id == student_id:
+
+                    student_found = True
+
+                    match = face_recognition.compare_faces(
+                        [saved_encoding],
+                        face_encodings[0],
+                        tolerance=0.45
+                    )[0]
+
+                    if match:
+                        student_matched = True
+
+                    break
+
+            if not student_found:
+
+                suspicious = True
+                reason = "Student face not registered"
+
+            elif not student_matched:
+
+                suspicious = True
+                reason = "Different face detected"
+
+            else:
+
+                direction = detect_head_direction(frame)
+
+                if direction == "LOOKING_LEFT":
+
+                    suspicious = True
+                    reason = "Looking left"
+
+                elif direction == "LOOKING_RIGHT":
+
+                    suspicious = True
+                    reason = "Looking right"
+
+                else:
+
+                    suspicious = False
+
+    current_time = time.time()
+
+    if suspicious:
+
+        if student_id not in suspicious_tracker:
+            suspicious_tracker[student_id] = current_time
+
+        elapsed = current_time - suspicious_tracker[student_id]
+
+        if elapsed >= 120:
+            save_proctoring_log(
+                student_id,
+                "malpractice",
+                reason,
+                int(elapsed),
+                "auto_submit"
+            )
+
+            return {
+                "status": "malpractice",
+                "action": "auto_submit",
+                "reason": reason,
+                "duration": int(elapsed)
+            }
+
+        save_proctoring_log(
+            student_id,
+            "warning",
+            reason,
+            int(elapsed),
+            "continue"
+        )
+
+        return {
+            "status": "warning",
+            "action": "continue",
+            "reason": reason,
+            "duration": int(elapsed)
+        }
+
+    else:
+
+        suspicious_tracker.pop(student_id, None)
+
+        return {
+            "status": "normal",
+            "action": "continue",
+            "reason": "Student focused"
+        }
+
+@app.get("/logs")
+def get_logs():
+
+    file_name = "proctoring_logs.csv"
+
+    if not os.path.exists(file_name):
+
+        return {
+            "status": "success",
+            "logs": []
+        }
+
+    logs = []
+
+    with open(file_name, mode="r") as file:
+
+        reader = csv.DictReader(file)
+
+        for row in reader:
+            logs.append(row)
+
+    return {
+        "status": "success",
+        "logs": logs
+    }
+
+
+@app.delete("/logs")
+def clear_logs():
+    file_name = "proctoring_logs.csv"
+
+    if os.path.exists(file_name):
+        os.remove(file_name)
+
+    return {
+        "status": "success",
+        "message": "Logs cleared successfully"
+    }
+
+@app.get("/")
+def home():
+    return {
+        "status": "running",
+        "service": "AI Exam Proctoring System"
+    }
